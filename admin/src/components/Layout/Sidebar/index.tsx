@@ -53,7 +53,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { sidebarCollapsed, toggleSidebar, username, isLogin, menus } = useAppStore()
-  const [openKeys, setOpenKeys] = useState<string[]>(['overview', 'data', 'data-dev', 'data-service', 'data-govern', 'monitor', 'user', 'business', 'system'])
+  const [openKeys, setOpenKeys] = useState<string[]>(['overview', 'growth', 'card-engine', 'companion', 'acceptance', 'points-system', 'user', 'system'])
 
   const filteredMenu = renderMenuItems(menuConfig, menus, isLogin, sidebarCollapsed)
 
@@ -136,7 +136,7 @@ export default function Sidebar() {
                   fontSize: 15,
                 }}
               >
-                Z
+                K
               </div>
               <span
                 style={{
@@ -148,7 +148,7 @@ export default function Sidebar() {
                   flex: 1,
                 }}
               >
-                中台管理
+                巧记成长
               </span>
               <Button
                 type="text"

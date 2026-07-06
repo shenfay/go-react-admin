@@ -75,7 +75,7 @@ export const useAppStore = create<AppState>()(
       // User
       login: userData => {
         const { permissionConfig } = get()
-        const role = userData.role || 'member'
+        const role = userData.role || 'viewer'
         const config = permissionConfig.find(c => c.role === role)
         set({
           ...initialUserState,
@@ -91,11 +91,11 @@ export const useAppStore = create<AppState>()(
       setUserInfo: info => set(state => ({ ...state, ...info })),
     }),
     {
-      name: 'admin-scaffold-storage',
-      version: 2,
+      name: 'kiqi-admin-storage',
+      version: 3,
       migrate: (_persistedState: unknown, version: number) => {
         // 版本变更时丢弃旧缓存，使用默认初始状态
-        if (version < 2) {
+        if (version < 3) {
           return initialUserState as AppState & { sidebarCollapsed: boolean }
         }
         return _persistedState as AppState & { sidebarCollapsed: boolean }
