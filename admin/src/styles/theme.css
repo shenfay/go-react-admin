@@ -1,0 +1,60 @@
+:root {
+  /* Sidebar */
+  --sidebar-bg: #F5F3EF;
+  --sidebar-collapsed: 56px;
+  --sidebar-expanded: 224px;
+
+  /* Main */
+  --main-bg: #FFFFFF;
+  --content-bg: #FAFAF8;
+
+  /* Text */
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --text-muted: #999999;
+
+  /* Border */
+  --border-color: #E8E6E1;
+
+  /* Accent */
+  --accent: #3D5A80;
+  --accent-light: #5B7DA8;
+  --accent-bg: #EEF2F7;
+
+  /* Status */
+  --green: #2DA44E;
+  --green-light: #DAFBE1;
+  --green-text: #11632C;
+  --red: #CF222E;
+  --red-light: #FFEBE9;
+  --red-text: #8C3B2D;
+  --yellow: #BF8700;
+  --yellow-light: #FFF8C5;
+  --yellow-text: #7A5E00;
+  --blue: #0969DA;
+  --blue-light: #DDEEFF;
+  --blue-text: #0969DA;
+  --gray: #57606A;
+  --gray-light: #EBEBEB;
+  --gray-text: #57606A;
+
+  /* Hover / Active */
+  --hover-bg: #EDEAE4;
+  --active-bg: #E4E0D8;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Font */
+  --font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+
+  /* Transition */
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

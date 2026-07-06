@@ -1,0 +1,203 @@
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--main-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Ant Design Overrides */
+.ant-layout {
+  background: var(--main-bg) !important;
+}
+
+.ant-layout-sider {
+  background: var(--sidebar-bg) !important;
+}
+
+.ant-menu {
+  background: transparent !important;
+  border-right: none !important;
+}
+
+.ant-menu-item {
+  border-radius: var(--radius-sm) !important;
+  margin: 2px 8px !important;
+  color: var(--text-secondary) !important;
+}
+
+.ant-menu-item:hover {
+  background: var(--hover-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-menu-item-selected {
+  background: var(--active-bg) !important;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
+.ant-menu-item-selected::after {
+  display: none !important;
+}
+
+.ant-menu-submenu-title {
+  border-radius: var(--radius-sm) !important;
+  margin: 2px 8px !important;
+  color: var(--text-secondary) !important;
+}
+
+.ant-menu-submenu-title:hover {
+  background: var(--hover-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-card {
+  border-radius: var(--radius-md) !important;
+  border-color: var(--border-color) !important;
+}
+
+.ant-card-head {
+  border-bottom-color: var(--border-color) !important;
+  padding: 14px 20px !important;
+  min-height: auto !important;
+}
+
+.ant-card-head-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.ant-card-body {
+  padding: 16px 20px !important;
+}
+
+.ant-btn {
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-family) !important;
+}
+
+.ant-btn-primary {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--accent-light) !important;
+  border-color: var(--accent-light) !important;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-picker {
+  border-radius: var(--radius-sm) !important;
+  border-color: var(--border-color) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(61, 90, 128, 0.1) !important;
+}
+
+.ant-table {
+  font-size: 14px !important;
+}
+
+.ant-table-thead > tr > th {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border-bottom-color: var(--border-color) !important;
+  padding: 10px 12px 10px 0 !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom-color: var(--border-color) !important;
+  padding: 13px 12px 13px 0 !important;
+}
+
+.ant-table-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+.ant-tag {
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  padding: 2px 8px !important;
+}
+
+.ant-progress-inner {
+  border-radius: 3px !important;
+  background: #EBEBEB !important;
+}
+
+.ant-progress-bg {
+  border-radius: 3px !important;
+}
+
+.ant-breadcrumb {
+  font-size: 14px !important;
+}
+
+.ant-breadcrumb a,
+.ant-breadcrumb-separator {
+  color: var(--text-muted) !important;
+}
+
+.ant-breadcrumb li:last-child {
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
+.ant-form-item-label > label {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.ant-modal-content,
+.ant-modal-header {
+  border-radius: var(--radius-md) !important;
+}
+
+.ant-dropdown-menu {
+  border-radius: var(--radius-sm) !important;
+}
