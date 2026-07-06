@@ -2,8 +2,8 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/middleware"
-	"github.com/shenfay/go-ddd-scaffold/pkg/metrics"
+	"github.com/shenfay/kiqi/internal/transport/http/middleware"
+	"github.com/shenfay/kiqi/pkg/metrics"
 )
 
 // Middlewares 注册全局中间件

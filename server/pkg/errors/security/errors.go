@@ -3,7 +3,7 @@ package security
 import (
 	"net/http"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/errors"
+	"github.com/shenfay/kiqi/pkg/errors"
 )
 
 // 安全域预定义错误

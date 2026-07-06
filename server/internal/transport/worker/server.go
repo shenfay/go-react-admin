@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/hibiken/asynq"
-	"github.com/shenfay/go-ddd-scaffold/pkg/logger"
+	"github.com/shenfay/kiqi/pkg/logger"
 )
 
 // Server Worker 服务器

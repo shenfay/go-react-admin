@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/repository"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/response"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/internal/transport/http/response"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // AuditLogHandler 审计日志HTTP处理器（查询）

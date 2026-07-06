@@ -1,4 +1,4 @@
-module github.com/shenfay/go-ddd-scaffold
+module github.com/shenfay/kiqi
 
 go 1.25.6
 

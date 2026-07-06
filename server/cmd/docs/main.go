@@ -14,7 +14,7 @@ import (
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support
-// @contact.url    http://www.github.com/shenfay/go-ddd-scaffold
+// @contact.url    http://www.github.com/shenfay/kiqi
 // @contact.email  support@example.com
 
 // @license.name   MIT

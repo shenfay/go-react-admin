@@ -3,7 +3,7 @@ package event
 import (
 	"context"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/logger"
+	"github.com/shenfay/kiqi/pkg/logger"
 	"go.uber.org/zap"
 )
 

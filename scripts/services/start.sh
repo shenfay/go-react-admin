@@ -120,7 +120,7 @@ check_postgresql() {
     # 使用环境变量或默认值
     local db_host="${APP_DATABASE_HOST:-localhost}"
     local db_port="${APP_DATABASE_PORT:-5432}"
-    local db_name="${APP_DATABASE_NAME:-ddd_scaffold}"
+    local db_name="${APP_DATABASE_NAME:-kiqi}"
     local db_user="${APP_DATABASE_USER:-shenfay}"
     local db_password="${APP_DATABASE_PASSWORD:-postgres}"
     
@@ -309,7 +309,7 @@ save_pids() {
     local asynqmon_pid=$(pgrep -f "asynqmon")
     local swagger_pid=$(pgrep -f "cmd/docs/main.go")
     
-    cat > /tmp/ddd-scaffold-pids.txt << EOF
+    cat > /tmp/kiqi-pids.txt << EOF
 API_PID=$api_pid
 WORKER_PID=$worker_pid
 ASYNQMON_PID=${asynqmon_pid:-}
@@ -317,7 +317,7 @@ SWAGGER_PID=${swagger_pid:-}
 TIMESTAMP=$(date)
 EOF
     
-    print_info "进程 ID 已保存到 /tmp/ddd-scaffold-pids.txt"
+    print_info "进程 ID 已保存到 /tmp/kiqi-pids.txt"
 }
 
 # 主函数
@@ -420,7 +420,7 @@ main() {
     fi
     
     echo "  💾 PostgreSQL:"
-    echo "     - 连接：localhost:5432 (数据库：ddd_scaffold)"
+    echo "     - 连接：localhost:5432 (数据库：kiqi)"
     echo ""
     
     echo "  🗄️  Redis:"

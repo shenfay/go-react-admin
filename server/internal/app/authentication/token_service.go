@@ -9,9 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/constants"
-	authErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/auth"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/constants"
+	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // TokenServiceImpl Token服务实现

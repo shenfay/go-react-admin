@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/user"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/user"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // CreateUserCommand 创建用户命令

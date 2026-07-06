@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/internal/app/user"
-	_ "github.com/shenfay/go-ddd-scaffold/internal/transport/http/middleware" // for swagger types
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/response"
-	validationErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/validation"
+	"github.com/shenfay/kiqi/internal/app/user"
+	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger types
+	"github.com/shenfay/kiqi/internal/transport/http/response"
+	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
 )
 
 // UserHandler 用户管理 HTTP 处理器

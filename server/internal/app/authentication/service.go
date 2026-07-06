@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/user"
-	authErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/auth"
-	userErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/user"
-	"github.com/shenfay/go-ddd-scaffold/pkg/metrics"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/user"
+	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
+	userErr "github.com/shenfay/kiqi/pkg/errors/user"
+	"github.com/shenfay/kiqi/pkg/metrics"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // JWTClaims JWT 自定义声明

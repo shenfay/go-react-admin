@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/shenfay/go-ddd-scaffold/pkg/errors"
+	"github.com/shenfay/kiqi/pkg/errors"
 )
 
 // 校验域预定义错误

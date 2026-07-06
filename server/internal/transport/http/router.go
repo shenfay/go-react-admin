@@ -3,9 +3,9 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/shenfay/go-ddd-scaffold/internal/app/authentication"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/handlers"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/middleware"
+	"github.com/shenfay/kiqi/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/transport/http/handlers"
+	"github.com/shenfay/kiqi/internal/transport/http/middleware"
 )
 
 // Router 路由配置

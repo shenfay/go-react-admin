@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/app/authentication"
 )
 
 // JWTAuthConfig JWT 认证中间件配置

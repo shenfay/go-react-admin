@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/metrics"
+	"github.com/shenfay/kiqi/pkg/metrics"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

@@ -10,9 +10,9 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/user"
-	userErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/user"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/internal/domain/user"
+	userErr "github.com/shenfay/kiqi/pkg/errors/user"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // UserPO 用户持久化对象

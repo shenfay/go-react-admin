@@ -669,7 +669,7 @@
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
-    "ddd-scaffold"
+    "kiqi"
   ],
   "templating": {
     "list": []
@@ -681,7 +681,7 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "DDD-Scaffold Monitoring",
-  "uid": "ddd-scaffold-monitoring",
+  "uid": "kiqi-monitoring",
   "version": 1,
   "weekStart": "",
   "datasource": {

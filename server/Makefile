@@ -3,14 +3,14 @@
 .PHONY: help clean build build-worker test run setup install-deps
 
 # Variables
-APP_NAME = go-ddd-scaffold
+APP_NAME = kiqi
 VERSION ?= $(shell git describe --tags --always --dirty)
 BUILD_TIME = $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT = $(shell git rev-parse HEAD)
 GO_LDFLAGS = -X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT)
 
 # CLI Tool
-CLI_BINARY=go-ddd-scaffold
+CLI_BINARY=kiqi
 CLI_CMD=cmd/cli/main.go
 
 # Help target

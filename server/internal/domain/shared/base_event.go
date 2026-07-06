@@ -3,7 +3,7 @@ package shared
 import (
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // BaseEvent 领域事件基类（可选）

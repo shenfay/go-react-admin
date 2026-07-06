@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 

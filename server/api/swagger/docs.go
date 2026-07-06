@@ -12,7 +12,7 @@ const docTemplate = `{
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
-            "url": "http://www.github.com/shenfay/go-ddd-scaffold",
+            "url": "http://www.github.com/shenfay/kiqi",
             "email": "support@example.com"
         },
         "license": {
@@ -47,7 +47,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -87,13 +87,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -128,13 +128,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.SuccessResponse"
+                                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_authentication.AuthResponse"
+                                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.AuthResponse"
                                         }
                                     }
                                 }
@@ -144,25 +144,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "账号或密码错误",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "423": {
                         "description": "账户已锁定",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -196,7 +196,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -227,7 +227,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -251,13 +251,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_authentication.UserResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.UserResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -290,19 +290,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_authentication.AuthResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.AuthResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid or expired token",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -337,13 +337,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.SuccessResponse"
+                                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_authentication.AuthResponse"
+                                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.AuthResponse"
                                         }
                                     }
                                 }
@@ -353,19 +353,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "邮箱已存在",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -405,13 +405,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.SuccessResponse"
+                                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_user.UserDTO"
+                                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_user.UserDTO"
                                         }
                                     }
                                 }
@@ -421,19 +421,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Validation error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "邮箱已存在",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -466,19 +466,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_authentication.UserResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.UserResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse"
                         }
                     }
                 }
@@ -486,7 +486,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_shenfay_go-ddd-scaffold_internal_app_authentication.AuthResponse": {
+        "github_com_shenfay_kiqi_internal_app_authentication.AuthResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -499,11 +499,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/github_com_shenfay_go-ddd-scaffold_internal_app_authentication.UserResponse"
+                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.UserResponse"
                 }
             }
         },
-        "github_com_shenfay_go-ddd-scaffold_internal_app_authentication.UserResponse": {
+        "github_com_shenfay_kiqi_internal_app_authentication.UserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -523,7 +523,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_shenfay_go-ddd-scaffold_internal_app_user.UserDTO": {
+        "github_com_shenfay_kiqi_internal_app_user.UserDTO": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -549,7 +549,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.ErrorResponse": {
+        "github_com_shenfay_kiqi_internal_transport_http_middleware.ErrorResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -569,7 +569,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_shenfay_go-ddd-scaffold_internal_transport_http_middleware.SuccessResponse": {
+        "github_com_shenfay_kiqi_internal_transport_http_middleware.SuccessResponse": {
             "type": "object",
             "properties": {
                 "code": {

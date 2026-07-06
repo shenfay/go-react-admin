@@ -3,7 +3,7 @@ package authentication
 import (
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/user"
+	"github.com/shenfay/kiqi/internal/domain/user"
 )
 
 // UserResponse 用户响应 DTO

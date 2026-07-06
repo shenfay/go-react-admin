@@ -14,13 +14,13 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/app/authentication"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/config"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/repository"
-	transhttp "github.com/shenfay/go-ddd-scaffold/internal/transport/http"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/handlers"
-	"github.com/shenfay/go-ddd-scaffold/pkg/metrics"
+	"github.com/shenfay/kiqi/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/repository"
+	transhttp "github.com/shenfay/kiqi/internal/transport/http"
+	"github.com/shenfay/kiqi/internal/transport/http/handlers"
+	"github.com/shenfay/kiqi/pkg/metrics"
 )
 
 // AuthIntegrationSuite 认证集成测试套件
@@ -47,7 +47,7 @@ func (s *AuthIntegrationSuite) SetupSuite() {
 			Database: config.DatabaseConfig{
 				Host:            getEnv("TEST_DB_HOST", "localhost"),
 				Port:            5432,
-				Name:            getEnv("TEST_DB_NAME", "go_ddd_scaffold_test"),
+				Name:            getEnv("TEST_DB_NAME", "kiqi_test"),
 				User:            getEnv("TEST_DB_USER", "postgres"),
 				Password:        getEnv("TEST_DB_PASSWORD", "postgres"),
 				SSLMode:         "disable",
@@ -64,7 +64,7 @@ func (s *AuthIntegrationSuite) SetupSuite() {
 				Secret:        "test-secret-key-not-for-production",
 				AccessExpire:  30 * time.Minute,
 				RefreshExpire: 7 * 24 * time.Hour,
-				Issuer:        "go-ddd-scaffold-test",
+				Issuer:        "kiqi-test",
 			},
 		}
 	}

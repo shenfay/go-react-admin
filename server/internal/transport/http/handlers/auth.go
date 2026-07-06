@@ -6,12 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/app/authentication"
-	authErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/auth"
-	userErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/user"
-	validationErr "github.com/shenfay/go-ddd-scaffold/pkg/errors/validation"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/middleware"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/response"
+	"github.com/shenfay/kiqi/internal/app/authentication"
+	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
+	userErr "github.com/shenfay/kiqi/pkg/errors/user"
+	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
+	"github.com/shenfay/kiqi/internal/transport/http/middleware"
+	"github.com/shenfay/kiqi/internal/transport/http/response"
 )
 
 // AuthHandler 认证 HTTP 处理器

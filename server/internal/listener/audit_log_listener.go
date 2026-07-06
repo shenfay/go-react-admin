@@ -3,10 +3,10 @@ package listener
 import (
 	"context"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/user"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/repository"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/user"
+	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // AuditLogListener 审计日志事件监听器

@@ -14,12 +14,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/user"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/config"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/repository"
-	"github.com/shenfay/go-ddd-scaffold/internal/listener"
-	"github.com/shenfay/go-ddd-scaffold/pkg/logger"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/user"
+	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/internal/listener"
+	"github.com/shenfay/kiqi/pkg/logger"
 )
 
 // eventRegistry 领域事件反序列化注册表

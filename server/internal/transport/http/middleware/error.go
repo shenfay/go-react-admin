@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/pkg/errors"
+	"github.com/shenfay/kiqi/pkg/errors"
 )
 
 // BaseResponse 响应基础结构

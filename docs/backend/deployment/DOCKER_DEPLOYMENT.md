@@ -106,8 +106,8 @@ docker-compose --version
 #### 步骤 1：克隆项目
 
 ```bash
-git clone <repository-url> /opt/ddd-scaffold
-cd /opt/ddd-scaffold
+git clone <repository-url> /opt/kiqi
+cd /opt/kiqi
 ```
 
 #### 步骤 2：配置环境变量
@@ -129,9 +129,9 @@ SERVER_MODE=release
 # 数据库
 DB_HOST=postgres
 DB_PORT=5432
-DB_USER=ddd_scaffold
+DB_USER=kiqi
 DB_PASSWORD=<强密码>
-DB_NAME=ddd_scaffold
+DB_NAME=kiqi
 
 # Redis
 REDIS_HOST=redis
@@ -155,7 +155,7 @@ LOG_FORMAT=json
 docker-compose build api worker
 
 # 查看镜像
-docker images | grep ddd-scaffold
+docker images | grep kiqi
 ```
 
 #### 步骤 4：启动服务
@@ -170,10 +170,10 @@ docker-compose ps
 # 预期输出：
 #       Name                     Command               State          Ports
 # -----------------------------------------------------------------------------------
-# ddd-scaffold-api      /app/api                       Up      0.0.0.0:8080->8080/tcp
-# ddd-scaffold-postgres docker-entrypoint.sh postgres  Up      5432/tcp
-# ddd-scaffold-redis    docker-entrypoint.sh redis ... Up      6379/tcp
-# ddd-scaffold-worker   /app/worker                    Up
+# kiqi-api      /app/api                       Up      0.0.0.0:8080->8080/tcp
+# kiqi-postgres docker-entrypoint.sh postgres  Up      5432/tcp
+# kiqi-redis    docker-entrypoint.sh redis ... Up      6379/tcp
+# kiqi-worker   /app/worker                    Up
 ```
 
 #### 步骤 5：运行数据库迁移
@@ -357,9 +357,9 @@ services:
   postgres:
     image: postgres:14-alpine
     environment:
-      - POSTGRES_USER=ddd_scaffold
+      - POSTGRES_USER=kiqi
       - POSTGRES_PASSWORD=${DB_PASSWORD:-secret}
-      - POSTGRES_DB=ddd_scaffold
+      - POSTGRES_DB=kiqi
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
@@ -407,7 +407,7 @@ networks:
 | `DB_PORT` | 5432 | 数据库端口 | 否 |
 | `DB_USER` | postgres | 数据库用户 | 是 |
 | `DB_PASSWORD` | - | 数据库密码 | 是 |
-| `DB_NAME` | ddd_scaffold | 数据库名称 | 是 |
+| `DB_NAME` | kiqi | 数据库名称 | 是 |
 | `REDIS_HOST` | localhost | Redis 主机 | 是 |
 | `REDIS_PORT` | 6379 | Redis 端口 | 否 |
 | `REDIS_PASSWORD` | - | Redis 密码 | 是 |
@@ -474,7 +474,7 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: localhost:24224
-        tag: ddd-scaffold.api
+        tag: kiqi.api
 ```
 
 ## 备份与恢复
@@ -483,20 +483,20 @@ services:
 
 ```bash
 # 备份数据库
-docker-compose exec postgres pg_dump -U ddd_scaffold ddd_scaffold > backup_$(date +%Y%m%d_%H%M%S).sql
+docker-compose exec postgres pg_dump -U kiqi kiqi > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # 压缩备份
-docker-compose exec postgres pg_dump -U ddd_scaffold ddd_scaffold | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
+docker-compose exec postgres pg_dump -U kiqi kiqi | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
 ```
 
 ### 数据库恢复
 
 ```bash
 # 恢复数据库
-cat backup_20260408_100000.sql | docker-compose exec -T postgres psql -U ddd_scaffold ddd_scaffold
+cat backup_20260408_100000.sql | docker-compose exec -T postgres psql -U kiqi kiqi
 
 # 恢复压缩备份
-gunzip -c backup_20260408_100000.sql.gz | docker-compose exec -T postgres psql -U ddd_scaffold ddd_scaffold
+gunzip -c backup_20260408_100000.sql.gz | docker-compose exec -T postgres psql -U kiqi kiqi
 ```
 
 ### 自动备份脚本
@@ -505,7 +505,7 @@ gunzip -c backup_20260408_100000.sql.gz | docker-compose exec -T postgres psql -
 #!/bin/bash
 # backup.sh
 
-BACKUP_DIR="/opt/backups/ddd-scaffold"
+BACKUP_DIR="/opt/backups/kiqi"
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/backup_$DATE.sql.gz"
 
@@ -513,7 +513,7 @@ BACKUP_FILE="$BACKUP_DIR/backup_$DATE.sql.gz"
 mkdir -p $BACKUP_DIR
 
 # 执行备份
-docker-compose exec -T postgres pg_dump -U ddd_scaffold ddd_scaffold | gzip > $BACKUP_FILE
+docker-compose exec -T postgres pg_dump -U kiqi kiqi | gzip > $BACKUP_FILE
 
 # 删除 7 天前的备份
 find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +7 -delete
@@ -524,7 +524,7 @@ echo "Backup completed: $BACKUP_FILE"
 **添加 cron 任务**：
 ```bash
 # 每天凌晨 2 点备份
-0 2 * * * /opt/ddd-scaffold/scripts/backup.sh
+0 2 * * * /opt/kiqi/scripts/backup.sh
 ```
 
 ## 性能调优

@@ -369,7 +369,7 @@ Family（家庭）
 | 推送 | 家长验收通知、伙伴状态变化推送 |
 | 数据持久化 | PostgreSQL + Redis（连续打卡/积分余额缓存） |
 | 前端技术栈 | Vite 8 + React 19 + TypeScript + Tailwind CSS v4 |
-| 后端技术栈 | go-ddd-scaffold（Go + Gin + PostgreSQL + Redis + Asynq） |
+| 后端技术栈 | kiqi（Go + Gin + PostgreSQL + Redis + Asynq） |
 
 ---
 

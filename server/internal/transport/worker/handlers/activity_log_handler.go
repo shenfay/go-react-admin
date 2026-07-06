@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 
 	"github.com/hibiken/asynq"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/repository"
-	"github.com/shenfay/go-ddd-scaffold/pkg/logger"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/pkg/logger"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // ActivityLogWorkerHandler 活动日志Worker处理器

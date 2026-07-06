@@ -113,7 +113,7 @@ func setDefaults() {
 	// Database
 	viper.SetDefault("database.host", "localhost")
 	viper.SetDefault("database.port", 5432)
-	viper.SetDefault("database.name", "go_ddd_scaffold")
+	viper.SetDefault("database.name", "kiqi")
 	viper.SetDefault("database.user", "postgres")
 	viper.SetDefault("database.ssl_mode", "disable")
 	viper.SetDefault("database.max_open_conns", 25)
@@ -130,7 +130,7 @@ func setDefaults() {
 	viper.SetDefault("jwt.secret", "your-jwt-secret-key-change-in-production")
 	viper.SetDefault("jwt.access_expire", 30*time.Minute)
 	viper.SetDefault("jwt.refresh_expire", 7*24*time.Hour)
-	viper.SetDefault("jwt.issuer", "go-ddd-scaffold")
+	viper.SetDefault("jwt.issuer", "kiqi")
 
 	// Asynq
 	viper.SetDefault("asynq.addr", "localhost:6379")

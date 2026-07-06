@@ -28,7 +28,7 @@
 ```bash
 # 1. 克隆项目
 git clone <repository-url>
-cd ddd-scaffold
+cd kiqi
 
 # 2. 启动所有基础设施（PostgreSQL + Redis）
 docker-compose up -d postgres redis
@@ -75,9 +75,9 @@ redis-cli ping  # 应返回 PONG
 
 ```bash
 # 创建数据库
-psql -U postgres -c "CREATE DATABASE ddd_scaffold;"
-psql -U postgres -c "CREATE USER ddd_scaffold WITH PASSWORD 'ddd_scaffold';"
-psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE ddd_scaffold TO ddd_scaffold;"
+psql -U postgres -c "CREATE DATABASE kiqi;"
+psql -U postgres -c "CREATE USER kiqi WITH PASSWORD 'kiqi';"
+psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE kiqi TO kiqi;"
 ```
 
 #### 步骤 3：配置环境变量
@@ -97,7 +97,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=your_password
-DB_NAME=ddd_scaffold
+DB_NAME=kiqi
 
 # Redis 配置
 REDIS_HOST=localhost
@@ -288,7 +288,7 @@ brew services list | grep postgresql
 brew services start postgresql
 
 # 验证连接
-psql -U postgres -d ddd_scaffold -c "SELECT 1;"
+psql -U postgres -d kiqi -c "SELECT 1;"
 ```
 
 ### 问题 2：Redis 连接失败
@@ -392,4 +392,4 @@ prometheus --config.file=prometheus.yml > /tmp/prometheus.log 2>&1 &
 
 ---
 
-**遇到问题？** 查看 [故障排查指南](../operations/TROUBLESHOOTING.md) 或提交 [GitHub Issue](https://github.com/shenfay/go-ddd-scaffold/issues)
+**遇到问题？** 查看 [故障排查指南](../operations/TROUBLESHOOTING.md) 或提交 [GitHub Issue](https://github.com/shenfay/kiqi/issues)

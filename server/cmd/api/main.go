@@ -17,18 +17,18 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/shenfay/go-ddd-scaffold/internal/app/authentication"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/config"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/messaging"
-	"github.com/shenfay/go-ddd-scaffold/internal/infra/repository"
-	transhttp "github.com/shenfay/go-ddd-scaffold/internal/transport/http"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/handlers"
-	pkglogger "github.com/shenfay/go-ddd-scaffold/pkg/logger"
-	"github.com/shenfay/go-ddd-scaffold/pkg/metrics"
+	"github.com/shenfay/kiqi/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/messaging"
+	"github.com/shenfay/kiqi/internal/infra/repository"
+	transhttp "github.com/shenfay/kiqi/internal/transport/http"
+	"github.com/shenfay/kiqi/internal/transport/http/handlers"
+	pkglogger "github.com/shenfay/kiqi/pkg/logger"
+	"github.com/shenfay/kiqi/pkg/metrics"
 
 	// 导入生成的 Swagger 文档
-	_ "github.com/shenfay/go-ddd-scaffold/api/swagger"
+	_ "github.com/shenfay/kiqi/api/swagger"
 )
 
 // @title           Go DDD Scaffold API
@@ -37,7 +37,7 @@ import (
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support
-// @contact.url    http://www.github.com/shenfay/go-ddd-scaffold
+// @contact.url    http://www.github.com/shenfay/kiqi
 // @contact.email  support@example.com
 
 // @license.name   MIT

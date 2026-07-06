@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 
 	"github.com/hibiken/asynq"
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
-	"github.com/shenfay/go-ddd-scaffold/pkg/constants"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/pkg/constants"
 )
 
 // DomainToIntegrationBridge 领域事件到集成事件的桥接器

@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/pkg/metrics"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/metrics"
+	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // PrometheusMiddleware Prometheus 指标收集中间件

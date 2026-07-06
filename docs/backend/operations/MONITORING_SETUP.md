@@ -121,7 +121,7 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   # DDD-Scaffold API 服务
-  - job_name: 'ddd-scaffold-api'
+  - job_name: 'kiqi-api'
     scrape_interval: 5s
     metrics_path: '/metrics'
     static_configs:
@@ -163,7 +163,7 @@ open http://localhost:9090
 
 应该看到：
 - ✅ `prometheus` - UP
-- ✅ `ddd-scaffold-api` - UP
+- ✅ `kiqi-api` - UP
 
 ## 配置 Grafana
 
@@ -381,7 +381,7 @@ curl http://localhost:8080/health
 curl http://localhost:8080/metrics | head -20
 
 # 3. 检查 Prometheus 配置
-cat prometheus.yml | grep -A 5 "ddd-scaffold-api"
+cat prometheus.yml | grep -A 5 "kiqi-api"
 
 # 4. 重启 Prometheus
 pkill prometheus

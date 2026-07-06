@@ -50,10 +50,10 @@ brew services list | grep postgresql
 cat backend/configs/.env | grep DB_
 
 # 3. 测试数据库连接
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "SELECT 1"
+psql -h localhost -U kiqi -d kiqi -c "SELECT 1"
 
 # 4. 检查数据库是否存在
-psql -h localhost -U postgres -c "\l" | grep ddd_scaffold
+psql -h localhost -U postgres -c "\l" | grep kiqi
 ```
 
 **解决方案**：
@@ -62,7 +62,7 @@ psql -h localhost -U postgres -c "\l" | grep ddd_scaffold
 brew services start postgresql
 
 # 创建数据库
-createdb -h localhost -U postgres ddd_scaffold
+createdb -h localhost -U postgres kiqi
 
 # 运行迁移
 cd backend
@@ -163,7 +163,7 @@ go run ./cmd/cli migrate up
 
 ```bash
 # 1. 查看慢查询日志
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "
+psql -h localhost -U kiqi -d kiqi -c "
 SELECT query, calls, total_time, mean_time 
 FROM pg_stat_statements 
 ORDER BY mean_time DESC 
@@ -171,7 +171,7 @@ LIMIT 10;
 "
 
 # 2. 查看当前运行的查询
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "
+psql -h localhost -U kiqi -d kiqi -c "
 SELECT pid, now() - pg_stat_activity.query_start AS duration, query, state
 FROM pg_stat_activity
 WHERE state != 'idle'
@@ -179,7 +179,7 @@ ORDER BY duration DESC;
 "
 
 # 3. 查看索引使用情况
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "
+psql -h localhost -U kiqi -d kiqi -c "
 SELECT schemaname, tablename, indexname, idx_scan
 FROM pg_stat_user_indexes
 ORDER BY idx_scan ASC;
@@ -206,12 +206,12 @@ too many clients already
 **解决方案**：
 ```bash
 # 1. 查看当前连接数
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "
+psql -h localhost -U kiqi -d kiqi -c "
 SELECT count(*) FROM pg_stat_activity;
 "
 
 # 2. 查看最大连接数
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "
+psql -h localhost -U kiqi -d kiqi -c "
 SHOW max_connections;
 "
 
@@ -468,7 +468,7 @@ curl -s http://localhost:8080/metrics > /dev/null && echo "✅" || echo "❌"
 
 # 检查数据库
 echo -n "Database: "
-psql -h localhost -U ddd_scaffold -d ddd_scaffold -c "SELECT 1" > /dev/null 2>&1 && echo "✅" || echo "❌"
+psql -h localhost -U kiqi -d kiqi -c "SELECT 1" > /dev/null 2>&1 && echo "✅" || echo "❌"
 
 # 检查 Redis
 echo -n "Redis: "

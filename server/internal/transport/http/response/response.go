@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/internal/transport/http/middleware"
+	"github.com/shenfay/kiqi/internal/transport/http/middleware"
 )
 
 // Success 返回成功响应（200 OK）

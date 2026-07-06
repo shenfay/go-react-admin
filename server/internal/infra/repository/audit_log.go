@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/utils"
 	"gorm.io/gorm"
 )
 

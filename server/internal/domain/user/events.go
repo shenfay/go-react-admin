@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/shenfay/go-ddd-scaffold/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
 )
 
 // 编译期断言：所有领域事件实现 events.DomainEvent 接口

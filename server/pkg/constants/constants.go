@@ -22,7 +22,7 @@ const (
 
 // Redis Key 前缀
 const (
-	RedisKeyPrefix            = "go_ddd_scaffold:"
+	RedisKeyPrefix            = "kiqi:"
 	RedisKeyRefreshToken      = RedisKeyPrefix + "refresh_token:"
 	RedisKeyUserSession       = RedisKeyPrefix + "user_session:"
 	RedisKeyLoginAttempts     = RedisKeyPrefix + "login_attempts:"

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/go-ddd-scaffold/pkg/logger"
-	"github.com/shenfay/go-ddd-scaffold/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/logger"
+	"github.com/shenfay/kiqi/pkg/utils"
 	"go.uber.org/zap"
 )
 

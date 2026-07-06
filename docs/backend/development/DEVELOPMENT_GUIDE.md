@@ -524,7 +524,7 @@ http POST http://localhost:8080/api/v1/auth/register \
 
 ```bash
 # 连接数据库
-psql -U postgres -d ddd_scaffold
+psql -U postgres -d kiqi
 
 # 查看用户表
 SELECT id, email, email_verified, created_at FROM users LIMIT 10;
