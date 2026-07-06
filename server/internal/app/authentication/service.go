@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
 	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
@@ -52,6 +53,7 @@ type DeviceInfo struct {
 // Service 认证应用服务
 type Service struct {
 	userRepo     user.UserRepository
+	roleRepo     rbac.RoleRepository
 	tokenService TokenService
 	eventBus     events.Bus
 	metrics      *metrics.Metrics
@@ -59,9 +61,10 @@ type Service struct {
 }
 
 // NewService 创建认证服务实例
-func NewService(userRepo user.UserRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics) *Service {
+func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics) *Service {
 	return &Service{
 		userRepo:     userRepo,
+		roleRepo:     roleRepo,
 		tokenService: tokenService,
 		eventBus:     eventBus,
 		metrics:      m,
@@ -91,7 +94,7 @@ func (s *Service) Register(ctx context.Context, cmd RegisterCommand) (*ServiceAu
 	}
 
 	// 2. 创建用户实体
-	u, err := user.NewUser(cmd.Email, cmd.Password)
+	u, err := user.NewUser(cmd.Email, "", cmd.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -199,11 +202,18 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		Timestamp: utils.Now(),
 	})
 
+	// 8. 查询用户权限
+	var permissions *rbac.UserPermission
+	if s.roleRepo != nil {
+		permissions, _ = s.roleRepo.FindPermissionsByUserID(ctx, u.ID)
+	}
+
 	return &ServiceAuthResponse{
 		User:         u,
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 		ExpiresIn:    tokens.ExpiresIn,
+		Permissions:  permissions,
 	}, nil
 }
 

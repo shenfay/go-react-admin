@@ -1,22 +1,16 @@
 import { useState } from 'react'
-import { Card, Form, Input, Button, Avatar, Descriptions, Divider, message, Tabs } from 'antd'
+import { Card, Form, Input, Button, Avatar, Descriptions, Divider, message, Tabs, Tag } from 'antd'
 import { UserOutlined, LockOutlined, BellOutlined } from '@ant-design/icons'
+import { useAppStore } from '@/stores'
 import DataPanel from '@/components/DataPanel'
 
 export default function Profile() {
   const [profileForm] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [activeTab, setActiveTab] = useState('profile')
+  const { username, email, roles } = useAppStore()
 
-  const userInfo = {
-    name: '张小明',
-    email: 'zhangxiaoming@example.com',
-    role: '管理员',
-    dept: '技术部',
-    phone: '138****5678',
-    joinDate: '2026-01-15',
-    lastLogin: '2026-05-27 09:30:00',
-  }
+  const roleLabels = roles.map(r => r.name).join('、') || '未分配角色'
 
   const handleSaveProfile = () => {
     message.success('个人信息已保存')
@@ -34,12 +28,12 @@ export default function Profile() {
           <Avatar size={80} icon={<UserOutlined />} style={{ background: 'var(--accent)', flexShrink: 0 }} />
           <div>
             <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-              {userInfo.name}
+              {username || '用户'}
             </div>
-            <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{userInfo.email}</div>
-            <div style={{ display: 'flex', gap: 16 }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>{userInfo.role} · {userInfo.dept}</span>
-              <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>上次登录: {userInfo.lastLogin}</span>
+            <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{email || ''}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {roles.map(r => <Tag key={r.code} color="blue">{r.name}</Tag>)}
+              {roles.length === 0 && <Tag>未分配角色</Tag>}
             </div>
           </div>
         </div>
@@ -60,12 +54,12 @@ export default function Profile() {
             children: (
               <DataPanel title="">
                 <Descriptions bordered column={2}>
-                  <Descriptions.Item label="姓名" span={1}>{userInfo.name}</Descriptions.Item>
-                  <Descriptions.Item label="邮箱" span={1}>{userInfo.email}</Descriptions.Item>
-                  <Descriptions.Item label="角色" span={1}>{userInfo.role}</Descriptions.Item>
-                  <Descriptions.Item label="部门" span={1}>{userInfo.dept}</Descriptions.Item>
-                  <Descriptions.Item label="手机号" span={1}>{userInfo.phone}</Descriptions.Item>
-                  <Descriptions.Item label="入职日期" span={1}>{userInfo.joinDate}</Descriptions.Item>
+                  <Descriptions.Item label="姓名" span={1}>{username || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="邮箱" span={1}>{email || '-'}</Descriptions.Item>
+                  <Descriptions.Item label="角色" span={1}>{roleLabels}</Descriptions.Item>
+                  <Descriptions.Item label="部门" span={1}>-</Descriptions.Item>
+                  <Descriptions.Item label="手机号" span={1}>-</Descriptions.Item>
+                  <Descriptions.Item label="注册日期" span={1}>-</Descriptions.Item>
                 </Descriptions>
 
                 <Divider />
@@ -75,13 +69,13 @@ export default function Profile() {
                   layout="vertical"
                   style={{ maxWidth: 500 }}
                 >
-                  <Form.Item label="昵称" name="nickname" initialValue={userInfo.name}>
+                  <Form.Item label="昵称" name="nickname" initialValue={username || ''}>
                     <Input />
                   </Form.Item>
-                  <Form.Item label="邮箱" name="email" initialValue={userInfo.email} rules={[{ type: 'email', message: '请输入正确的邮箱格式' }]}>
+                  <Form.Item label="邮箱" name="email" initialValue={email || ''} rules={[{ type: 'email', message: '请输入正确的邮箱格式' }]}>
                     <Input />
                   </Form.Item>
-                  <Form.Item label="手机号" name="phone" initialValue={userInfo.phone}>
+                  <Form.Item label="手机号" name="phone" initialValue="">
                     <Input />
                   </Form.Item>
                   <Form.Item label="个人简介" name="bio">

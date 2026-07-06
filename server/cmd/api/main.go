@@ -17,6 +17,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/shenfay/kiqi/internal/app/admin"
 	"github.com/shenfay/kiqi/internal/app/authentication"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/infra/config"
@@ -96,6 +97,7 @@ func main() {
 
 	// 6. 初始化服务依赖
 	userRepo := repository.NewUserRepository(db)
+	roleRepo := repository.NewRoleRepository(db)
 	tokenService := authentication.NewTokenServiceImpl(
 		redisClient,
 		cfg.JWT.Secret,
@@ -103,10 +105,14 @@ func main() {
 		cfg.JWT.AccessExpire,
 		cfg.JWT.RefreshExpire,
 	)
-	authService := authentication.NewService(userRepo, tokenService, inProcessBus, m)
+	authService := authentication.NewService(userRepo, roleRepo, tokenService, inProcessBus, m)
 
 	// 创建认证 Handler
 	authHandler := handlers.NewAuthHandler(authService, tokenService)
+
+	// 创建管理员服务
+	adminService := admin.NewService(userRepo, roleRepo)
+	adminHandler := handlers.NewAdminHandler(adminService)
 
 	// 5. 设置 Gin 模式
 	if cfg.Server.Mode == "release" {
@@ -120,7 +126,7 @@ func main() {
 	transhttp.Middlewares(engine, m)
 
 	// 8. 创建并配置路由器
-	apiRouter := transhttp.NewRouter(engine, authHandler, tokenService)
+	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, tokenService, roleRepo)
 	apiRouter.Setup()
 
 	// 7. 创建 HTTP 服务器

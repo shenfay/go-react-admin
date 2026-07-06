@@ -12,6 +12,7 @@ import (
 // CreateUserCommand 创建用户命令
 type CreateUserCommand struct {
 	Email    string
+	Name     string
 	Password string
 }
 
@@ -25,6 +26,7 @@ type UpdateProfileCommand struct {
 type UserDTO struct {
 	ID            string     `json:"id"`
 	Email         string     `json:"email"`
+	Name          string     `json:"name"`
 	EmailVerified bool       `json:"email_verified"`
 	Locked        bool       `json:"locked"`
 	LastLoginAt   *time.Time `json:"last_login_at,omitempty"`
@@ -49,7 +51,7 @@ func NewService(userRepo user.UserRepository, eventBus events.Bus) *Service {
 // CreateUser 创建用户
 func (s *Service) CreateUser(ctx context.Context, cmd CreateUserCommand) (*UserDTO, error) {
 	// 1. 创建领域实体
-	u, err := user.NewUser(cmd.Email, cmd.Password)
+	u, err := user.NewUser(cmd.Email, cmd.Name, cmd.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +126,7 @@ func toUserDTO(u *user.User) *UserDTO {
 	return &UserDTO{
 		ID:            u.ID,
 		Email:         u.Email,
+		Name:          u.Name,
 		EmailVerified: u.EmailVerified,
 		Locked:        u.Locked,
 		LastLoginAt:   u.LastLoginAt,

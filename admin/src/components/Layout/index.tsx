@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Layout } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageContainer from './PageContainer'
@@ -13,19 +14,19 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const { isLogin, login } = useAppStore()
+  const navigate = useNavigate()
+  const { isLogin } = useAppStore()
 
-  // 首次加载时自动以管理员身份登录
+  // 未登录时跳转到登录页
   useEffect(() => {
     if (!isLogin) {
-      login({
-        userId: '1',
-        username: '管理员',
-        role: 'admin',
-        roleName: '管理员',
-      })
+      navigate('/login', { replace: true })
     }
-  }, [isLogin, login])
+  }, [isLogin, navigate])
+
+  if (!isLogin) {
+    return null
+  }
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

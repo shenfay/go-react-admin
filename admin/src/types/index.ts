@@ -4,7 +4,7 @@
 
 // 通用响应结构
 export interface ApiResponse<T = unknown> {
-  code: number
+  code: string
   message: string
   data: T
 }
@@ -23,15 +23,84 @@ export interface PaginationResult<T> {
   pageSize: number
 }
 
+// 角色简要信息
+export interface RoleBrief {
+  id: string
+  name: string
+  code: string
+}
+
+// 用户权限信息
+export interface UserPermission {
+  roles: RoleBrief[]
+  permissions: string[]
+  menus: string[]
+}
+
 // 用户
 export interface User {
   id: string
-  name: string
   email: string
-  role: string
-  dept: string
-  status: string
-  createdAt: string
+  name: string
+  email_verified: boolean
+  locked: boolean
+  roles: RoleBrief[]
+  last_login_at?: string
+  created_at: string
+  updated_at: string
+}
+
+// 用户列表响应
+export interface UserListResponse {
+  users: User[]
+  total: number
+}
+
+// 角色
+export interface Role {
+  id: string
+  name: string
+  code: string
+  description: string
+  status: boolean
+  created_at: string
+  updated_at: string
+}
+
+// 角色权限
+export interface RolePermission {
+  id?: number
+  role_id: string
+  permission_key: string
+  menu_key: string
+}
+
+// 登录请求
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+// 登录响应
+export interface LoginResponse {
+  user: {
+    id: string
+    email: string
+    name: string
+    email_verified: boolean
+    created_at: string
+  }
+  access_token: string
+  refresh_token: string
+  expires_in: number
+  permissions?: UserPermission
+}
+
+// 菜单树节点
+export interface MenuTreeNode {
+  key: string
+  title: string
+  children?: MenuTreeNode[]
 }
 
 // 活动记录

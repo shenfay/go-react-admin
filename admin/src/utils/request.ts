@@ -29,8 +29,8 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response
-    // 统一处理响应格式
-    if (data.code !== undefined && data.code !== 200 && data.code !== 0) {
+    // 统一处理响应格式（后端 code 可能是数字或字符串）
+    if (data.code !== undefined && data.code !== 200 && data.code !== 0 && data.code !== 'SUCCESS' && data.code !== 'CREATED') {
       message.error(data.message || '请求失败')
       return Promise.reject(new Error(data.message || '请求失败'))
     }

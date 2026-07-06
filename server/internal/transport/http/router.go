@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/shenfay/kiqi/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/transport/http/handlers"
 	"github.com/shenfay/kiqi/internal/transport/http/middleware"
 )
@@ -12,19 +13,25 @@ import (
 type Router struct {
 	engine       *gin.Engine
 	authHandler  *handlers.AuthHandler
+	adminHandler *handlers.AdminHandler
 	tokenService authentication.TokenService
+	roleRepo     rbac.RoleRepository
 }
 
 // NewRouter 创建路由器
 func NewRouter(
 	engine *gin.Engine,
 	authHandler *handlers.AuthHandler,
+	adminHandler *handlers.AdminHandler,
 	tokenService authentication.TokenService,
+	roleRepo rbac.RoleRepository,
 ) *Router {
 	return &Router{
 		engine:       engine,
 		authHandler:  authHandler,
+		adminHandler: adminHandler,
 		tokenService: tokenService,
+		roleRepo:     roleRepo,
 	}
 }
 
@@ -47,6 +54,7 @@ func (r *Router) Setup() {
 	{
 		r.setupAuthRoutes(v1)
 		r.setupUserRoutes(v1)
+		r.setupAdminRoutes(v1)
 	}
 
 	// 注册 Swagger UI 路由（开发环境）
@@ -82,5 +90,41 @@ func (r *Router) setupUserRoutes(v1 *gin.RouterGroup) {
 	}))
 	{
 		users.GET("/:id", r.authHandler.GetUserByID)
+	}
+}
+
+// setupAdminRoutes 配置管理员路由组
+func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
+	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
+		TokenService: r.tokenService,
+	})
+	rbacMiddleware := middleware.RBACMiddleware(r.roleRepo, "admin")
+
+	adminGroup := v1.Group("/admin")
+	adminGroup.Use(authMiddleware, rbacMiddleware)
+	{
+		// 用户管理
+		adminGroup.GET("/users", r.adminHandler.ListUsers)
+		adminGroup.POST("/users", r.adminHandler.CreateUser)
+		adminGroup.PUT("/users/:id", r.adminHandler.UpdateUser)
+		adminGroup.PATCH("/users/:id/status", r.adminHandler.ToggleUserStatus)
+
+		// 角色管理
+		adminGroup.GET("/roles", r.adminHandler.ListRoles)
+		adminGroup.POST("/roles", r.adminHandler.CreateRole)
+		adminGroup.PUT("/roles/:id", r.adminHandler.UpdateRole)
+		adminGroup.DELETE("/roles/:id", r.adminHandler.DeleteRole)
+		adminGroup.PATCH("/roles/:id/status", r.adminHandler.ToggleRoleStatus)
+
+		// 权限管理
+		adminGroup.GET("/roles/:id/permissions", r.adminHandler.GetRolePermissions)
+		adminGroup.PUT("/roles/:id/permissions", r.adminHandler.UpdateRolePermissions)
+	}
+
+	// 当前用户权限（放在 auth 组下，只需登录即可）
+	auth := v1.Group("/auth")
+	auth.Use(authMiddleware)
+	{
+		auth.GET("/permissions", r.adminHandler.GetCurrentUserPermissions)
 	}
 }

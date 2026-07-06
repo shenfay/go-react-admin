@@ -19,6 +19,7 @@ import (
 type UserPO struct {
 	ID             string    `gorm:"primaryKey;type:varchar(50)" json:"id"`
 	Email          string    `gorm:"uniqueIndex;type:varchar(255);not null" json:"email"`
+	Name           string    `gorm:"type:varchar(100);default:''" json:"name"`
 	Password       string    `gorm:"type:varchar(255);not null" json:"-"`
 	EmailVerified  bool      `gorm:"default:false" json:"email_verified"`
 	Locked         bool      `gorm:"default:false" json:"locked"`
@@ -119,6 +120,7 @@ func (po *UserPO) ToDomain() *user.User {
 	u := &user.User{
 		ID:             po.ID,
 		Email:          po.Email,
+		Name:           po.Name,
 		Password:       po.Password,
 		EmailVerified:  po.EmailVerified,
 		Locked:         po.Locked,
@@ -139,6 +141,7 @@ func ToPO(u *user.User) *UserPO {
 	po := &UserPO{
 		ID:             u.ID,
 		Email:          u.Email,
+		Name:           u.Name,
 		Password:       u.Password,
 		EmailVerified:  u.EmailVerified,
 		Locked:         u.Locked,
@@ -217,4 +220,50 @@ func (r *userRepository) ExistsByEmail(ctx context.Context, email string) bool {
 func (r *userRepository) Update(ctx context.Context, u *user.User) error {
 	po := ToPO(u)
 	return r.db.WithContext(ctx).Save(po).Error
+}
+
+// List 分页查询用户列表
+func (r *userRepository) List(ctx context.Context, params user.UserListParams) (*user.UserListResult, error) {
+	query := r.db.WithContext(ctx).Model(&UserPO{})
+
+	if params.Keyword != "" {
+		keyword := "%" + params.Keyword + "%"
+		query = query.Where("name ILIKE ? OR email ILIKE ?", keyword, keyword)
+	}
+	if params.RoleID != "" {
+		query = query.Where("id IN (SELECT user_id FROM user_roles WHERE role_id = ?)", params.RoleID)
+	}
+	if params.Status != nil {
+		query = query.Where("locked = ?", !*params.Status)
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	page := params.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := params.PageSize
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var pos []UserPO
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&pos).Error; err != nil {
+		return nil, err
+	}
+
+	users := make([]*user.User, 0, len(pos))
+	for i := range pos {
+		users = append(users, pos[i].ToDomain())
+	}
+
+	return &user.UserListResult{
+		Users: users,
+		Total: total,
+	}, nil
 }

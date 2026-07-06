@@ -3,6 +3,7 @@ package authentication
 import (
 	"time"
 
+	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/user"
 )
 
@@ -37,4 +38,5 @@ type ServiceAuthResponse struct {
 	AccessToken  string
 	RefreshToken string
 	ExpiresIn    time.Duration
+	Permissions  *rbac.UserPermission
 }

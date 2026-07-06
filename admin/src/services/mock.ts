@@ -1,120 +1,80 @@
 /**
  * Mock 数据服务
- * 开发环境使用，生产环境可移除
+ * 开发环境使用，后端 API 就绪后可移除
  */
 
-import type { PermissionConfig } from '@/config/permission'
+import type { UserPermission } from '@/types'
 
 // 模拟延迟
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-// 用户登录
-export async function mockLogin(username: string, _password: string) {
+// 默认权限配置
+const defaultPermissions: UserPermission = {
+  roles: [{ id: 'role_admin', name: '管理员', code: 'admin' }],
+  permissions: [
+    'dashboard:view',
+    'family:manage',
+    'goal:manage',
+    'card_template:manage',
+    'card_instance:view',
+    'companion:manage',
+    'acceptance:manage',
+    'points:view',
+    'shop_item:manage',
+    'exchange_order:manage',
+    'user:manage',
+    'permission:manage',
+    'profile:view',
+    'operation:log',
+    'setting:manage',
+  ],
+  menus: [
+    'dashboard',
+    'family',
+    'goals',
+    'card-templates',
+    'card-instances',
+    'companions',
+    'acceptance',
+    'points',
+    'shop-items',
+    'exchange-orders',
+    'user-management',
+    'permission-management',
+    'profile',
+    'operation-log',
+    'system-settings',
+  ],
+}
+
+// 模拟登录
+export async function mockLogin(email: string, _password: string) {
   await delay(500)
-  const users: Record<string, { userId: string; username: string; role: string }> = {
-    admin: { userId: '1', username: '管理员', role: 'admin' },
-    operator: { userId: '2', username: '运营', role: 'operator' },
-    viewer: { userId: '3', username: '观察员', role: 'viewer' },
+
+  const users: Record<string, { userId: string; name: string; email: string }> = {
+    'admin@example.com': { userId: '1', name: '管理员', email: 'admin@example.com' },
+    'operator@example.com': { userId: '2', name: '运营', email: 'operator@example.com' },
+    'viewer@example.com': { userId: '3', name: '观察员', email: 'viewer@example.com' },
   }
-  const user = users[username]
+
+  const user = users[email]
   if (!user) {
     throw new Error('用户名或密码错误')
   }
-  return {
-    token: `mock-token-${user.userId}`,
-    ...user,
-  }
-}
 
-// 获取权限配置
-export async function mockGetPermissions(): Promise<PermissionConfig[]> {
-  await delay(300)
-  return [
-    {
-      role: 'admin',
-      roleName: '管理员',
-      permissions: [
-        'dashboard:view',
-        'family:manage',
-        'goal:manage',
-        'card_template:manage',
-        'card_instance:view',
-        'companion:manage',
-        'acceptance:manage',
-        'points:view',
-        'shop_item:manage',
-        'exchange_order:manage',
-        'user:manage',
-        'permission:manage',
-        'profile:view',
-        'operation:log',
-        'setting:manage',
-      ],
-      menus: [
-        'dashboard',
-        'family',
-        'goals',
-        'card-templates',
-        'card-instances',
-        'companions',
-        'acceptance',
-        'points',
-        'shop-items',
-        'exchange-orders',
-        'user-management',
-        'permission-management',
-        'profile',
-        'operation-log',
-        'system-settings',
-      ],
+  return {
+    user: {
+      id: user.userId,
+      email: user.email,
+      name: user.name,
+      email_verified: true,
+      created_at: new Date().toISOString(),
     },
-    {
-      role: 'operator',
-      roleName: '运营',
-      permissions: [
-        'dashboard:view',
-        'family:manage',
-        'goal:manage',
-        'card_template:manage',
-        'card_instance:view',
-        'companion:manage',
-        'acceptance:manage',
-        'points:view',
-        'shop_item:manage',
-        'exchange_order:manage',
-        'profile:view',
-      ],
-      menus: [
-        'dashboard',
-        'family',
-        'goals',
-        'card-templates',
-        'card-instances',
-        'companions',
-        'acceptance',
-        'points',
-        'shop-items',
-        'exchange-orders',
-        'profile',
-      ],
-    },
-    {
-      role: 'viewer',
-      roleName: '观察员',
-      permissions: [
-        'dashboard:view',
-        'card_instance:view',
-        'points:view',
-        'profile:view',
-      ],
-      menus: [
-        'dashboard',
-        'card-instances',
-        'points',
-        'profile',
-      ],
-    },
-  ]
+    access_token: `mock-token-${user.userId}`,
+    refresh_token: `mock-refresh-${user.userId}`,
+    expires_in: 7200,
+    permissions: defaultPermissions,
+  }
 }
 
 // 获取概览统计

@@ -10,20 +10,21 @@ import (
 // User 用户聚合根
 // 封装用户身份、凭据和生命周期状态
 type User struct {
-	ID             string     `json:"id"`                       // 用户唯一标识
-	Email          string     `json:"email"`                    // 用户邮箱
-	Password       string     `json:"-"`                        // 密码哈希（不序列化）
-	EmailVerified  bool       `json:"email_verified"`           // 邮箱验证状态
-	Locked         bool       `json:"locked"`                   // 账户锁定状态
-	FailedAttempts int        `json:"failed_attempts"`          // 连续登录失败次数
-	LastLoginAt    *time.Time `json:"last_login_at,omitempty"`  // 最后登录时间
-	CreatedAt      time.Time  `json:"created_at"`               // 创建时间
-	UpdatedAt      time.Time  `json:"updated_at"`               // 更新时间
+	ID             string     `json:"id"`                      // 用户唯一标识
+	Email          string     `json:"email"`                   // 用户邮箱
+	Name           string     `json:"name"`                    // 用户名称
+	Password       string     `json:"-"`                       // 密码哈希（不序列化）
+	EmailVerified  bool       `json:"email_verified"`          // 邮箱验证状态
+	Locked         bool       `json:"locked"`                  // 账户锁定状态
+	FailedAttempts int        `json:"failed_attempts"`         // 连续登录失败次数
+	LastLoginAt    *time.Time `json:"last_login_at,omitempty"` // 最后登录时间
+	CreatedAt      time.Time  `json:"created_at"`              // 创建时间
+	UpdatedAt      time.Time  `json:"updated_at"`              // 更新时间
 }
 
 // NewUser 创建新用户
 // 邮箱格式无效或密码不符合要求时返回错误
-func NewUser(email, password string) (*User, error) {
+func NewUser(email, name, password string) (*User, error) {
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		return nil, err
@@ -33,6 +34,7 @@ func NewUser(email, password string) (*User, error) {
 	return &User{
 		ID:             utils.GenerateID(),
 		Email:          email,
+		Name:           name,
 		Password:       hashedPassword,
 		EmailVerified:  false,
 		Locked:         false,
@@ -40,6 +42,13 @@ func NewUser(email, password string) (*User, error) {
 		CreatedAt:      now,
 		UpdatedAt:      now,
 	}, nil
+}
+
+// UpdateName 更新用户名称
+func (u *User) UpdateName(newName string) error {
+	u.Name = newName
+	u.UpdatedAt = utils.Now()
+	return nil
 }
 
 // VerifyPassword 验证密码是否匹配

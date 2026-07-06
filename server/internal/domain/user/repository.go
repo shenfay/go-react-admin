@@ -2,6 +2,21 @@ package user
 
 import "context"
 
+// UserListParams 用户列表查询参数
+type UserListParams struct {
+	Page     int
+	PageSize int
+	Keyword  string
+	RoleID   string
+	Status   *bool
+}
+
+// UserListResult 用户列表结果
+type UserListResult struct {
+	Users []*User
+	Total int64
+}
+
 // UserRepository 用户仓储接口
 type UserRepository interface {
 	// Create 创建用户
@@ -21,4 +36,7 @@ type UserRepository interface {
 
 	// Update 更新用户
 	Update(ctx context.Context, user *User) error
+
+	// List 分页查询用户列表
+	List(ctx context.Context, params UserListParams) (*UserListResult, error)
 }

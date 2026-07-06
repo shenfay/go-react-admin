@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import MainLayout from '@/components/Layout'
 import PermissionGuard from '@/components/PermissionGuard'
+import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Family from '@/pages/Family'
 import Goal from '@/pages/Goal'
@@ -19,6 +20,10 @@ import SystemSettings from '@/pages/SystemSettings'
 
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <Login />,
+  },
+  {
     path: '/',
     element: (
       <MainLayout>
@@ -31,7 +36,6 @@ const router = createBrowserRouter([
         path: 'dashboard',
         element: <PermissionGuard permission="dashboard:view"><Dashboard /></PermissionGuard>,
       },
-      // 成长管理
       {
         path: 'family',
         element: <PermissionGuard permission="family:manage"><Family /></PermissionGuard>,
@@ -40,7 +44,6 @@ const router = createBrowserRouter([
         path: 'goals',
         element: <PermissionGuard permission="goal:manage"><Goal /></PermissionGuard>,
       },
-      // 卡片引擎
       {
         path: 'card-templates',
         element: <PermissionGuard permission="card_template:manage"><CardTemplate /></PermissionGuard>,
@@ -49,17 +52,14 @@ const router = createBrowserRouter([
         path: 'card-instances',
         element: <PermissionGuard permission="card_instance:view"><CardInstance /></PermissionGuard>,
       },
-      // 伙伴系统
       {
         path: 'companions',
         element: <PermissionGuard permission="companion:manage"><Companion /></PermissionGuard>,
       },
-      // 验收管理
       {
         path: 'acceptance',
         element: <PermissionGuard permission="acceptance:manage"><Acceptance /></PermissionGuard>,
       },
-      // 积分系统
       {
         path: 'points',
         element: <PermissionGuard permission="points:view"><PointsRecord /></PermissionGuard>,
@@ -72,7 +72,6 @@ const router = createBrowserRouter([
         path: 'exchange-orders',
         element: <PermissionGuard permission="exchange_order:manage"><ExchangeOrder /></PermissionGuard>,
       },
-      // 用户中心
       {
         path: 'users',
         element: <PermissionGuard permission="user:manage"><UserManagement /></PermissionGuard>,
@@ -85,7 +84,6 @@ const router = createBrowserRouter([
         path: 'profile',
         element: <PermissionGuard permission="profile:view"><Profile /></PermissionGuard>,
       },
-      // 系统
       {
         path: 'operation-log',
         element: <PermissionGuard permission="operation:log"><OperationLog /></PermissionGuard>,
