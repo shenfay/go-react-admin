@@ -20,6 +20,7 @@ import (
 	"github.com/shenfay/kiqi/internal/app/admin"
 	"github.com/shenfay/kiqi/internal/app/authentication"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	casbinenforcer "github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/internal/infra/config"
 	"github.com/shenfay/kiqi/internal/infra/messaging"
 	"github.com/shenfay/kiqi/internal/infra/repository"
@@ -98,6 +99,14 @@ func main() {
 	// 6. 初始化服务依赖
 	userRepo := repository.NewUserRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
+
+	// 初始化 Casbin 权限引擎
+	enforcer, err := casbinenforcer.NewEnforcer(db)
+	if err != nil {
+		log.Fatalf("Failed to initialize Casbin enforcer: %v", err)
+	}
+	pkglogger.Info("✓ Casbin enforcer initialized")
+
 	tokenService := authentication.NewTokenServiceImpl(
 		redisClient,
 		cfg.JWT.Secret,
@@ -105,13 +114,13 @@ func main() {
 		cfg.JWT.AccessExpire,
 		cfg.JWT.RefreshExpire,
 	)
-	authService := authentication.NewService(userRepo, roleRepo, tokenService, inProcessBus, m)
+	authService := authentication.NewService(userRepo, roleRepo, tokenService, inProcessBus, m, enforcer)
 
 	// 创建认证 Handler
 	authHandler := handlers.NewAuthHandler(authService, tokenService)
 
 	// 创建管理员服务
-	adminService := admin.NewService(userRepo, roleRepo)
+	adminService := admin.NewService(userRepo, roleRepo, enforcer)
 	adminHandler := handlers.NewAdminHandler(adminService)
 
 	// 5. 设置 Gin 模式
@@ -126,7 +135,7 @@ func main() {
 	transhttp.Middlewares(engine, m)
 
 	// 8. 创建并配置路由器
-	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, tokenService, roleRepo)
+	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, tokenService, enforcer)
 	apiRouter.Setup()
 
 	// 7. 创建 HTTP 服务器

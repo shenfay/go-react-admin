@@ -67,6 +67,19 @@ func handleAppError(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, ErrorResponse{
 		BaseResponse: baseResponse,
 		Code:         "SYSTEM.INTERNAL_ERROR",
-		Message:      "Internal server error",
+		Message:      "服务器内部错误",
 	})
+}
+
+// RespondError 中间件统一错误响应（含 trace_id 和 timestamp）
+func RespondError(c *gin.Context, httpStatus int, code string, message string) {
+	c.JSON(httpStatus, ErrorResponse{
+		BaseResponse: BaseResponse{
+			TraceID:   GetTraceID(c),
+			Timestamp: time.Now().UTC().Format(time.RFC3339),
+		},
+		Code:    code,
+		Message: message,
+	})
+	c.Abort()
 }

@@ -25,15 +25,6 @@ type RoleRepository interface {
 	// FindByUserID 查询用户的所有角色（通过 user_roles 关联表）
 	FindByUserID(ctx context.Context, userID string) ([]*Role, error)
 
-	// FindPermissionsByUserID 查询用户的所有权限（通过 user_roles + role_permissions）
-	FindPermissionsByUserID(ctx context.Context, userID string) (*UserPermission, error)
-
-	// FindRolePermissions 查询角色的权限列表
-	FindRolePermissions(ctx context.Context, roleID string) ([]RolePermission, error)
-
-	// UpdateRolePermissions 更新角色权限（先删后插）
-	UpdateRolePermissions(ctx context.Context, roleID string, permissions []RolePermission) error
-
 	// AssignRolesToUser 分配角色给用户（先删后插 user_roles）
 	AssignRolesToUser(ctx context.Context, userID string, roleIDs []string) error
 

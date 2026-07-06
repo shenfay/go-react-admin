@@ -14,28 +14,28 @@ var (
 	// ErrFieldRequired 字段必填
 	ErrFieldRequired = &errors.AppError{
 		Code:       "VALIDATION.FIELD_REQUIRED",
-		Message:    "Field is required",
+		Message:    "必填字段不能为空",
 		HTTPStatus: http.StatusBadRequest,
 	}
 
 	// ErrFieldInvalid 字段格式无效
 	ErrFieldInvalid = &errors.AppError{
 		Code:       "VALIDATION.FIELD_INVALID",
-		Message:    "Field format is invalid",
+		Message:    "字段格式不正确",
 		HTTPStatus: http.StatusBadRequest,
 	}
 
 	// ErrFieldTooShort 字段长度太短
 	ErrFieldTooShort = &errors.AppError{
 		Code:       "VALIDATION.FIELD_TOO_SHORT",
-		Message:    "Field length is too short",
+		Message:    "字段长度太短",
 		HTTPStatus: http.StatusBadRequest,
 	}
 
 	// ErrFieldTooLong 字段长度太长
 	ErrFieldTooLong = &errors.AppError{
 		Code:       "VALIDATION.FIELD_TOO_LONG",
-		Message:    "Field length is too long",
+		Message:    "字段长度太长",
 		HTTPStatus: http.StatusBadRequest,
 	}
 )
@@ -80,14 +80,14 @@ func FromGinError(err error) *errors.AppError {
 func formatFieldError(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
-		return fmt.Sprintf("%s is required", fe.Field())
+		return fmt.Sprintf("%s 为必填字段", fe.Field())
 	case "email":
-		return fmt.Sprintf("%s must be a valid email address", fe.Field())
+		return fmt.Sprintf("%s 必须是有效的邮箱地址", fe.Field())
 	case "min":
-		return fmt.Sprintf("%s must be at least %s characters", fe.Field(), fe.Param())
+		return fmt.Sprintf("%s 长度不能少于 %s 个字符", fe.Field(), fe.Param())
 	case "max":
-		return fmt.Sprintf("%s must be at most %s characters", fe.Field(), fe.Param())
+		return fmt.Sprintf("%s 长度不能超过 %s 个字符", fe.Field(), fe.Param())
 	default:
-		return fmt.Sprintf("%s is invalid", fe.Field())
+		return fmt.Sprintf("%s 格式不正确", fe.Field())
 	}
 }

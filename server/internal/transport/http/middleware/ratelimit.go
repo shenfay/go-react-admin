@@ -70,11 +70,7 @@ func RateLimitMiddleware(rl *RateLimiter) gin.HandlerFunc {
 		ip := c.ClientIP()
 
 		if !rl.allow(ip) {
-			c.JSON(http.StatusTooManyRequests, gin.H{
-				"code":    "TOO_MANY_REQUESTS",
-				"message": "Too many requests, please try again later",
-			})
-			c.Abort()
+			RespondError(c, http.StatusTooManyRequests, "SYSTEM.TOO_MANY_REQUESTS", "请求过于频繁，请稍后重试")
 			return
 		}
 

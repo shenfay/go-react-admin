@@ -11,7 +11,7 @@ var (
 	// ErrTooManyAttempts 过多尝试次数
 	ErrTooManyAttempts = &errors.AppError{
 		Code:       errors.ErrCodeSecurityTooManyAttempts,
-		Message:    "Too many attempts, please try again later",
+		Message:    "操作次数过多，请稍后重试",
 		HTTPStatus: http.StatusTooManyRequests,
 	}
 )

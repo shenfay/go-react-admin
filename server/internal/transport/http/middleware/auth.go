@@ -19,21 +19,13 @@ func JWTAuthMiddleware(config JWTAuthConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    "UNAUTHORIZED",
-				"message": "Missing authorization header",
-			})
-			c.Abort()
+			RespondError(c, http.StatusUnauthorized, "SYSTEM.UNAUTHORIZED", "缺少认证信息")
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    "UNAUTHORIZED",
-				"message": "Invalid authorization format",
-			})
-			c.Abort()
+			RespondError(c, http.StatusUnauthorized, "SYSTEM.UNAUTHORIZED", "认证格式不正确")
 			return
 		}
 
@@ -41,11 +33,7 @@ func JWTAuthMiddleware(config JWTAuthConfig) gin.HandlerFunc {
 
 		claims, err := config.TokenService.ValidateAccessToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    "INVALID_TOKEN",
-				"message": err.Error(),
-			})
-			c.Abort()
+			RespondError(c, http.StatusUnauthorized, "AUTH.INVALID_TOKEN", "无效的认证令牌")
 			return
 		}
 

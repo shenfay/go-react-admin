@@ -7,11 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shenfay/kiqi/internal/app/authentication"
-	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
-	userErr "github.com/shenfay/kiqi/pkg/errors/user"
-	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
 	"github.com/shenfay/kiqi/internal/transport/http/middleware"
 	"github.com/shenfay/kiqi/internal/transport/http/response"
+	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
 )
 
 // AuthHandler 认证 HTTP 处理器
@@ -30,7 +28,7 @@ func NewAuthHandler(service *authentication.Service, tokenService authentication
 
 // RegisterRequest 用户注册请求
 type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email,max=255"`    // 用户邮箱
+	Email    string `json:"email" binding:"required,email,max=255"`   // 用户邮箱
 	Password string `json:"password" binding:"required,min=8,max=72"` // 用户密码（8-72字符）
 }
 
@@ -175,35 +173,9 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	response.Success(c, authentication.ToAuthResponse(resp))
 }
 
-// handleServiceError 处理服务层错误
+// handleServiceError 处理服务层错误（走统一错误处理链路，含 trace_id/timestamp）
 func (h *AuthHandler) handleServiceError(c *gin.Context, err error) {
-	switch err {
-	case userErr.ErrEmailAlreadyExists:
-		c.JSON(http.StatusConflict, middleware.ErrorResponse{
-			Code:    userErr.ErrEmailAlreadyExists.Code,
-			Message: err.Error(),
-		})
-	case authErr.ErrInvalidCredentials, authErr.ErrInvalidToken, authErr.ErrTokenExpired:
-		c.JSON(http.StatusUnauthorized, middleware.ErrorResponse{
-			Code:    authErr.ErrInvalidCredentials.Code,
-			Message: err.Error(),
-		})
-	case authErr.ErrAccountLocked:
-		c.JSON(http.StatusLocked, middleware.ErrorResponse{
-			Code:    authErr.ErrAccountLocked.Code,
-			Message: err.Error(),
-		})
-	case userErr.ErrNotFound:
-		c.JSON(http.StatusNotFound, middleware.ErrorResponse{
-			Code:    userErr.ErrNotFound.Code,
-			Message: err.Error(),
-		})
-	default:
-		c.JSON(http.StatusInternalServerError, middleware.ErrorResponse{
-			Code:    "SYSTEM.INTERNAL_ERROR",
-			Message: "Internal server error",
-		})
-	}
+	response.Error(c, err)
 }
 
 // GetUserByID 根据 ID 获取用户信息
@@ -219,19 +191,13 @@ func (h *AuthHandler) handleServiceError(c *gin.Context, err error) {
 func (h *AuthHandler) GetUserByID(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {
-		c.JSON(http.StatusBadRequest, middleware.ErrorResponse{
-			Code:    "INVALID_REQUEST",
-			Message: "User ID is required",
-		})
+		middleware.RespondError(c, http.StatusBadRequest, "SYSTEM.INVALID_REQUEST", "用户 ID 不能为空")
 		return
 	}
 
 	u, err := h.service.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, middleware.ErrorResponse{
-			Code:    "USER_NOT_FOUND",
-			Message: "User not found",
-		})
+		middleware.RespondError(c, http.StatusNotFound, "USER.NOT_FOUND", "用户不存在")
 		return
 	}
 
@@ -249,19 +215,13 @@ func (h *AuthHandler) GetUserByID(c *gin.Context) {
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, middleware.ErrorResponse{
-			Code:    "UNAUTHORIZED",
-			Message: "Missing authorization header",
-		})
+		middleware.RespondError(c, http.StatusUnauthorized, "SYSTEM.UNAUTHORIZED", "缺少认证信息")
 		return
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		c.JSON(http.StatusUnauthorized, middleware.ErrorResponse{
-			Code:    "UNAUTHORIZED",
-			Message: "Invalid authorization format",
-		})
+		middleware.RespondError(c, http.StatusUnauthorized, "SYSTEM.UNAUTHORIZED", "认证格式不正确")
 		return
 	}
 
@@ -269,19 +229,13 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 
 	claims, err := h.tokenService.ValidateAccessToken(tokenString)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, middleware.ErrorResponse{
-			Code:    "INVALID_TOKEN",
-			Message: err.Error(),
-		})
+		middleware.RespondError(c, http.StatusUnauthorized, "AUTH.INVALID_TOKEN", "无效的认证令牌")
 		return
 	}
 
 	u, err := h.service.GetUserByID(c.Request.Context(), claims.UserID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, middleware.ErrorResponse{
-			Code:    "USER_NOT_FOUND",
-			Message: "User not found",
-		})
+		middleware.RespondError(c, http.StatusNotFound, "USER.NOT_FOUND", "用户不存在")
 		return
 	}
 
@@ -327,10 +281,7 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 
 	devices, err := h.tokenService.GetUserDevices(c.Request.Context(), userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, middleware.ErrorResponse{
-			Code:    "INTERNAL_ERROR",
-			Message: "Failed to get devices",
-		})
+		middleware.RespondError(c, http.StatusInternalServerError, "SYSTEM.INTERNAL_ERROR", "获取设备列表失败")
 		return
 	}
 
@@ -366,35 +317,23 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 	token := c.Param("token")
 
 	if token == "" {
-		c.JSON(http.StatusBadRequest, middleware.ErrorResponse{
-			Code:    "INVALID_REQUEST",
-			Message: "Device token is required",
-		})
+		middleware.RespondError(c, http.StatusBadRequest, "SYSTEM.INVALID_REQUEST", "设备令牌不能为空")
 		return
 	}
 
 	deviceInfo, err := h.tokenService.ValidateRefreshTokenWithDevice(c.Request.Context(), token)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, middleware.ErrorResponse{
-			Code:    "INVALID_TOKEN",
-			Message: "Invalid or expired device token",
-		})
+		middleware.RespondError(c, http.StatusUnauthorized, "AUTH.INVALID_TOKEN", "无效或已过期的设备令牌")
 		return
 	}
 
 	if deviceInfo.UserID != userID {
-		c.JSON(http.StatusForbidden, middleware.ErrorResponse{
-			Code:    "FORBIDDEN",
-			Message: "You can only revoke your own devices",
-		})
+		middleware.RespondError(c, http.StatusForbidden, "SYSTEM.FORBIDDEN", "只能撤销自己的设备")
 		return
 	}
 
 	if err := h.tokenService.RevokeDeviceByToken(c.Request.Context(), token); err != nil {
-		c.JSON(http.StatusInternalServerError, middleware.ErrorResponse{
-			Code:    "INTERNAL_ERROR",
-			Message: "Failed to revoke device",
-		})
+		middleware.RespondError(c, http.StatusInternalServerError, "SYSTEM.INTERNAL_ERROR", "撤销设备失败")
 		return
 	}
 
@@ -413,10 +352,7 @@ func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
 
 	if err := h.tokenService.RevokeAllDevices(c.Request.Context(), userID); err != nil {
-		c.JSON(http.StatusInternalServerError, middleware.ErrorResponse{
-			Code:    "INTERNAL_ERROR",
-			Message: "Failed to logout from all devices",
-		})
+		middleware.RespondError(c, http.StatusInternalServerError, "SYSTEM.INTERNAL_ERROR", "退出所有设备失败")
 		return
 	}
 

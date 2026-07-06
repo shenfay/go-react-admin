@@ -11,21 +11,21 @@ var (
 	// ErrNotFound 用户不存在
 	ErrNotFound = &errors.AppError{
 		Code:       errors.ErrCodeUserNotFound,
-		Message:    "User not found",
+		Message:    "用户不存在",
 		HTTPStatus: http.StatusNotFound,
 	}
 
 	// ErrEmailAlreadyExists 邮箱已注册
 	ErrEmailAlreadyExists = &errors.AppError{
 		Code:       errors.ErrCodeUserEmailAlreadyExists,
-		Message:    "Email address is already registered",
+		Message:    "该邮箱已被注册",
 		HTTPStatus: http.StatusConflict,
 	}
 
 	// ErrEmailNotVerified 邮箱未验证
 	ErrEmailNotVerified = &errors.AppError{
 		Code:       errors.ErrCodeUserEmailNotVerified,
-		Message:    "Email address has not been verified",
+		Message:    "邮箱尚未验证",
 		HTTPStatus: http.StatusForbidden,
 	}
 )

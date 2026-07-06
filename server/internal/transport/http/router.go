@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/shenfay/kiqi/internal/app/authentication"
-	"github.com/shenfay/kiqi/internal/domain/rbac"
+	"github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/internal/transport/http/handlers"
 	"github.com/shenfay/kiqi/internal/transport/http/middleware"
 )
@@ -15,7 +15,7 @@ type Router struct {
 	authHandler  *handlers.AuthHandler
 	adminHandler *handlers.AdminHandler
 	tokenService authentication.TokenService
-	roleRepo     rbac.RoleRepository
+	enforcer     *authorize.Enforcer
 }
 
 // NewRouter 创建路由器
@@ -24,14 +24,14 @@ func NewRouter(
 	authHandler *handlers.AuthHandler,
 	adminHandler *handlers.AdminHandler,
 	tokenService authentication.TokenService,
-	roleRepo rbac.RoleRepository,
+	enforcer *authorize.Enforcer,
 ) *Router {
 	return &Router{
 		engine:       engine,
 		authHandler:  authHandler,
 		adminHandler: adminHandler,
 		tokenService: tokenService,
-		roleRepo:     roleRepo,
+		enforcer:     enforcer,
 	}
 }
 
@@ -98,10 +98,10 @@ func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
 	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
 		TokenService: r.tokenService,
 	})
-	rbacMiddleware := middleware.RBACMiddleware(r.roleRepo, "admin")
+	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
 
 	adminGroup := v1.Group("/admin")
-	adminGroup.Use(authMiddleware, rbacMiddleware)
+	adminGroup.Use(authMiddleware, permMiddleware)
 	{
 		// 用户管理
 		adminGroup.GET("/users", r.adminHandler.ListUsers)

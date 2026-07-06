@@ -11,35 +11,35 @@ var (
 	// ErrInvalidCredentials 凭证无效（邮箱或密码错误）
 	ErrInvalidCredentials = &errors.AppError{
 		Code:       errors.ErrCodeAuthInvalidCredentials,
-		Message:    "Invalid email or password",
+		Message:    "邮箱或密码错误",
 		HTTPStatus: http.StatusUnauthorized,
 	}
 
 	// ErrInvalidToken 无效 Token
 	ErrInvalidToken = &errors.AppError{
 		Code:       errors.ErrCodeAuthInvalidToken,
-		Message:    "Invalid token",
+		Message:    "无效的认证令牌",
 		HTTPStatus: http.StatusUnauthorized,
 	}
 
 	// ErrTokenExpired Token 已过期
 	ErrTokenExpired = &errors.AppError{
 		Code:       errors.ErrCodeAuthTokenExpired,
-		Message:    "Token has expired",
+		Message:    "登录已过期，请重新登录",
 		HTTPStatus: http.StatusUnauthorized,
 	}
 
 	// ErrTokenRevoked Token 已被撤销
 	ErrTokenRevoked = &errors.AppError{
 		Code:       errors.ErrCodeAuthTokenRevoked,
-		Message:    "Token has been revoked",
+		Message:    "令牌已被撤销",
 		HTTPStatus: http.StatusUnauthorized,
 	}
 
 	// ErrAccountLocked 账户已锁定
 	ErrAccountLocked = &errors.AppError{
 		Code:       errors.ErrCodeAuthAccountLocked,
-		Message:    "Account locked due to too many failed login attempts",
+		Message:    "账户已锁定，请稍后重试",
 		HTTPStatus: http.StatusLocked,
 	}
 )

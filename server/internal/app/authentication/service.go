@@ -8,6 +8,7 @@ import (
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
+	"github.com/shenfay/kiqi/internal/infra/authorize"
 	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
 	"github.com/shenfay/kiqi/pkg/metrics"
@@ -58,10 +59,11 @@ type Service struct {
 	eventBus     events.Bus
 	metrics      *metrics.Metrics
 	maxAttempts  int
+	enforcer     *authorize.Enforcer
 }
 
 // NewService 创建认证服务实例
-func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics) *Service {
+func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics, enforcer *authorize.Enforcer) *Service {
 	return &Service{
 		userRepo:     userRepo,
 		roleRepo:     roleRepo,
@@ -69,6 +71,7 @@ func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, toke
 		eventBus:     eventBus,
 		metrics:      m,
 		maxAttempts:  5,
+		enforcer:     enforcer,
 	}
 }
 
@@ -202,10 +205,34 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		Timestamp: utils.Now(),
 	})
 
-	// 8. 查询用户权限
+	// 8. 查询用户权限（通过 Casbin）
 	var permissions *rbac.UserPermission
-	if s.roleRepo != nil {
-		permissions, _ = s.roleRepo.FindPermissionsByUserID(ctx, u.ID)
+	if s.enforcer != nil {
+		// 查询用户角色
+		roles, _ := s.roleRepo.FindByUserID(ctx, u.ID)
+		roleBriefs := make([]rbac.RoleBrief, 0, len(roles))
+		for _, role := range roles {
+			roleBriefs = append(roleBriefs, rbac.RoleBrief{
+				ID:   role.ID,
+				Name: role.Name,
+				Code: role.Code,
+			})
+		}
+
+		// 从 Casbin 查询权限
+		perms, _ := s.enforcer.GetPermissionsForUser(u.ID)
+		if perms == nil {
+			perms = []string{}
+		}
+
+		// 推导菜单
+		menus := rbac.DeriveMenus(perms)
+
+		permissions = &rbac.UserPermission{
+			Roles:       roleBriefs,
+			Permissions: perms,
+			Menus:       menus,
+		}
 	}
 
 	return &ServiceAuthResponse{

@@ -6,6 +6,7 @@ import (
 
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/user"
+	"github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
@@ -13,13 +14,15 @@ import (
 type Service struct {
 	userRepo user.UserRepository
 	roleRepo rbac.RoleRepository
+	enforcer *authorize.Enforcer
 }
 
 // NewService 创建管理员应用服务
-func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository) *Service {
+func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, enforcer *authorize.Enforcer) *Service {
 	return &Service{
 		userRepo: userRepo,
 		roleRepo: roleRepo,
+		enforcer: enforcer,
 	}
 }
 
@@ -60,9 +63,12 @@ func (s *Service) CreateUser(ctx context.Context, cmd CreateUserCmd) (*UserDTO, 
 		return nil, err
 	}
 
-	// 分配角色
+	// 分配角色（DB + Casbin 同步）
 	if len(cmd.RoleIDs) > 0 {
 		if err := s.roleRepo.AssignRolesToUser(ctx, u.ID, cmd.RoleIDs); err != nil {
+			return nil, err
+		}
+		if err := s.enforcer.SyncUserRoles(u.ID, cmd.RoleIDs); err != nil {
 			return nil, err
 		}
 	}
@@ -93,9 +99,12 @@ func (s *Service) UpdateUser(ctx context.Context, cmd UpdateUserCmd) (*UserDTO, 
 		return nil, err
 	}
 
-	// 更新角色（如果提供了）
+	// 更新角色（DB + Casbin 同步）
 	if cmd.RoleIDs != nil {
 		if err := s.roleRepo.AssignRolesToUser(ctx, u.ID, cmd.RoleIDs); err != nil {
+			return nil, err
+		}
+		if err := s.enforcer.SyncUserRoles(u.ID, cmd.RoleIDs); err != nil {
 			return nil, err
 		}
 	}
@@ -181,21 +190,49 @@ func (s *Service) ToggleRoleStatus(ctx context.Context, roleID string) error {
 	return s.roleRepo.Update(ctx, r)
 }
 
-// ---- 权限管理 ----
+// ---- 权限管理（通过 Casbin）----
 
-// GetRolePermissions 获取角色权限列表
-func (s *Service) GetRolePermissions(ctx context.Context, roleID string) ([]rbac.RolePermission, error) {
-	return s.roleRepo.FindRolePermissions(ctx, roleID)
+// GetRolePermissions 获取角色权限列表（从 Casbin 查询）
+func (s *Service) GetRolePermissions(ctx context.Context, roleID string) ([]string, error) {
+	return s.enforcer.GetPermissionsForRole(roleID)
 }
 
-// UpdateRolePermissions 更新角色权限
-func (s *Service) UpdateRolePermissions(ctx context.Context, roleID string, permissions []rbac.RolePermission) error {
-	return s.roleRepo.UpdateRolePermissions(ctx, roleID, permissions)
+// UpdateRolePermissions 更新角色权限（通过 Casbin）
+func (s *Service) UpdateRolePermissions(ctx context.Context, roleID string, permissions []string) error {
+	return s.enforcer.SetRolePermissions(roleID, permissions)
 }
 
 // GetUserPermissions 获取用户权限（登录时使用）
 func (s *Service) GetUserPermissions(ctx context.Context, userID string) (*rbac.UserPermission, error) {
-	return s.roleRepo.FindPermissionsByUserID(ctx, userID)
+	// 1. 查用户角色
+	roles, err := s.roleRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	roleBriefs := make([]rbac.RoleBrief, 0, len(roles))
+	for _, role := range roles {
+		roleBriefs = append(roleBriefs, rbac.RoleBrief{
+			ID:   role.ID,
+			Name: role.Name,
+			Code: role.Code,
+		})
+	}
+
+	// 2. 从 Casbin 查权限
+	permissions, err := s.enforcer.GetPermissionsForUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. 推导菜单
+	menus := rbac.DeriveMenus(permissions)
+
+	return &rbac.UserPermission{
+		Roles:       roleBriefs,
+		Permissions: permissions,
+		Menus:       menus,
+	}, nil
 }
 
 // ---- 命令对象 ----
@@ -260,12 +297,6 @@ type RoleDTO struct {
 	Status      bool      `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
-}
-
-// PermissionDTO 权限数据传输对象
-type PermissionDTO struct {
-	PermissionKey string `json:"permission_key"`
-	MenuKey       string `json:"menu_key"`
 }
 
 // ---- 转换函数 ----

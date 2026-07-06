@@ -33,16 +33,6 @@ type UserRolePO struct {
 
 func (UserRolePO) TableName() string { return "user_roles" }
 
-// RolePermissionPO 角色权限持久化对象
-type RolePermissionPO struct {
-	ID            int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	RoleID        string `gorm:"uniqueIndex:idx_role_perm;type:varchar(50);not null" json:"role_id"`
-	PermissionKey string `gorm:"uniqueIndex:idx_role_perm;type:varchar(100);not null" json:"permission_key"`
-	MenuKey       string `gorm:"type:varchar(100);default:''" json:"menu_key"`
-}
-
-func (RolePermissionPO) TableName() string { return "role_permissions" }
-
 // ToDomain 转换为领域模型
 func (po *RolePO) ToDomain() *rbac.Role {
 	if po == nil {
@@ -102,10 +92,6 @@ func (r *roleRepository) Update(ctx context.Context, role *rbac.Role) error {
 
 func (r *roleRepository) Delete(ctx context.Context, roleID string) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 删除角色权限
-		if err := tx.Where("role_id = ?", roleID).Delete(&RolePermissionPO{}).Error; err != nil {
-			return err
-		}
 		// 删除用户角色关联
 		if err := tx.Where("role_id = ?", roleID).Delete(&UserRolePO{}).Error; err != nil {
 			return err
@@ -169,111 +155,6 @@ func (r *roleRepository) FindByUserID(ctx context.Context, userID string) ([]*rb
 		roles = append(roles, pos[i].ToDomain())
 	}
 	return roles, nil
-}
-
-// FindPermissionsByUserID 查询用户的所有权限
-func (r *roleRepository) FindPermissionsByUserID(ctx context.Context, userID string) (*rbac.UserPermission, error) {
-	// 1. 查用户角色
-	roles, err := r.FindByUserID(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(roles) == 0 {
-		return &rbac.UserPermission{
-			Roles:       []rbac.RoleBrief{},
-			Permissions: []string{},
-			Menus:       []string{},
-		}, nil
-	}
-
-	roleIDs := make([]string, 0, len(roles))
-	roleBriefs := make([]rbac.RoleBrief, 0, len(roles))
-	for _, role := range roles {
-		roleIDs = append(roleIDs, role.ID)
-		roleBriefs = append(roleBriefs, rbac.RoleBrief{
-			ID:   role.ID,
-			Name: role.Name,
-			Code: role.Code,
-		})
-	}
-
-	// 2. 查角色权限（去重）
-	var perms []RolePermissionPO
-	err = r.db.WithContext(ctx).
-		Where("role_id IN ?", roleIDs).
-		Find(&perms).Error
-	if err != nil {
-		return nil, err
-	}
-
-	permSet := make(map[string]bool)
-	menuSet := make(map[string]bool)
-	for _, p := range perms {
-		permSet[p.PermissionKey] = true
-		if p.MenuKey != "" {
-			menuSet[p.MenuKey] = true
-		}
-	}
-
-	permissions := make([]string, 0, len(permSet))
-	for k := range permSet {
-		permissions = append(permissions, k)
-	}
-	menus := make([]string, 0, len(menuSet))
-	for k := range menuSet {
-		menus = append(menus, k)
-	}
-
-	return &rbac.UserPermission{
-		Roles:       roleBriefs,
-		Permissions: permissions,
-		Menus:       menus,
-	}, nil
-}
-
-// FindRolePermissions 查询角色的权限列表
-func (r *roleRepository) FindRolePermissions(ctx context.Context, roleID string) ([]rbac.RolePermission, error) {
-	var pos []RolePermissionPO
-	err := r.db.WithContext(ctx).Where("role_id = ?", roleID).Find(&pos).Error
-	if err != nil {
-		return nil, err
-	}
-	perms := make([]rbac.RolePermission, 0, len(pos))
-	for _, p := range pos {
-		perms = append(perms, rbac.RolePermission{
-			ID:            p.ID,
-			RoleID:        p.RoleID,
-			PermissionKey: p.PermissionKey,
-			MenuKey:       p.MenuKey,
-		})
-	}
-	return perms, nil
-}
-
-// UpdateRolePermissions 更新角色权限（先删后插）
-func (r *roleRepository) UpdateRolePermissions(ctx context.Context, roleID string, permissions []rbac.RolePermission) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// 删除旧权限
-		if err := tx.Where("role_id = ?", roleID).Delete(&RolePermissionPO{}).Error; err != nil {
-			return err
-		}
-		// 插入新权限
-		if len(permissions) > 0 {
-			pos := make([]RolePermissionPO, 0, len(permissions))
-			for _, p := range permissions {
-				pos = append(pos, RolePermissionPO{
-					RoleID:        roleID,
-					PermissionKey: p.PermissionKey,
-					MenuKey:       p.MenuKey,
-				})
-			}
-			if err := tx.Create(&pos).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
 }
 
 // AssignRolesToUser 分配角色给用户（先删后插 user_roles）

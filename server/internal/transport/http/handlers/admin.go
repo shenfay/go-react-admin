@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shenfay/kiqi/internal/app/admin"
-	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
@@ -246,10 +245,7 @@ func (h *AdminHandler) UpdateRolePermissions(c *gin.Context) {
 	roleID := c.Param("id")
 
 	var req struct {
-		Permissions []struct {
-			PermissionKey string `json:"permission_key" binding:"required"`
-			MenuKey       string `json:"menu_key"`
-		} `json:"permissions" binding:"required"`
+		Permissions []string `json:"permissions" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -257,15 +253,7 @@ func (h *AdminHandler) UpdateRolePermissions(c *gin.Context) {
 		return
 	}
 
-	perms := make([]rbac.RolePermission, 0, len(req.Permissions))
-	for _, p := range req.Permissions {
-		perms = append(perms, rbac.RolePermission{
-			PermissionKey: p.PermissionKey,
-			MenuKey:       p.MenuKey,
-		})
-	}
-
-	if err := h.service.UpdateRolePermissions(c.Request.Context(), roleID, perms); err != nil {
+	if err := h.service.UpdateRolePermissions(c.Request.Context(), roleID, req.Permissions); err != nil {
 		response.Error(c, err)
 		return
 	}
