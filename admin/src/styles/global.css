@@ -324,3 +324,63 @@ body {
   font-size: 13px !important;
   color: var(--text-muted) !important;
 }
+
+/* ==================== ProTable ==================== */
+
+/* Card container */
+.ant-pro-table .ant-pro-card {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border-light) !important;
+  overflow: hidden;
+}
+
+.ant-pro-table .ant-pro-card-body {
+  padding: 0 !important;
+}
+
+/* Search form area */
+.ant-pro-table .ant-pro-table-search {
+  margin-bottom: 0 !important;
+  padding: 20px 20px 16px !important;
+  border-bottom: 1px solid var(--divider) !important;
+  background: var(--bg-white) !important;
+}
+
+.ant-pro-table .ant-pro-table-search .ant-form {
+  gap: 12px !important;
+}
+
+.ant-pro-table .ant-pro-table-search .ant-form-item {
+  margin-bottom: 0 !important;
+}
+
+.ant-pro-table .ant-pro-table-search .ant-input,
+.ant-pro-table .ant-pro-table-search .ant-select-selector {
+  height: 34px !important;
+}
+
+/* Toolbar (headerTitle + toolBarRender) */
+.ant-pro-table .ant-pro-table-list-toolbar {
+  padding: 12px 20px !important;
+}
+
+.ant-pro-table .ant-pro-table-list-toolbar-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-pro-table .ant-pro-table-list-toolbar .ant-space {
+  gap: 8px !important;
+}
+
+/* Options reload button */
+.ant-pro-table .ant-pro-table-list-toolbar .ant-pro-table-list-toolbar-option-button {
+  color: var(--text-muted) !important;
+}
+
+.ant-pro-table .ant-pro-table-list-toolbar .ant-pro-table-list-toolbar-option-button:hover {
+  color: var(--text-secondary) !important;
+  background: var(--hover-bg-light) !important;
+  border-radius: var(--radius-sm) !important;
+}
