@@ -27,7 +27,6 @@ export default function Companion() {
   return (
     <DataPanel
       title="伙伴模板管理"
-      description="管理 AI 伙伴角色配置"
       extra={
         <Button type="primary" icon={<PlusOutlined />}>
           新增伙伴

@@ -257,7 +257,6 @@ export default function MenuManagement() {
     <div>
       <DataPanel
         title="菜单管理"
-        description="管理系统菜单结构与权限标识"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRoot}>
             新增顶级菜单

@@ -55,7 +55,7 @@ export default function PointsRecord() {
           </Col>
         </Row>
       </div>
-      <DataPanel title="积分流水" description="查看积分收支明细" style={{ marginTop: 16 }}>
+      <DataPanel title="积分流水" style={{ marginTop: 16 }}>
         <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
       </DataPanel>
     </div>

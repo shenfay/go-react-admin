@@ -171,7 +171,6 @@ export default function UserManagement() {
     <div>
       <DataPanel
         title="用户管理"
-        description="管理系统用户账户和权限"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加用户

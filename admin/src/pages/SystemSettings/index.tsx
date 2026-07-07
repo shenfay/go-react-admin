@@ -16,7 +16,7 @@ export default function SystemSettings() {
 
   return (
     <div>
-      <DataPanel title="基础配置" description="系统基础参数设置" compact>
+      <DataPanel title="基础配置" compact>
         <div style={{ padding: '0 28px 20px' }}>
           <Form form={form} layout="vertical" initialValues={{
             siteName: '中台管理系统',
@@ -57,7 +57,7 @@ export default function SystemSettings() {
         </div>
       </DataPanel>
 
-      <DataPanel title="功能开关" description="控制系统功能模块的启用状态" compact>
+      <DataPanel title="功能开关" compact>
         <div style={{ padding: '0 28px 20px' }}>
           <Form form={form} layout="vertical">
             <Form.Item

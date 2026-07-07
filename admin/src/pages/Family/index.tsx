@@ -28,7 +28,6 @@ export default function Family() {
   return (
     <DataPanel
       title="家庭管理"
-      description="管理家庭账户信息"
       extra={
         <Button type="primary" icon={<PlusOutlined />}>
           新增家庭

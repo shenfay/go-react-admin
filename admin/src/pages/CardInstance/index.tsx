@@ -40,7 +40,7 @@ const columns = [
 
 export default function CardInstance() {
   return (
-    <DataPanel title="卡片提交记录" description="查看所有卡片提交与验收记录">
+    <DataPanel title="卡片提交记录">
       <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
     </DataPanel>
   )

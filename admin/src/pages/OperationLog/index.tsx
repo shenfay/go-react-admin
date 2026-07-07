@@ -76,7 +76,6 @@ export default function OperationLog() {
     <div>
       <DataPanel
         title="操作日志"
-        description="查看系统操作记录与审计日志"
         filters={
           <>
             <FilterSearch placeholder="搜索操作..." />

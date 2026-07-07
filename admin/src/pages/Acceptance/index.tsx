@@ -42,7 +42,7 @@ const columns = [
 
 export default function Acceptance() {
   return (
-    <DataPanel title="验收管理" description="管理卡片内容验收流程">
+    <DataPanel title="验收管理">
       <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
     </DataPanel>
   )

@@ -60,7 +60,7 @@ body {
 }
 
 .ant-menu-item:hover {
-  background: var(--hover-bg) !important;
+  background: var(--active-bg) !important;
   color: var(--text-primary) !important;
 }
 
@@ -81,7 +81,7 @@ body {
 }
 
 .ant-menu-submenu-title:hover {
-  background: var(--hover-bg) !important;
+  background: var(--active-bg) !important;
   color: var(--text-primary) !important;
 }
 
@@ -118,11 +118,12 @@ body {
   background: var(--brand-dark) !important;
   border-color: var(--brand-dark) !important;
   color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 .ant-btn-primary:hover {
-  background: var(--brand-dark-hover) !important;
-  border-color: var(--brand-dark-hover) !important;
+  background: var(--brand-dark) !important;
+  border-color: var(--brand-dark) !important;
 }
 
 .ant-btn-default {
@@ -142,7 +143,12 @@ body {
 }
 
 .ant-btn-text:hover {
-  background: var(--hover-bg) !important;
+  background: var(--active-bg) !important;
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--active-bg) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Inputs */

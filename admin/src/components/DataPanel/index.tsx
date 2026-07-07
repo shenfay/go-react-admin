@@ -5,8 +5,6 @@ import type { ReactNode } from 'react'
 interface DataPanelProps {
   /** 页面主标题 */
   title?: string
-  /** 页面描述文字 */
-  description?: string
   /** 标题右侧操作按钮 */
   extra?: ReactNode
   /** 筛选栏内容（搜索框、筛选按钮等） */
@@ -99,7 +97,6 @@ export function FilterSearch({ value, onChange, placeholder = '搜索...', onSea
 
 export default function DataPanel({
   title,
-  description,
   extra,
   filters,
   toolbarActions,
@@ -136,18 +133,6 @@ export default function DataPanel({
                 {title}
               </h2>
             )}
-            {description && (
-              <p
-                style={{
-                  fontSize: 13,
-                  color: '#b0a89a',
-                  marginTop: 4,
-                  marginBottom: 0,
-                }}
-              >
-                {description}
-              </p>
-            )}
           </div>
           {extra && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
@@ -157,14 +142,14 @@ export default function DataPanel({
         </div>
       )}
 
-      {/* Title 与 Filter Bar 间距 */}
-      {hasHeader && hasFilters && <div style={{ height: 16 }} />}
+      {/* 标题与下个区域间距 */}
+      {hasHeader && <div style={{ height: 16 }} />}
 
       {/* Filter Bar */}
       {hasFilters && (
         <div
           style={{
-            padding: '16px 28px 0',
+            padding: '0 28px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',

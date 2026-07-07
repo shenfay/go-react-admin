@@ -266,7 +266,6 @@ export default function PermissionManagement() {
     <div>
       <DataPanel
         title="角色管理"
-        description="管理系统角色及其权限配置"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRole}>
             新增角色

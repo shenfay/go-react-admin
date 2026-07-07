@@ -47,7 +47,7 @@ const columns = [
 
 export default function ExchangeOrder() {
   return (
-    <DataPanel title="兑换订单" description="管理积分兑换订单审批">
+    <DataPanel title="兑换订单">
       <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
     </DataPanel>
   )

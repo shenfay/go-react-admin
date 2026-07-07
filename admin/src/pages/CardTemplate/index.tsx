@@ -42,7 +42,6 @@ export default function CardTemplate() {
   return (
     <DataPanel
       title="卡片模板管理"
-      description="管理各类卡片模板配置"
       extra={
         <Button type="primary" icon={<PlusOutlined />}>
           新增模板

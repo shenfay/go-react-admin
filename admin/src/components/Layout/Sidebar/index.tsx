@@ -171,6 +171,7 @@ export default function Sidebar() {
           {sidebarCollapsed ? (
             <Button
               type="text"
+              className="sidebar-toggle-btn"
               icon={<MenuUnfoldOutlined style={{ fontSize: 16 }} />}
               onClick={toggleSidebar}
               style={{
@@ -218,14 +219,20 @@ export default function Sidebar() {
               </span>
               <Button
                 type="text"
+                className="sidebar-toggle-btn"
                 icon={<MenuFoldOutlined style={{ fontSize: 16 }} />}
                 onClick={toggleSidebar}
                 style={{
-                  width: 24,
-                  height: 24,
-                  minWidth: 24,
+                  width: 28,
+                  height: 28,
+                  minWidth: 28,
                   padding: 0,
                   color: 'var(--text-muted)',
+                  borderRadius: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s',
                 }}
               />
             </>

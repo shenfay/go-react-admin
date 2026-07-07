@@ -38,7 +38,6 @@ export default function ShopItem() {
   return (
     <DataPanel
       title="商品管理"
-      description="管理积分兑换商城商品"
       extra={
         <Button type="primary" icon={<PlusOutlined />}>
           新增商品

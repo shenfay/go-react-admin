@@ -32,7 +32,6 @@ export default function Goal() {
   return (
     <DataPanel
       title="目标管理"
-      description="管理家庭成员的成长目标"
       extra={
         <Button type="primary" icon={<PlusOutlined />}>
           新增目标
