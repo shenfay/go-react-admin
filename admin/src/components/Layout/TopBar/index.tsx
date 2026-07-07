@@ -1,5 +1,5 @@
 import { Breadcrumb, Button } from 'antd'
-import { SearchOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useLocation } from 'react-router-dom'
 import { menuConfig } from '@/config/menu'
 
@@ -92,12 +92,13 @@ export default function TopBar() {
         </div>
         <Button
           type="text"
-          icon={<QuestionCircleOutlined style={{ fontSize: 16 }} />}
+          icon={<ReloadOutlined style={{ fontSize: 16 }} />}
           style={{
             width: 36,
             height: 36,
             color: 'var(--text-secondary)',
           }}
+          onClick={() => window.location.reload()}
         />
       </div>
     </div>
