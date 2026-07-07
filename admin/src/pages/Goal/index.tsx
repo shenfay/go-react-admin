@@ -1,5 +1,6 @@
-import { Card, Table, Tag, Space, Button } from 'antd'
+import { Table, Tag, Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+import DataPanel from '@/components/DataPanel'
 
 const columns = [
   { title: '目标名称', dataIndex: 'name', key: 'name' },
@@ -10,17 +11,18 @@ const columns = [
     dataIndex: 'status',
     key: 'status',
     render: (status: string) => {
-      const colorMap: Record<string, string> = {
-        active: 'green',
-        completed: 'blue',
-        archived: 'default',
+      const colorMap: Record<string, { bg: string; color: string }> = {
+        active: { bg: '#dcfce7', color: '#166534' },
+        completed: { bg: '#edf2ff', color: '#3b6fdf' },
+        archived: { bg: '#f5f2ed', color: '#b0a89a' },
       }
       const labelMap: Record<string, string> = {
         active: '进行中',
         completed: '已完成',
         archived: '已归档',
       }
-      return <Tag color={colorMap[status]}>{labelMap[status] || status}</Tag>
+      const c = colorMap[status] || { bg: '#f5f2ed', color: '#6b6258' }
+      return <Tag style={{ background: c.bg, color: c.color, border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{labelMap[status] || status}</Tag>
     },
   },
   { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt' },
@@ -28,17 +30,16 @@ const columns = [
 
 export default function Goal() {
   return (
-    <Card
+    <DataPanel
       title="目标管理"
+      description="管理家庭成员的成长目标"
       extra={
-        <Space>
-          <Button type="primary" icon={<PlusOutlined />}>
-            新增目标
-          </Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />}>
+          新增目标
+        </Button>
       }
     >
       <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
-    </Card>
+    </DataPanel>
   )
 }

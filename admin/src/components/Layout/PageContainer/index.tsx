@@ -10,7 +10,6 @@ export default function PageContainer({ children }: PageContainerProps) {
       style={{
         height: '100%',
         overflowY: 'auto',
-        padding: 24,
         background: 'var(--main-bg)',
       }}
     >

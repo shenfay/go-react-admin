@@ -21,28 +21,28 @@ interface StatusTagProps {
 }
 
 const statusColorMap: Record<string, { color: string; bg: string }> = {
-  完成: { color: 'var(--green-text)', bg: 'var(--green-light)' },
-  正常: { color: 'var(--green-text)', bg: 'var(--green-light)' },
-  活跃: { color: 'var(--green-text)', bg: 'var(--green-light)' },
-  处理中: { color: 'var(--blue-text)', bg: 'var(--blue-light)' },
-  待审核: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  警告: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  延迟: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  待激活: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  失败: { color: 'var(--red-text)', bg: 'var(--red-light)' },
-  异常: { color: 'var(--red-text)', bg: 'var(--red-light)' },
-  已禁用: { color: 'var(--red-text)', bg: 'var(--red-light)' },
-  管理员: { color: 'var(--blue-text)', bg: 'var(--blue-light)' },
-  编辑: { color: 'var(--gray-text)', bg: 'var(--gray-light)' },
-  成员: { color: 'var(--gray-text)', bg: 'var(--gray-light)' },
-  MySQL: { color: 'var(--blue-text)', bg: 'var(--blue-light)' },
-  Elasticsearch: { color: 'var(--gray-text)', bg: 'var(--gray-light)' },
-  S3: { color: 'var(--gray-text)', bg: 'var(--gray-light)' },
-  Kafka: { color: 'var(--gray-text)', bg: 'var(--gray-light)' },
+  完成: { color: '#166534', bg: '#dcfce7' },
+  正常: { color: '#166534', bg: '#dcfce7' },
+  活跃: { color: '#166534', bg: '#dcfce7' },
+  处理中: { color: '#3b6fdf', bg: '#edf2ff' },
+  待审核: { color: '#92400e', bg: '#fef3c7' },
+  警告: { color: '#92400e', bg: '#fef3c7' },
+  延迟: { color: '#92400e', bg: '#fef3c7' },
+  待激活: { color: '#92400e', bg: '#fef3c7' },
+  失败: { color: '#e74c3c', bg: '#fef2f2' },
+  异常: { color: '#e74c3c', bg: '#fef2f2' },
+  已禁用: { color: '#e74c3c', bg: '#fef2f2' },
+  管理员: { color: '#3b6fdf', bg: '#edf2ff' },
+  编辑: { color: '#6b6258', bg: '#f5f2ed' },
+  成员: { color: '#6b6258', bg: '#f5f2ed' },
+  MySQL: { color: '#3b6fdf', bg: '#edf2ff' },
+  Elasticsearch: { color: '#6b6258', bg: '#f5f2ed' },
+  S3: { color: '#6b6258', bg: '#f5f2ed' },
+  Kafka: { color: '#6b6258', bg: '#f5f2ed' },
 }
 
 export default function StatusTag({ status, children }: StatusTagProps) {
-  const style = statusColorMap[status] || { color: 'var(--gray-text)', bg: 'var(--gray-light)' }
+  const style = statusColorMap[status] || { color: '#6b6258', bg: '#f5f2ed' }
 
   return (
     <Tag
@@ -50,10 +50,11 @@ export default function StatusTag({ status, children }: StatusTagProps) {
         color: style.color,
         background: style.bg,
         border: 'none',
-        borderRadius: 4,
+        borderRadius: 6,
         fontSize: 12,
         fontWeight: 500,
-        padding: '2px 8px',
+        padding: '2px 10px',
+        lineHeight: '20px',
       }}
     >
       {children || status}

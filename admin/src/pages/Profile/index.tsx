@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Form, Input, Button, Avatar, Descriptions, Divider, message, Tabs, Tag } from 'antd'
+import { Form, Input, Button, Avatar, Descriptions, Divider, message, Tabs, Tag } from 'antd'
 import { UserOutlined, LockOutlined, BellOutlined } from '@ant-design/icons'
 import { useAppStore } from '@/stores'
 import DataPanel from '@/components/DataPanel'
@@ -23,17 +23,19 @@ export default function Profile() {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       {/* User Info Card */}
-      <DataPanel title="" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <Avatar size={80} icon={<UserOutlined />} style={{ background: 'var(--accent)', flexShrink: 0 }} />
-          <div>
-            <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-              {username || '用户'}
-            </div>
-            <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{email || ''}</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {roles.map(r => <Tag key={r.code} color="blue">{r.name}</Tag>)}
-              {roles.length === 0 && <Tag>未分配角色</Tag>}
+      <DataPanel title="" compact>
+        <div style={{ padding: '20px 28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            <Avatar size={80} icon={<UserOutlined />} style={{ background: '#2b2b2b', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: '#2b2b2b', marginBottom: 4 }}>
+                {username || '用户'}
+              </div>
+              <div style={{ color: '#6b6258', marginBottom: 8 }}>{email || ''}</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {roles.map(r => <Tag key={r.code} style={{ background: '#edf2ff', color: '#3b6fdf', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{r.name}</Tag>)}
+                {roles.length === 0 && <Tag style={{ background: '#f5f2ed', color: '#b0a89a', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>未分配角色</Tag>}
+              </div>
             </div>
           </div>
         </div>
@@ -42,6 +44,7 @@ export default function Profile() {
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
+        style={{ padding: '0 28px' }}
         items={[
           {
             key: 'profile',
@@ -52,7 +55,7 @@ export default function Profile() {
               </span>
             ),
             children: (
-              <DataPanel title="">
+              <div style={{ padding: '16px 0' }}>
                 <Descriptions bordered column={2}>
                   <Descriptions.Item label="姓名" span={1}>{username || '-'}</Descriptions.Item>
                   <Descriptions.Item label="邮箱" span={1}>{email || '-'}</Descriptions.Item>
@@ -83,7 +86,7 @@ export default function Profile() {
                   </Form.Item>
                   <Button type="primary" onClick={handleSaveProfile}>保存修改</Button>
                 </Form>
-              </DataPanel>
+              </div>
             ),
           },
           {
@@ -95,7 +98,7 @@ export default function Profile() {
               </span>
             ),
             children: (
-              <DataPanel title="">
+              <div style={{ padding: '16px 0' }}>
                 <Form
                   form={passwordForm}
                   layout="vertical"
@@ -123,7 +126,7 @@ export default function Profile() {
                   </Form.Item>
                   <Button type="primary" onClick={handleChangePassword}>修改密码</Button>
                 </Form>
-              </DataPanel>
+              </div>
             ),
           },
           {
@@ -135,24 +138,24 @@ export default function Profile() {
               </span>
             ),
             children: (
-              <DataPanel title="">
-                <div style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
+              <div style={{ padding: '16px 0' }}>
+                <div style={{ color: '#6b6258', marginBottom: 16 }}>
                   配置您需要接收的系统通知类型
                 </div>
                 <Form layout="vertical" style={{ maxWidth: 500 }}>
                   <Form.Item label="邮件通知" name="emailNotify">
-                    <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
+                    <div style={{ color: '#6b6258', fontSize: 13, marginBottom: 8 }}>
                       接收系统告警和任务状态更新的邮件通知
                     </div>
                   </Form.Item>
                   <Form.Item label="短信通知" name="smsNotify">
-                    <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
+                    <div style={{ color: '#6b6258', fontSize: 13, marginBottom: 8 }}>
                       接收紧急告警的短信通知
                     </div>
                   </Form.Item>
                   <Button type="primary">保存设置</Button>
                 </Form>
-              </DataPanel>
+              </div>
             ),
           },
         ]}

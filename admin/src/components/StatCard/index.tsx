@@ -8,7 +8,7 @@ interface StatCardProps {
   color?: string
 }
 
-export default function StatCard({ label, value, change, changeLabel, color = 'var(--accent)' }: StatCardProps) {
+export default function StatCard({ label, value, change, changeLabel, color = 'var(--brand-dark)' }: StatCardProps) {
   const isPositive = change !== undefined && change >= 0
   const isNegative = change !== undefined && change < 0
 

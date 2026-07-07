@@ -1,5 +1,6 @@
-import { Card, Table, Tag, Space, Button } from 'antd'
+import { Table, Tag, Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+import DataPanel from '@/components/DataPanel'
 
 const columns = [
   { title: '模板名称', dataIndex: 'name', key: 'name' },
@@ -15,7 +16,7 @@ const columns = [
         feynman: '费曼卡',
         daily3: '每日三件事',
       }
-      return <Tag>{labelMap[type] || type}</Tag>
+      return <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{labelMap[type] || type}</Tag>
     },
   },
   { title: '难度系数', dataIndex: 'difficulty', key: 'difficulty' },
@@ -25,7 +26,11 @@ const columns = [
     dataIndex: 'acceptanceType',
     key: 'acceptanceType',
     render: (type: string) => (
-      <Tag color={type === 'auto' ? 'green' : 'orange'}>
+      <Tag style={{
+        background: type === 'auto' ? '#dcfce7' : '#fef3c7',
+        color: type === 'auto' ? '#166534' : '#92400e',
+        border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500,
+      }}>
         {type === 'auto' ? '自动通过' : '家长验收'}
       </Tag>
     ),
@@ -35,17 +40,16 @@ const columns = [
 
 export default function CardTemplate() {
   return (
-    <Card
+    <DataPanel
       title="卡片模板管理"
+      description="管理各类卡片模板配置"
       extra={
-        <Space>
-          <Button type="primary" icon={<PlusOutlined />}>
-            新增模板
-          </Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />}>
+          新增模板
+        </Button>
       }
     >
       <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
-    </Card>
+    </DataPanel>
   )
 }

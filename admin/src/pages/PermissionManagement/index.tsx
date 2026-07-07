@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
-import { menuConfig, type MenuItem } from '@/config/menu'
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
+import DataPanel, { IconButton } from '@/components/DataPanel'
+import { menuConfig } from '@/config/menu'
 import {
   getRoleList,
   createRole,
@@ -94,7 +94,6 @@ export default function PermissionManagement() {
     if (!selectedRole) return
     setPermLoading(true)
     try {
-      // 将选中的菜单 key 转换为权限标识列表
       const permissions: string[] = []
       permissionTree.forEach(group => {
         group.children?.forEach(item => {
@@ -189,7 +188,7 @@ export default function PermissionManagement() {
       dataIndex: 'code',
       key: 'code',
       width: 120,
-      render: (v: string) => <Tag>{v}</Tag>,
+      render: (v: string) => <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>,
     },
     { title: '描述', dataIndex: 'description', key: 'description' },
     {
@@ -210,11 +209,11 @@ export default function PermissionManagement() {
       key: 'action',
       width: 200,
       render: (_: unknown, record: Role) => (
-        <Space>
-          <Button type="link" size="small" onClick={() => handleSelectRole(record)}>
+        <Space size={4}>
+          <Button type="link" size="small" onClick={() => handleSelectRole(record)} style={{ color: '#6b6258', fontSize: 13 }}>
             配置权限
           </Button>
-          <Button type="link" size="small" onClick={() => handleEditRole(record)}>
+          <Button type="link" size="small" onClick={() => handleEditRole(record)} style={{ color: '#6b6258', fontSize: 13 }}>
             编辑
           </Button>
           <Popconfirm
@@ -222,7 +221,7 @@ export default function PermissionManagement() {
             description="删除后不可恢复"
             onConfirm={() => handleDeleteRole(record)}
           >
-            <Button type="link" size="small" danger>删除</Button>
+            <Button type="link" size="small" danger style={{ fontSize: 13 }}>删除</Button>
           </Popconfirm>
         </Space>
       ),
@@ -232,11 +231,15 @@ export default function PermissionManagement() {
   return (
     <div>
       <DataPanel
-        title="角色列表"
+        title="角色管理"
+        description="管理系统角色及其权限配置"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRole}>
             新增角色
           </Button>
+        }
+        toolbarActions={
+          <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} onClick={() => fetchRoles()} title="刷新" />
         }
       >
         <Table
@@ -251,7 +254,7 @@ export default function PermissionManagement() {
       {selectedRole && (
         <DataPanel
           title={`${selectedRole.name} - 菜单权限配置`}
-          style={{ marginTop: 16 }}
+          style={{ marginTop: 0 }}
           extra={
             <Space>
               <Button
@@ -267,12 +270,12 @@ export default function PermissionManagement() {
               </Button>
             </Space>
           }
+          compact
         >
           <Tree
             checkable
             checkedKeys={checkedKeys}
             onCheck={(keys) => {
-              // 只保留叶子节点的 key
               const leafKeys = (keys as string[]).filter(k => allLeafKeys.includes(k))
               setCheckedKeys(leafKeys)
             }}

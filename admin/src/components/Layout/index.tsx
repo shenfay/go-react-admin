@@ -33,7 +33,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Sidebar />
       <Layout style={{ height: '100vh' }}>
         <TopBar />
-        <Content style={{ overflow: 'hidden', height: 'calc(100vh - 52px)', display: 'flex', flexDirection: 'column' }}>
+        <Content style={{ overflow: 'hidden', height: 'calc(100vh - 50px)', display: 'flex', flexDirection: 'column' }}>
           <PageContainer>{children}</PageContainer>
         </Content>
       </Layout>

@@ -16,10 +16,9 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import DataPanel, { IconButton } from '@/components/DataPanel'
 import {
   getMenuTree,
   createMenu,
@@ -62,7 +61,6 @@ export default function MenuManagement() {
     try {
       const tree = await getMenuTree()
       setMenuTree(tree || [])
-      // 默认展开所有顶级菜单
       if (expandedKeys.length === 0 && tree) {
         setExpandedKeys(tree.map(m => m.key))
       }
@@ -77,7 +75,7 @@ export default function MenuManagement() {
     fetchMenus()
   }, [fetchMenus])
 
-  /** 扁平化菜单列表（用于父级选择下拉） */
+  /** 扁平化菜单列表 */
   const flatMenus: MenuNode[] = []
   function flatten(nodes: MenuNode[]) {
     for (const node of nodes) {
@@ -164,7 +162,6 @@ export default function MenuManagement() {
           sort_order: 0,
         })
         message.success('菜单已添加')
-        // 自动展开父级
         if (parent && !expandedKeys.includes(parent.key)) {
           setExpandedKeys(prev => [...prev, parent.key])
         }
@@ -189,28 +186,28 @@ export default function MenuManagement() {
       dataIndex: 'key',
       key: 'key',
       width: 160,
-      render: (v: string) => <Tag color="blue">{v}</Tag>,
+      render: (v: string) => <Tag style={{ background: '#edf2ff', color: '#3b6fdf', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>,
     },
     {
       title: '图标',
       dataIndex: 'icon',
       key: 'icon',
       width: 160,
-      render: (v: string) => v ? <Tag>{v}</Tag> : '-',
+      render: (v: string) => v ? <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag> : <span style={{ color: '#b0a89a' }}>-</span>,
     },
     {
       title: '路由路径',
       dataIndex: 'path',
       key: 'path',
       width: 160,
-      render: (v: string) => v || <span style={{ color: '#999' }}>—</span>,
+      render: (v: string) => v || <span style={{ color: '#b0a89a' }}>—</span>,
     },
     {
       title: '权限标识',
       dataIndex: 'permission',
       key: 'permission',
       width: 180,
-      render: (v: string) => v ? <Tag color="green">{v}</Tag> : '-',
+      render: (v: string) => v ? <Tag style={{ background: '#dcfce7', color: '#166534', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag> : <span style={{ color: '#b0a89a' }}>-</span>,
     },
     {
       title: '状态',
@@ -228,31 +225,28 @@ export default function MenuManagement() {
     {
       title: '操作',
       key: 'action',
-      width: 240,
+      width: 140,
       render: (_: unknown, record: MenuNode) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<PlusOutlined />}
+        <Space size={4}>
+          <IconButton
+            title="添加子菜单"
+            icon={<PlusOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
             onClick={() => handleAddChild(record.key)}
-          >
-            子菜单
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
+          />
+          <IconButton
+            title="编辑"
+            icon={<EditOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
             onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
+          />
           <Popconfirm
             title="确定删除该菜单？"
             description="子菜单将一并删除"
             onConfirm={() => handleDelete(record)}
           >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+            <IconButton
+              title="删除"
+              icon={<DeleteOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -263,10 +257,14 @@ export default function MenuManagement() {
     <div>
       <DataPanel
         title="菜单管理"
+        description="管理系统菜单结构与权限标识"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRoot}>
             新增顶级菜单
           </Button>
+        }
+        toolbarActions={
+          <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} onClick={() => fetchMenus()} title="刷新" />
         }
       >
         <Table

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Table, Tag, Select, DatePicker, Button, Space } from 'antd'
-import { SearchOutlined, ExportOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { Table, Tag, Select, DatePicker, Button } from 'antd'
+import { SearchOutlined, ExportOutlined, ReloadOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch, IconButton } from '@/components/DataPanel'
 
 const { RangePicker } = DatePicker
 
@@ -45,7 +45,12 @@ export default function OperationLog() {
   const columns = [
     { title: '时间', dataIndex: 'time', key: 'time', width: 170 },
     { title: '操作人', dataIndex: 'user', key: 'user' },
-    { title: '模块', dataIndex: 'module', key: 'module', render: (v: string) => <Tag>{v}</Tag> },
+    {
+      title: '模块',
+      dataIndex: 'module',
+      key: 'module',
+      render: (v: string) => <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>,
+    },
     { title: '操作', dataIndex: 'action', key: 'action' },
     { title: '详情', dataIndex: 'detail', key: 'detail' },
     { title: 'IP 地址', dataIndex: 'ip', key: 'ip' },
@@ -53,42 +58,54 @@ export default function OperationLog() {
       title: '结果',
       dataIndex: 'result',
       key: 'result',
-      render: (v: string) => (
-        <Tag color={v === '成功' ? 'success' : v === '拒绝' ? 'warning' : 'error'}>{v}</Tag>
-      ),
+      render: (v: string) => {
+        const colorMap: Record<string, { bg: string; color: string }> = {
+          成功: { bg: '#dcfce7', color: '#166534' },
+          拒绝: { bg: '#fef3c7', color: '#92400e' },
+          失败: { bg: '#fef2f2', color: '#e74c3c' },
+        }
+        const c = colorMap[v] || { bg: '#f5f2ed', color: '#6b6258' }
+        return (
+          <Tag style={{ background: c.bg, color: c.color, border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>
+        )
+      },
     },
   ]
 
   return (
     <div>
-      {/* Filter Bar */}
-      <DataPanel title="操作日志" style={{ marginBottom: 16 }}>
-        <Space wrap>
-          <Select
-            value={moduleFilter}
-            onChange={setModuleFilter}
-            style={{ width: 140 }}
-            options={moduleOptions}
-          />
-          <Select
-            value={resultFilter}
-            onChange={setResultFilter}
-            style={{ width: 120 }}
-            options={[
-              { label: '全部结果', value: '' },
-              { label: '成功', value: '成功' },
-              { label: '失败', value: '失败' },
-              { label: '拒绝', value: '拒绝' },
-            ]}
-          />
-          <RangePicker />
-          <Button type="primary" icon={<SearchOutlined />}>查询</Button>
-          <Button icon={<ExportOutlined />}>导出</Button>
-        </Space>
-      </DataPanel>
-
-      {/* Log Table */}
-      <DataPanel title="">
+      <DataPanel
+        title="操作日志"
+        description="查看系统操作记录与审计日志"
+        filters={
+          <>
+            <FilterSearch placeholder="搜索操作..." />
+            <Select
+              value={moduleFilter}
+              onChange={setModuleFilter}
+              style={{ width: 140 }}
+              options={moduleOptions}
+            />
+            <Select
+              value={resultFilter}
+              onChange={setResultFilter}
+              style={{ width: 120 }}
+              options={[
+                { label: '全部结果', value: '' },
+                { label: '成功', value: '成功' },
+                { label: '失败', value: '失败' },
+                { label: '拒绝', value: '拒绝' },
+              ]}
+            />
+            <RangePicker />
+            <Button type="primary" icon={<SearchOutlined />}>查询</Button>
+            <Button icon={<ExportOutlined />}>导出</Button>
+          </>
+        }
+        toolbarActions={
+          <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} title="刷新" />
+        }
+      >
         <Table
           dataSource={logData}
           columns={columns}

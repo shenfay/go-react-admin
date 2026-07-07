@@ -153,7 +153,7 @@ export default function Sidebar() {
                   width: 32,
                   height: 32,
                   minWidth: 32,
-                  background: 'var(--accent)',
+                  background: 'var(--brand-dark)',
                   borderRadius: 'var(--radius-sm)',
                   display: 'flex',
                   alignItems: 'center',

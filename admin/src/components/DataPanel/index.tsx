@@ -1,33 +1,209 @@
-import { Card } from 'antd'
+import { Input } from 'antd'
+import { SearchOutlined } from '@ant-design/icons'
 import type { ReactNode } from 'react'
 
 interface DataPanelProps {
-  title: string
+  /** 页面主标题 */
+  title?: string
+  /** 页面描述文字 */
+  description?: string
+  /** 标题右侧操作按钮 */
   extra?: ReactNode
+  /** 筛选栏内容（搜索框、筛选按钮等） */
+  filters?: ReactNode
+  /** 筛选栏右侧工具图标 */
+  toolbarActions?: ReactNode
+  /** 表格/内容区域 */
   children: ReactNode
+  /** 自定义样式 */
   style?: React.CSSProperties
+  /** 是否使用紧凑卡片模式（无表格容器包装） */
+  compact?: boolean
 }
 
-export default function DataPanel({ title, extra, children, style }: DataPanelProps) {
+/** 图标按钮样式（顶栏/筛选栏通用） */
+export const iconButtonStyle: React.CSSProperties = {
+  width: 34,
+  height: 34,
+  borderRadius: 8,
+  border: '1px solid #e8e2d8',
+  background: '#faf8f5',
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'all 0.15s',
+}
+
+export function IconButton({ icon, onClick, title }: { icon: ReactNode; onClick?: () => void; title?: string }) {
   return (
-    <Card
+    <button
+      type="button"
       title={title}
-      extra={extra}
-      style={{
-        borderRadius: 'var(--radius-md)',
-        borderColor: 'var(--border-color)',
-        ...style,
+      onClick={onClick}
+      style={iconButtonStyle}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = '#f0ece6'
+        e.currentTarget.style.borderColor = '#d4cdc0'
       }}
-      headStyle={{
-        borderBottomColor: 'var(--border-color)',
-        padding: '14px 20px',
-        minHeight: 'auto',
-      }}
-      bodyStyle={{
-        padding: '16px 20px',
+      onMouseLeave={e => {
+        e.currentTarget.style.background = '#faf8f5'
+        e.currentTarget.style.borderColor = '#e8e2d8'
       }}
     >
-      {children}
-    </Card>
+      {icon}
+    </button>
+  )
+}
+
+/** 筛选搜索框 */
+export function FilterSearch({ value, onChange, placeholder = '搜索...', onSearch }: {
+  value?: string
+  onChange?: (v: string) => void
+  placeholder?: string
+  onSearch?: () => void
+}) {
+  return (
+    <div style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+      <SearchOutlined
+        style={{
+          position: 'absolute',
+          left: 10,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          fontSize: 14,
+          color: '#c4bdb0',
+          pointerEvents: 'none',
+        }}
+      />
+      <Input
+        value={value}
+        onChange={e => onChange?.(e.target.value)}
+        onPressEnter={onSearch}
+        placeholder={placeholder}
+        style={{
+          height: 34,
+          paddingLeft: 32,
+          paddingRight: 12,
+          borderRadius: 8,
+          border: '1px solid #e8e2d8',
+          background: '#ffffff',
+          fontSize: 13,
+        }}
+        onFocus={e => { e.target.style.borderColor = '#2b2b2b' }}
+        onBlur={e => { e.target.style.borderColor = '#e8e2d8' }}
+      />
+    </div>
+  )
+}
+
+export default function DataPanel({
+  title,
+  description,
+  extra,
+  filters,
+  toolbarActions,
+  children,
+  style,
+  compact,
+}: DataPanelProps) {
+  const hasHeader = title || extra
+  const hasFilters = filters || toolbarActions
+
+  return (
+    <div style={style}>
+      {/* Page Header */}
+      {hasHeader && (
+        <div
+          style={{
+            padding: '20px 28px 0',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+          }}
+        >
+          <div>
+            {title && (
+              <h2
+                style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  color: '#2b2b2b',
+                  lineHeight: 1.3,
+                  margin: 0,
+                }}
+              >
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p
+                style={{
+                  fontSize: 13,
+                  color: '#b0a89a',
+                  marginTop: 4,
+                  marginBottom: 0,
+                }}
+              >
+                {description}
+              </p>
+            )}
+          </div>
+          {extra && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              {extra}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Title 与 Filter Bar 间距 */}
+      {hasHeader && hasFilters && <div style={{ height: 16 }} />}
+
+      {/* Filter Bar */}
+      {hasFilters && (
+        <div
+          style={{
+            padding: '16px 28px 0',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+            {filters}
+          </div>
+          {toolbarActions && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              {toolbarActions}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Filter Bar 与 Table 间距 */}
+      {hasFilters && <div style={{ height: 16 }} />}
+
+      {/* Table / Content Area */}
+      {compact ? (
+        <div style={{ padding: '0 28px 20px' }}>
+          {children}
+        </div>
+      ) : (
+        <div style={{ padding: '0 28px 20px' }}>
+          <div
+            style={{
+              border: '1px solid #efeae2',
+              borderRadius: 12,
+              background: '#fff',
+              overflow: 'hidden',
+            }}
+          >
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

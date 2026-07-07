@@ -1,5 +1,6 @@
-import { Card, Table, Tag, Statistic, Row, Col, Space } from 'antd'
+import { Table, Tag, Statistic, Row, Col, Card } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons'
+import DataPanel from '@/components/DataPanel'
 
 const columns = [
   { title: '用户', dataIndex: 'userName', key: 'userName' },
@@ -8,7 +9,11 @@ const columns = [
     dataIndex: 'type',
     key: 'type',
     render: (type: string) => (
-      <Tag color={type === 'earn' ? 'green' : 'red'}>
+      <Tag style={{
+        background: type === 'earn' ? '#dcfce7' : '#fef2f2',
+        color: type === 'earn' ? '#166534' : '#e74c3c',
+        border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500,
+      }}>
         {type === 'earn' ? '获得' : '消费'}
       </Tag>
     ),
@@ -18,9 +23,8 @@ const columns = [
     dataIndex: 'points',
     key: 'points',
     render: (points: number, record: { type: string }) => (
-      <span style={{ color: record.type === 'earn' ? '#52c41a' : '#ff4d4f' }}>
-        {record.type === 'earn' ? '+' : '-'}
-        {points}
+      <span style={{ color: record.type === 'earn' ? '#22c55e' : '#e74c3c', fontSize: 13 }}>
+        {record.type === 'earn' ? '+' : '-'}{points}
       </span>
     ),
   },
@@ -31,27 +35,29 @@ const columns = [
 
 export default function PointsRecord() {
   return (
-    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <Row gutter={16}>
-        <Col span={8}>
-          <Card>
-            <Statistic title="今日发放积分" value={0} prefix={<ArrowUpOutlined />} valueStyle={{ color: '#52c41a' }} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic title="今日消费积分" value={0} prefix={<ArrowDownOutlined />} valueStyle={{ color: '#ff4d4f' }} />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic title="积分总余额" value={0} />
-          </Card>
-        </Col>
-      </Row>
-      <Card title="积分流水">
+    <div>
+      <div style={{ padding: '20px 28px 0' }}>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Card style={{ borderRadius: 12, borderColor: '#efeae2' }}>
+              <Statistic title="今日发放积分" value={0} prefix={<ArrowUpOutlined />} valueStyle={{ color: '#22c55e' }} />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card style={{ borderRadius: 12, borderColor: '#efeae2' }}>
+              <Statistic title="今日消费积分" value={0} prefix={<ArrowDownOutlined />} valueStyle={{ color: '#e74c3c' }} />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card style={{ borderRadius: 12, borderColor: '#efeae2' }}>
+              <Statistic title="积分总余额" value={0} />
+            </Card>
+          </Col>
+        </Row>
+      </div>
+      <DataPanel title="积分流水" description="查看积分收支明细" style={{ marginTop: 16 }}>
         <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
-      </Card>
-    </Space>
+      </DataPanel>
+    </div>
   )
 }

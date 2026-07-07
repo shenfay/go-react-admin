@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Space, Button, Modal, Form, Input, Select, message, Switch, Popconfirm } from 'antd'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { PlusOutlined, ReloadOutlined, EditOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch, IconButton } from '@/components/DataPanel'
 import { getUserList, createUser, updateUser, toggleUserStatus } from '@/services/user'
 import { getRoleList } from '@/services/role'
 import type { User, Role } from '@/types'
@@ -25,7 +25,6 @@ export default function UserManagement() {
       setUsers(res.users || [])
       setTotal(res.total || 0)
     } catch {
-      // API 未就绪时使用空数据
       setUsers([])
       setTotal(0)
     } finally {
@@ -104,19 +103,19 @@ export default function UserManagement() {
   }
 
   const columns = [
-    { title: '姓名', dataIndex: 'name', key: 'name', width: 120 },
-    { title: '邮箱', dataIndex: 'email', key: 'email', width: 200 },
+    { title: '姓名', dataIndex: 'name', key: 'name', width: '10%' },
+    { title: '邮箱', dataIndex: 'email', key: 'email', width: '24%' },
     {
       title: '角色',
       dataIndex: 'roles',
       key: 'roles',
-      width: 200,
+      width: '10%',
       render: (roles: User['roles']) => (
         <Space wrap>
           {(roles || []).map(r => (
-            <Tag key={r.code} color="blue">{r.name}</Tag>
+            <Tag key={r.code} style={{ background: '#edf2ff', color: '#3b6fdf', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{r.name}</Tag>
           ))}
-          {(!roles || roles.length === 0) && <Tag>未分配</Tag>}
+          {(!roles || roles.length === 0) && <Tag style={{ background: '#f5f2ed', color: '#b0a89a', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>未分配</Tag>}
         </Space>
       ),
     },
@@ -124,34 +123,44 @@ export default function UserManagement() {
       title: '状态',
       dataIndex: 'locked',
       key: 'locked',
-      width: 100,
+      width: '8%',
       render: (locked: boolean) => (
-        <Tag color={locked ? 'default' : 'green'}>
-          {locked ? '已禁用' : '活跃'}
-        </Tag>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: locked ? '#d4cdc0' : '#22c55e',
+            display: 'inline-block',
+          }} />
+          <span style={{ color: '#2b2b2b', fontSize: 13 }}>{locked ? '已禁用' : '活跃'}</span>
+        </div>
       ),
     },
     {
       title: '注册时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      width: 180,
-      render: (v: string) => v ? new Date(v).toLocaleString('zh-CN') : '-',
+      width: '10%',
+      render: (v: string) => v ? <span style={{ color: '#6b6258' }}>{new Date(v).toLocaleString('zh-CN')}</span> : <span style={{ color: '#b0a89a' }}>-</span>,
     },
     {
       title: '操作',
       key: 'action',
-      width: 160,
+      width: '8%',
       render: (_: unknown, record: User) => (
-        <Space>
-          <Button type="link" size="small" onClick={() => handleEdit(record)}>编辑</Button>
+        <Space size={4}>
+          <IconButton
+            title="编辑"
+            icon={<EditOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
+            onClick={() => handleEdit(record)}
+          />
           <Popconfirm
             title={record.locked ? '确定启用该用户？' : '确定禁用该用户？'}
             onConfirm={() => handleToggleStatus(record)}
           >
-            <Button type="link" size="small" danger={!!record.locked}>
-              {record.locked ? '启用' : '禁用'}
-            </Button>
+            <IconButton
+              title={record.locked ? '启用' : '禁用'}
+              icon={<Switch checked={!record.locked} size="small" />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -162,31 +171,24 @@ export default function UserManagement() {
     <div>
       <DataPanel
         title="用户管理"
+        description="管理系统用户账户和权限"
         extra={
-          <Space>
-            <Input
-              placeholder="搜索姓名/邮箱"
-              prefix={<SearchOutlined />}
-              value={keyword}
-              onChange={e => setKeyword(e.target.value)}
-              onPressEnter={() => { setPage(1); fetchUsers() }}
-              style={{ width: 200 }}
-              allowClear
-            />
-            <Select
-              placeholder="按角色筛选"
-              allowClear
-              style={{ width: 140 }}
-              onChange={v => { setPage(1); setKeyword(v || '') }}
-            >
-              {roles.map(r => (
-                <Select.Option key={r.id} value={r.id}>{r.name}</Select.Option>
-              ))}
-            </Select>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-              添加用户
-            </Button>
-          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            添加用户
+          </Button>
+        }
+        filters={
+          <FilterSearch
+            value={keyword}
+            onChange={setKeyword}
+            placeholder="搜索姓名/邮箱"
+            onSearch={() => { setPage(1); fetchUsers() }}
+          />
+        }
+        toolbarActions={
+          <>
+            <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} onClick={() => fetchUsers()} title="刷新" />
+          </>
         }
       >
         <Table

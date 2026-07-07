@@ -1,4 +1,4 @@
-import { Breadcrumb, Button } from 'antd'
+import { Breadcrumb, Input } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useLocation } from 'react-router-dom'
 import { menuConfig } from '@/config/menu'
@@ -25,26 +25,27 @@ export default function TopBar() {
   return (
     <div
       style={{
-        height: 52,
+        height: 50,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 24px',
-        borderBottom: '1px solid var(--border-color)',
+        padding: '16px 28px 0',
         flexShrink: 0,
         background: 'var(--main-bg)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* Left: Breadcrumb */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <Breadcrumb
           items={breadcrumbItems.map((item, index) => ({
             title: (
               <span
                 style={{
+                  fontSize: 13,
                   color:
                     index === breadcrumbItems.length - 1
-                      ? 'var(--text-primary)'
-                      : 'var(--text-muted)',
+                      ? '#6b6258'
+                      : '#b0a89a',
                   fontWeight: index === breadcrumbItems.length - 1 ? 500 : 400,
                 }}
               >
@@ -54,52 +55,72 @@ export default function TopBar() {
           }))}
         />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <div
+
+      {/* Right: Global Search + Refresh */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Global Search */}
+        <div style={{ position: 'relative' }}>
+          <SearchOutlined
+            style={{
+              position: 'absolute',
+              left: 10,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              fontSize: 14,
+              color: '#c4bdb0',
+              pointerEvents: 'none',
+            }}
+          />
+          <Input
+            placeholder="搜索..."
+            style={{
+              width: 220,
+              height: 34,
+              paddingLeft: 32,
+              paddingRight: 12,
+              borderRadius: 8,
+              border: '1px solid #e8e2d8',
+              background: '#faf8f5',
+              fontSize: 13,
+            }}
+            onFocus={e => {
+              e.target.style.borderColor = '#2b2b2b'
+              e.target.style.background = '#fff'
+            }}
+            onBlur={e => {
+              e.target.style.borderColor = '#e8e2d8'
+              e.target.style.background = '#faf8f5'
+            }}
+          />
+        </div>
+
+        {/* Refresh Button */}
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '6px 12px',
-            background: '#F5F5F5',
-            borderRadius: 'var(--radius-sm)',
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            border: '1px solid #e8e2d8',
+            background: '#faf8f5',
             cursor: 'pointer',
-            transition: 'background 0.15s',
-            marginRight: 8,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.15s',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = '#EBEBEB'
+            e.currentTarget.style.background = '#f0ece6'
+            e.currentTarget.style.borderColor = '#d4cdc0'
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = '#F5F5F5'
+            e.currentTarget.style.background = '#faf8f5'
+            e.currentTarget.style.borderColor = '#e8e2d8'
           }}
         >
-          <SearchOutlined style={{ fontSize: 14, color: 'var(--text-muted)' }} />
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>搜索</span>
-          <kbd
-            style={{
-              fontSize: 11,
-              color: 'var(--text-muted)',
-              background: '#E5E5E5',
-              padding: '1px 5px',
-              borderRadius: 4,
-              fontFamily: 'var(--font-family)',
-              marginLeft: 8,
-            }}
-          >
-            ⌘K
-          </kbd>
-        </div>
-        <Button
-          type="text"
-          icon={<ReloadOutlined style={{ fontSize: 16 }} />}
-          style={{
-            width: 36,
-            height: 36,
-            color: 'var(--text-secondary)',
-          }}
-          onClick={() => window.location.reload()}
-        />
+          <ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />
+        </button>
       </div>
     </div>
   )
