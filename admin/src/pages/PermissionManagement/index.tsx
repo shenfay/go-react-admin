@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
 import DataPanel, { IconButton } from '@/components/DataPanel'
-import { menuConfig } from '@/config/menu'
+import { getMenuTree, type MenuNode } from '@/services/menu'
 import {
   getRoleList,
   createRole,
@@ -12,21 +12,26 @@ import {
   getRolePermissions,
   updateRolePermissions,
 } from '@/services/role'
-import type { Role, RolePermission } from '@/types'
+import type { Role } from '@/types'
 
 const { TextArea } = Input
 
-/** 从 menuConfig 生成权限树数据 */
-function buildPermissionTree() {
-  return menuConfig.map(group => ({
-    title: group.label,
-    key: group.key,
-    children: (group.children || []).map(item => ({
-      title: item.label,
-      key: item.key,
-      permission: item.permission || '',
-    })),
-  }))
+/** 从后端菜单数据生成权限树 */
+function buildPermissionTree(menus: MenuNode[]) {
+  return menus
+    .filter(m => m.status)
+    .map(group => ({
+      title: group.label,
+      key: group.key,
+      children: (group.children || [])
+        .filter(c => c.status)
+        .map(item => ({
+          title: item.label,
+          key: item.key,
+          permission: item.permission || '',
+        })),
+    }))
+    .filter(group => group.children && group.children.length > 0)
 }
 
 /** 从权限树中提取所有叶子节点的 key */
@@ -40,6 +45,17 @@ function getAllLeafKeys(treeData: ReturnType<typeof buildPermissionTree>): strin
   return keys
 }
 
+/** 构建 key -> permission 映射 */
+function buildKeyPermMap(treeData: ReturnType<typeof buildPermissionTree>): Record<string, string> {
+  const map: Record<string, string> = {}
+  treeData.forEach(group => {
+    group.children?.forEach(item => {
+      map[item.key] = item.permission || `${item.key}:view`
+    })
+  })
+  return map
+}
+
 export default function PermissionManagement() {
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
@@ -48,10 +64,12 @@ export default function PermissionManagement() {
   const [editingRole, setEditingRole] = useState<Role | null>(null)
   const [loading, setLoading] = useState(false)
   const [permLoading, setPermLoading] = useState(false)
+  const [menuData, setMenuData] = useState<MenuNode[]>([])
   const [form] = Form.useForm()
 
-  const permissionTree = buildPermissionTree()
+  const permissionTree = buildPermissionTree(menuData)
   const allLeafKeys = getAllLeafKeys(permissionTree)
+  const keyPermMap = buildKeyPermMap(permissionTree)
 
   const fetchRoles = useCallback(async () => {
     setLoading(true)
@@ -65,16 +83,33 @@ export default function PermissionManagement() {
     }
   }, [])
 
+  const fetchMenus = useCallback(async () => {
+    try {
+      const res = await getMenuTree()
+      setMenuData(res || [])
+    } catch {
+      setMenuData([])
+    }
+  }, [])
+
   useEffect(() => {
     fetchRoles()
-  }, [fetchRoles])
+    fetchMenus()
+  }, [fetchRoles, fetchMenus])
 
   /** 加载角色权限 */
   const loadRolePermissions = async (role: Role) => {
     setPermLoading(true)
     try {
       const perms = await getRolePermissions(role.id)
-      const menuKeys = perms.map((p: RolePermission) => p.menu_key).filter(Boolean)
+      // 反向映射：permission string -> menu key
+      const permToKey: Record<string, string> = {}
+      Object.entries(keyPermMap).forEach(([key, perm]) => {
+        permToKey[perm] = key
+      })
+      const menuKeys = perms
+        .map((p: string) => permToKey[p])
+        .filter((k): k is string => !!k)
       setCheckedKeys(menuKeys)
     } catch {
       setCheckedKeys([])
@@ -95,12 +130,11 @@ export default function PermissionManagement() {
     setPermLoading(true)
     try {
       const permissions: string[] = []
-      permissionTree.forEach(group => {
-        group.children?.forEach(item => {
-          if (checkedKeys.includes(item.key)) {
-            permissions.push(item.permission || `${item.key}:view`)
-          }
-        })
+      checkedKeys.forEach(key => {
+        const perm = keyPermMap[key]
+        if (perm) {
+          permissions.push(perm)
+        }
       })
       await updateRolePermissions(selectedRole.id, permissions)
       message.success('权限配置已保存')

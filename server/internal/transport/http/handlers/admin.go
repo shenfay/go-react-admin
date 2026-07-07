@@ -274,6 +274,19 @@ func (h *AdminHandler) GetCurrentUserPermissions(c *gin.Context) {
 	response.Success(c, perms)
 }
 
+// GetUserMenuTree 获取当前用户可见的菜单树
+func (h *AdminHandler) GetUserMenuTree(c *gin.Context) {
+	userID := c.GetString("user_id")
+
+	tree, err := h.service.GetUserMenuTree(c.Request.Context(), userID)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, tree)
+}
+
 // ---- 菜单管理 ----
 
 // ListMenus 获取菜单树

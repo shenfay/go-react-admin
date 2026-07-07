@@ -5,6 +5,7 @@ import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageContainer from './PageContainer'
 import { useAppStore } from '@/stores'
+import { getUserMenuTree } from '@/services/auth'
 import type { ReactNode } from 'react'
 
 const { Content } = Layout
@@ -15,7 +16,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate()
-  const { isLogin } = useAppStore()
+  const { isLogin, setMenuTree } = useAppStore()
 
   // 未登录时跳转到登录页
   useEffect(() => {
@@ -23,6 +24,19 @@ export default function MainLayout({ children }: MainLayoutProps) {
       navigate('/login', { replace: true })
     }
   }, [isLogin, navigate])
+
+  // 每次页面加载时都获取最新菜单树，确保权限变更后菜单实时更新
+  useEffect(() => {
+    if (isLogin) {
+      getUserMenuTree()
+        .then(tree => {
+          setMenuTree(tree || [])
+        })
+        .catch(() => {
+          // 获取失败静默处理
+        })
+    }
+  }, [isLogin, setMenuTree])
 
   if (!isLogin) {
     return null

@@ -3,7 +3,7 @@ import { Form, Input, Button, message } from 'antd'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/stores'
-import { login as loginApi } from '@/services/auth'
+import { login as loginApi, getUserMenuTree } from '@/services/auth'
 import type { LoginRequest } from '@/types'
 
 export default function Login() {
@@ -24,6 +24,15 @@ export default function Login() {
         token: res.access_token,
         refreshToken: res.refresh_token,
       })
+
+      // 登录后获取用户菜单树
+      try {
+        const menuTree = await getUserMenuTree()
+        useAppStore.getState().setMenuTree(menuTree || [])
+      } catch {
+        // 菜单获取失败不影响登录
+      }
+
       message.success('登录成功')
       navigate('/', { replace: true })
     } catch (err: unknown) {
@@ -228,7 +237,7 @@ export default function Login() {
           </Form>
 
           <div style={{ textAlign: 'center', fontSize: 12, color: '#bbb' }}>
-            默认管理员：admin@example.com / password123
+            请联系管理员获取登录凭据
           </div>
         </div>
       </div>

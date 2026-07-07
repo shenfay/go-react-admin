@@ -115,7 +115,7 @@ func main() {
 		cfg.JWT.AccessExpire,
 		cfg.JWT.RefreshExpire,
 	)
-	authService := authentication.NewService(userRepo, roleRepo, tokenService, inProcessBus, m, enforcer)
+	authService := authentication.NewService(userRepo, roleRepo, menuRepo, tokenService, inProcessBus, m, enforcer)
 
 	// 创建认证 Handler
 	authHandler := handlers.NewAuthHandler(authService, tokenService)

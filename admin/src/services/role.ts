@@ -2,7 +2,7 @@
  * 角色权限管理 API
  */
 import request from '@/utils/request'
-import type { Role, RolePermission } from '@/types'
+import type { Role } from '@/types'
 
 /** 获取角色列表 */
 export async function getRoleList(): Promise<Role[]> {
@@ -36,8 +36,8 @@ export async function toggleRoleStatus(id: string) {
   return request.patch(`/v1/admin/roles/${id}/status`)
 }
 
-/** 获取角色权限 */
-export async function getRolePermissions(roleId: string): Promise<RolePermission[]> {
+/** 获取角色权限（返回权限标识字符串数组，如 ["dashboard:view", "family:manage"]） */
+export async function getRolePermissions(roleId: string): Promise<string[]> {
   return request.get(`/v1/admin/roles/${roleId}/permissions`)
 }
 

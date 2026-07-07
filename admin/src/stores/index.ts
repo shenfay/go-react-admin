@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { PermissionConfig } from '@/config/permission'
-import { defaultPermissions } from '@/config/permission'
 import type { UserPermission, RoleBrief } from '@/types'
+import type { MenuTreeNode } from '@/services/auth'
 
 interface UserState {
   userId: string | null
@@ -12,6 +11,7 @@ interface UserState {
   roles: RoleBrief[]
   permissions: string[]
   menus: string[]
+  menuTree: MenuTreeNode[]
   isLogin: boolean
 }
 
@@ -21,13 +21,7 @@ interface LayoutState {
   toggleSidebar: () => void
 }
 
-interface PermissionState {
-  permissionConfig: PermissionConfig[]
-  setPermissionConfig: (config: PermissionConfig[]) => void
-  loadFromBackend: (config: PermissionConfig[]) => void
-}
-
-interface AppState extends UserState, LayoutState, PermissionState {
+interface AppState extends UserState, LayoutState {
   // User actions
   login: (userData: {
     userId: string
@@ -41,6 +35,7 @@ interface AppState extends UserState, LayoutState, PermissionState {
   logout: () => void
   setUserInfo: (info: Partial<UserState>) => void
   updatePermissions: (perms: UserPermission) => void
+  setMenuTree: (tree: MenuTreeNode[]) => void
 }
 
 const initialUserState: UserState = {
@@ -51,6 +46,7 @@ const initialUserState: UserState = {
   roles: [],
   permissions: [],
   menus: [],
+  menuTree: [],
   isLogin: false,
 }
 
@@ -63,13 +59,6 @@ export const useAppStore = create<AppState>()(
       sidebarCollapsed: true,
       setSidebarCollapsed: collapsed => set({ sidebarCollapsed: collapsed }),
       toggleSidebar: () => set(state => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-
-      // Permission
-      permissionConfig: defaultPermissions,
-      setPermissionConfig: config => set({ permissionConfig: config }),
-      loadFromBackend: config => {
-        set({ permissionConfig: config })
-      },
 
       // User
       login: userData => {
@@ -103,13 +92,14 @@ export const useAppStore = create<AppState>()(
           roles: perms?.roles || get().roles,
         })
       },
+      setMenuTree: tree => set({ menuTree: tree }),
     }),
     {
       name: 'kiqi-admin-storage',
-      version: 5,
+      version: 6,
       migrate: (_persistedState: unknown, version: number) => {
-        if (version < 5) {
-          return { ...(_persistedState as object), sidebarCollapsed: true } as AppState & { sidebarCollapsed: boolean }
+        if (version < 6) {
+          return { ...(_persistedState as object), sidebarCollapsed: true, menuTree: [] } as AppState & { sidebarCollapsed: boolean }
         }
         return _persistedState as AppState & { sidebarCollapsed: boolean }
       },
@@ -122,6 +112,7 @@ export const useAppStore = create<AppState>()(
         roles: state.roles,
         permissions: state.permissions,
         menus: state.menus,
+        menuTree: state.menuTree,
         isLogin: state.isLogin,
       }),
     }

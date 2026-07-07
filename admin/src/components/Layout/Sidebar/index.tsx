@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Layout, Menu, Badge, Avatar, Button, Dropdown } from 'antd'
+import { useState, useEffect } from 'react'
+import { Layout, Menu, Avatar, Button, Dropdown } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -10,63 +10,91 @@ import {
 } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAppStore } from '@/stores'
-import { menuConfig, getIcon } from '@/config/menu'
-import type { MenuItem } from '@/config/menu'
+import { getIcon } from '@/config/menu'
+import type { MenuTreeNode } from '@/services/auth'
 import { message } from 'antd'
 
 const { Sider } = Layout
 
-function renderMenuItems(items: MenuItem[], userMenus: string[], isLogin: boolean, showIcons: boolean): MenuItem[] {
-  return items
-    .map(item => {
-      const resolvedIcon = item.icon ? getIcon(item.icon as string) : undefined
-      const isParent = !!item.children
-      // 展开时只隐藏父级菜单图标，叶子菜单始终显示；折叠时全部显示
+/** 将后端菜单树转换为 Ant Design Menu 项 */
+function convertMenuTree(nodes: MenuTreeNode[], showIcons: boolean, isParent: boolean): Array<{ key: string; label: string; icon?: React.ReactNode; children?: Array<{ key: string; label: string; icon?: React.ReactNode }> }> {
+  return nodes
+    .filter(node => node.status)
+    .map(node => {
+      const resolvedIcon = node.icon ? getIcon(node.icon) : undefined
+      const hasChildren = node.children && node.children.length > 0
       const renderItem = {
-        ...item,
-        icon: isParent && !showIcons ? undefined : resolvedIcon,
-        label: item.badge ? (
-          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            {item.label}
-            <Badge count={item.badge} size="small" style={{ background: 'var(--red)' }} />
-          </span>
-        ) : (
-          item.label
-        ),
+        key: node.key,
+        label: node.label,
+        icon: (isParent && !showIcons) ? undefined : resolvedIcon,
       }
 
-      if (item.children) {
-        const filteredChildren = renderMenuItems(item.children, userMenus, isLogin, showIcons)
-        if (filteredChildren.length === 0) return null
+      if (hasChildren) {
         return {
           ...renderItem,
-          children: filteredChildren,
+          children: convertMenuTree(node.children!, showIcons, true),
         }
       }
 
-      // 未登录时显示所有菜单项；已登录时按权限过滤
-      if (!isLogin || !item.permission || userMenus.includes(item.key)) {
-        return renderItem
-      }
-      return null
+      return renderItem
     })
-    .filter(Boolean) as MenuItem[]
 }
 
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { sidebarCollapsed, toggleSidebar, username, isLogin, menus, logout } = useAppStore()
-  const [openKeys, setOpenKeys] = useState<string[]>(['overview', 'growth', 'card-engine', 'companion', 'acceptance', 'points-system', 'user', 'system'])
+  const { sidebarCollapsed, toggleSidebar, username, isLogin, menuTree, logout } = useAppStore()
+  const [openKeys, setOpenKeys] = useState<string[]>([])
 
-  const filteredMenu = renderMenuItems(menuConfig, menus, isLogin, sidebarCollapsed)
+  // 从动态菜单树中提取所有叶子节点的 key，用于 selectedKeys
+  const allLeafKeys: string[] = []
+  function collectLeafKeys(nodes: MenuTreeNode[]) {
+    nodes.forEach(node => {
+      if (node.children && node.children.length > 0) {
+        collectLeafKeys(node.children)
+      } else {
+        allLeafKeys.push(node.key)
+      }
+    })
+  }
+  if (menuTree.length > 0) {
+    collectLeafKeys(menuTree)
+  }
+
+  // 从动态菜单树中提取所有父级 key，用于 openKeys
+  useEffect(() => {
+    const parentKeys: string[] = []
+    function collectParentKeys(nodes: MenuTreeNode[]) {
+      nodes.forEach(node => {
+        if (node.children && node.children.length > 0) {
+          parentKeys.push(node.key)
+          collectParentKeys(node.children!)
+        }
+      })
+    }
+    collectParentKeys(menuTree)
+    setOpenKeys(parentKeys)
+  }, [menuTree])
+
+  const filteredMenu = menuTree.length > 0
+    ? convertMenuTree(menuTree, sidebarCollapsed, false)
+    : []
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    const item = menuConfig
-      .flatMap(m => m.children || [m])
-      .find(i => i.key === key)
-    if (item?.path) {
-      navigate(item.path)
+    // 从菜单树中查找对应 path
+    function findPath(nodes: MenuTreeNode[]): string | null {
+      for (const node of nodes) {
+        if (node.key === key && node.path) return node.path
+        if (node.children) {
+          const found = findPath(node.children)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    const path = findPath(menuTree)
+    if (path) {
+      navigate(path)
     }
   }
 
@@ -93,9 +121,20 @@ export default function Sidebar() {
     { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true },
   ]
 
-  const selectedKey = menuConfig
-    .flatMap(m => m.children || [m])
-    .find(i => i.path === location.pathname)?.key
+  const selectedKey = location.pathname === '/dashboard' ? 'dashboard' : allLeafKeys.find(key => {
+    // 从菜单树中查找 key 对应的 path
+    function findPathBykey(nodes: MenuTreeNode[]): string | null {
+      for (const node of nodes) {
+        if (node.key === key && node.path) return node.path
+        if (node.children) {
+          const found = findPathBykey(node.children)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    return findPathBykey(menuTree) === location.pathname
+  }) || ''
 
   return (
     <Sider

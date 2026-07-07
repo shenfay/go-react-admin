@@ -55,6 +55,7 @@ type DeviceInfo struct {
 type Service struct {
 	userRepo     user.UserRepository
 	roleRepo     rbac.RoleRepository
+	menuRepo     rbac.MenuRepository
 	tokenService TokenService
 	eventBus     events.Bus
 	metrics      *metrics.Metrics
@@ -63,10 +64,11 @@ type Service struct {
 }
 
 // NewService 创建认证服务实例
-func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics, enforcer *authorize.Enforcer) *Service {
+func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menuRepo rbac.MenuRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics, enforcer *authorize.Enforcer) *Service {
 	return &Service{
 		userRepo:     userRepo,
 		roleRepo:     roleRepo,
+		menuRepo:     menuRepo,
 		tokenService: tokenService,
 		eventBus:     eventBus,
 		metrics:      m,
@@ -225,8 +227,9 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 			perms = []string{}
 		}
 
-		// 推导菜单
-		menus := rbac.DeriveMenus(perms)
+		// 从数据库查询所有菜单，动态推导菜单
+		allMenus, _ := s.menuRepo.FindAll(ctx)
+		menus := rbac.DeriveMenusFromMenus(perms, allMenus)
 
 		permissions = &rbac.UserPermission{
 			Roles:       roleBriefs,

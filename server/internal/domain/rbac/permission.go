@@ -52,6 +52,7 @@ var PermissionMenuMap = map[string]string{
 }
 
 // DeriveMenus 根据权限列表推导菜单 key 列表（去重）
+// 保留作为 fallback，优先使用 DeriveMenusFromMenus
 func DeriveMenus(permissions []string) []string {
 	menuSet := make(map[string]bool)
 	for _, perm := range permissions {
@@ -64,4 +65,32 @@ func DeriveMenus(permissions []string) []string {
 		menus = append(menus, m)
 	}
 	return menus
+}
+
+// DeriveMenusFromMenus 根据权限列表和数据库菜单推导菜单 key 列表（去重）
+// 优先使用数据库中菜单的 Permission 字段进行匹配，fallback 到静态 PermissionMenuMap
+func DeriveMenusFromMenus(permissions []string, menus []*Menu) []string {
+	// 构建 permission → menu_key 动态映射
+	permToMenu := make(map[string]string)
+	for _, m := range menus {
+		if m.Status && m.Permission != "" {
+			permToMenu[m.Permission] = m.Key
+		}
+	}
+
+	menuSet := make(map[string]bool)
+	for _, perm := range permissions {
+		// 优先从数据库菜单映射查找
+		if menu, ok := permToMenu[perm]; ok {
+			menuSet[menu] = true
+		} else if menu, ok := PermissionMenuMap[perm]; ok {
+			// fallback 到静态映射
+			menuSet[menu] = true
+		}
+	}
+	result := make([]string, 0, len(menuSet))
+	for m := range menuSet {
+		result = append(result, m)
+	}
+	return result
 }

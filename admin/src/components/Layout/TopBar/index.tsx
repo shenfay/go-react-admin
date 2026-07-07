@@ -1,22 +1,29 @@
 import { Breadcrumb, Input } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useLocation } from 'react-router-dom'
-import { menuConfig } from '@/config/menu'
+import { useAppStore } from '@/stores'
+import type { MenuTreeNode } from '@/services/auth'
 
 export default function TopBar() {
   const location = useLocation()
+  const menuTree = useAppStore(state => state.menuTree)
 
   const findBreadcrumb = () => {
     const result: { title: string }[] = [{ title: '首页' }]
-    for (const group of menuConfig) {
-      for (const item of group.children || []) {
-        if (item.path === location.pathname) {
-          result.push({ title: group.label })
-          result.push({ title: item.label })
-          return result
+    function search(nodes: MenuTreeNode[], parentLabel?: string): boolean {
+      for (const node of nodes) {
+        if (node.path === location.pathname) {
+          if (parentLabel) result.push({ title: parentLabel })
+          result.push({ title: node.label })
+          return true
+        }
+        if (node.children && search(node.children, node.label)) {
+          return true
         }
       }
+      return false
     }
+    search(menuTree)
     return result
   }
 

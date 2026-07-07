@@ -129,10 +129,11 @@ func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
 		adminGroup.PUT("/menus/sort", r.adminHandler.UpdateMenuSort)
 	}
 
-	// 当前用户权限（放在 auth 组下，只需登录即可）
+	// 当前用户权限和菜单（放在 auth 组下，只需登录即可）
 	auth := v1.Group("/auth")
 	auth.Use(authMiddleware)
 	{
 		auth.GET("/permissions", r.adminHandler.GetCurrentUserPermissions)
+		auth.GET("/menus", r.adminHandler.GetUserMenuTree)
 	}
 }
