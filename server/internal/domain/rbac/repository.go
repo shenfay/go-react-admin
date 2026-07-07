@@ -31,3 +31,30 @@ type RoleRepository interface {
 	// HasRole 检查用户是否拥有指定角色
 	HasRole(ctx context.Context, userID string, roleCode string) (bool, error)
 }
+
+// MenuRepository 菜单仓储接口
+type MenuRepository interface {
+	// Create 创建菜单
+	Create(ctx context.Context, menu *Menu) error
+
+	// Update 更新菜单
+	Update(ctx context.Context, menu *Menu) error
+
+	// Delete 删除菜单（含子菜单）
+	Delete(ctx context.Context, menuID string) error
+
+	// FindByID 根据 ID 查找菜单
+	FindByID(ctx context.Context, id string) (*Menu, error)
+
+	// FindByKey 根据 key 查找菜单
+	FindByKey(ctx context.Context, key string) (*Menu, error)
+
+	// FindAll 获取所有菜单（扁平列表）
+	FindAll(ctx context.Context) ([]*Menu, error)
+
+	// FindChildren 查询子菜单
+	FindChildren(ctx context.Context, parentID string) ([]*Menu, error)
+
+	// UpdateSort 批量更新排序
+	UpdateSort(ctx context.Context, menuID string, sortOrder int) error
+}

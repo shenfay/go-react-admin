@@ -38,6 +38,10 @@ request.interceptors.response.use(
       const { status, data } = response
       const msg = data?.message
       if (status === 401) {
+        // 登录页的 401 是账号密码错误，不跳转，让登录页自行处理错误提示
+        if (window.location.pathname === '/login') {
+          return Promise.reject(error)
+        }
         message.error(msg || '登录已过期，请重新登录')
         localStorage.removeItem('admin-token')
         window.location.href = '/login'

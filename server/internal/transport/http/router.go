@@ -119,6 +119,14 @@ func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
 		// 权限管理
 		adminGroup.GET("/roles/:id/permissions", r.adminHandler.GetRolePermissions)
 		adminGroup.PUT("/roles/:id/permissions", r.adminHandler.UpdateRolePermissions)
+
+		// 菜单管理
+		adminGroup.GET("/menus", r.adminHandler.ListMenus)
+		adminGroup.POST("/menus", r.adminHandler.CreateMenu)
+		adminGroup.PUT("/menus/:id", r.adminHandler.UpdateMenu)
+		adminGroup.DELETE("/menus/:id", r.adminHandler.DeleteMenu)
+		adminGroup.PATCH("/menus/:id/status", r.adminHandler.ToggleMenuStatus)
+		adminGroup.PUT("/menus/sort", r.adminHandler.UpdateMenuSort)
 	}
 
 	// 当前用户权限（放在 auth 组下，只需登录即可）

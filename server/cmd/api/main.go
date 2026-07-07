@@ -99,6 +99,7 @@ func main() {
 	// 6. 初始化服务依赖
 	userRepo := repository.NewUserRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
+	menuRepo := repository.NewMenuRepository(db)
 
 	// 初始化 Casbin 权限引擎
 	enforcer, err := casbinenforcer.NewEnforcer(db)
@@ -120,7 +121,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(authService, tokenService)
 
 	// 创建管理员服务
-	adminService := admin.NewService(userRepo, roleRepo, enforcer)
+	adminService := admin.NewService(userRepo, roleRepo, menuRepo, enforcer)
 	adminHandler := handlers.NewAdminHandler(adminService)
 
 	// 5. 设置 Gin 模式

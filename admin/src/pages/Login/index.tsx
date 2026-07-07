@@ -27,7 +27,9 @@ export default function Login() {
       message.success('登录成功')
       navigate('/', { replace: true })
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '登录失败，请检查邮箱和密码'
+      // 从 axios 响应中提取后端返回的错误消息
+      const axiosErr = err as { response?: { data?: { message?: string } } }
+      const msg = axiosErr?.response?.data?.message || '登录失败，请检查邮箱和密码'
       message.error(msg)
     } finally {
       setLoading(false)

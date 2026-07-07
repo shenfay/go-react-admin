@@ -23,6 +23,13 @@ var RoutePermissions = map[string]string{
 	"PATCH:/api/v1/admin/roles/:id/status":    "permission:manage",
 	"GET:/api/v1/admin/roles/:id/permissions": "permission:manage",
 	"PUT:/api/v1/admin/roles/:id/permissions": "permission:manage",
+
+	"GET:/api/v1/admin/menus":              "menu:manage",
+	"POST:/api/v1/admin/menus":             "menu:manage",
+	"PUT:/api/v1/admin/menus/:id":          "menu:manage",
+	"DELETE:/api/v1/admin/menus/:id":       "menu:manage",
+	"PATCH:/api/v1/admin/menus/:id/status": "menu:manage",
+	"PUT:/api/v1/admin/menus/sort":         "menu:manage",
 }
 
 // PermissionMiddleware 基于 Casbin 的权限检查中间件

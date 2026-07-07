@@ -273,3 +273,140 @@ func (h *AdminHandler) GetCurrentUserPermissions(c *gin.Context) {
 
 	response.Success(c, perms)
 }
+
+// ---- 菜单管理 ----
+
+// ListMenus 获取菜单树
+func (h *AdminHandler) ListMenus(c *gin.Context) {
+	tree, err := h.service.ListMenuTree(c.Request.Context())
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, tree)
+}
+
+// CreateMenu 创建菜单
+func (h *AdminHandler) CreateMenu(c *gin.Context) {
+	var req struct {
+		Key        string `json:"key" binding:"required"`
+		Label      string `json:"label" binding:"required"`
+		Icon       string `json:"icon"`
+		Path       string `json:"path"`
+		Permission string `json:"permission"`
+		ParentID   string `json:"parent_id"`
+		SortOrder  int    `json:"sort_order"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	cmd := admin.CreateMenuCmd{
+		Key:        req.Key,
+		Label:      req.Label,
+		Icon:       req.Icon,
+		Path:       req.Path,
+		Permission: req.Permission,
+		ParentID:   req.ParentID,
+		SortOrder:  req.SortOrder,
+	}
+
+	dto, err := h.service.CreateMenu(c.Request.Context(), cmd)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Created(c, dto)
+}
+
+// UpdateMenu 更新菜单
+func (h *AdminHandler) UpdateMenu(c *gin.Context) {
+	menuID := c.Param("id")
+
+	var req struct {
+		Label      string `json:"label" binding:"required"`
+		Icon       string `json:"icon"`
+		Path       string `json:"path"`
+		Permission string `json:"permission"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	cmd := admin.UpdateMenuCmd{
+		MenuID:     menuID,
+		Label:      req.Label,
+		Icon:       req.Icon,
+		Path:       req.Path,
+		Permission: req.Permission,
+	}
+
+	dto, err := h.service.UpdateMenu(c.Request.Context(), cmd)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, dto)
+}
+
+// DeleteMenu 删除菜单
+func (h *AdminHandler) DeleteMenu(c *gin.Context) {
+	menuID := c.Param("id")
+
+	if err := h.service.DeleteMenu(c.Request.Context(), menuID); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "Menu deleted"})
+}
+
+// ToggleMenuStatus 切换菜单状态
+func (h *AdminHandler) ToggleMenuStatus(c *gin.Context) {
+	menuID := c.Param("id")
+
+	if err := h.service.ToggleMenuStatus(c.Request.Context(), menuID); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "Status toggled"})
+}
+
+// UpdateMenuSort 更新菜单排序
+func (h *AdminHandler) UpdateMenuSort(c *gin.Context) {
+	var req struct {
+		Items []struct {
+			ID        string `json:"id"`
+			SortOrder int    `json:"sort_order"`
+		} `json:"items" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	items := make([]admin.SortMenuItem, 0, len(req.Items))
+	for _, item := range req.Items {
+		items = append(items, admin.SortMenuItem{
+			ID:        item.ID,
+			SortOrder: item.SortOrder,
+		})
+	}
+
+	cmd := admin.SortMenuCmd{Items: items}
+	if err := h.service.UpdateMenuSort(c.Request.Context(), cmd); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "Sort updated"})
+}

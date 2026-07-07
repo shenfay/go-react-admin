@@ -13,6 +13,7 @@ import {
   AuditOutlined,
   SettingOutlined,
   ProfileOutlined,
+  MenuOutlined,
 } from '@ant-design/icons'
 import React, { type ReactNode } from 'react'
 
@@ -159,6 +160,13 @@ export const menuConfig: MenuItem[] = [
         permission: 'permission:manage',
       },
       {
+        key: 'menu-management',
+        label: '菜单管理',
+        icon: 'MenuOutlined',
+        path: '/menus',
+        permission: 'menu:manage',
+      },
+      {
         key: 'profile',
         label: '个人中心',
         icon: 'ProfileOutlined',
@@ -205,6 +213,7 @@ const iconMap: Record<string, ReactNode> = {
   AuditOutlined: React.createElement(AuditOutlined),
   SettingOutlined: React.createElement(SettingOutlined),
   ProfileOutlined: React.createElement(ProfileOutlined),
+  MenuOutlined: React.createElement(MenuOutlined),
 }
 
 export function getIcon(name: string): ReactNode {

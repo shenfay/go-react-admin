@@ -44,7 +44,7 @@ export async function getRolePermissions(roleId: string): Promise<RolePermission
 /** 更新角色权限 */
 export async function updateRolePermissions(
   roleId: string,
-  permissions: { permission_key: string; menu_key: string }[]
+  permissions: string[]
 ) {
   return request.put(`/v1/admin/roles/${roleId}/permissions`, { permissions })
 }

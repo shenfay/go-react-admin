@@ -14,6 +14,7 @@ import ShopItem from '@/pages/ShopItem'
 import ExchangeOrder from '@/pages/ExchangeOrder'
 import UserManagement from '@/pages/UserManagement'
 import PermissionManagement from '@/pages/PermissionManagement'
+import MenuManagement from '@/pages/MenuManagement'
 import Profile from '@/pages/Profile'
 import OperationLog from '@/pages/OperationLog'
 import SystemSettings from '@/pages/SystemSettings'
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: 'permissions',
         element: <PermissionGuard permission="permission:manage"><PermissionManagement /></PermissionGuard>,
+      },
+      {
+        path: 'menus',
+        element: <PermissionGuard permission="menu:manage"><MenuManagement /></PermissionGuard>,
       },
       {
         path: 'profile',

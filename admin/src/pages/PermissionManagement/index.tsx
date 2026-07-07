@@ -94,15 +94,12 @@ export default function PermissionManagement() {
     if (!selectedRole) return
     setPermLoading(true)
     try {
-      // 将选中的菜单 key 转换为权限列表
-      const permissions: { permission_key: string; menu_key: string }[] = []
+      // 将选中的菜单 key 转换为权限标识列表
+      const permissions: string[] = []
       permissionTree.forEach(group => {
         group.children?.forEach(item => {
           if (checkedKeys.includes(item.key)) {
-            permissions.push({
-              permission_key: item.permission || `${item.key}:view`,
-              menu_key: item.key,
-            })
+            permissions.push(item.permission || `${item.key}:view`)
           }
         })
       })

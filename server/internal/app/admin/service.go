@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/shenfay/kiqi/internal/domain/rbac"
@@ -14,14 +15,16 @@ import (
 type Service struct {
 	userRepo user.UserRepository
 	roleRepo rbac.RoleRepository
+	menuRepo rbac.MenuRepository
 	enforcer *authorize.Enforcer
 }
 
 // NewService 创建管理员应用服务
-func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, enforcer *authorize.Enforcer) *Service {
+func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menuRepo rbac.MenuRepository, enforcer *authorize.Enforcer) *Service {
 	return &Service{
 		userRepo: userRepo,
 		roleRepo: roleRepo,
+		menuRepo: menuRepo,
 		enforcer: enforcer,
 	}
 }
@@ -202,6 +205,71 @@ func (s *Service) UpdateRolePermissions(ctx context.Context, roleID string, perm
 	return s.enforcer.SetRolePermissions(roleID, permissions)
 }
 
+// ---- 菜单管理 ----
+
+// ListMenuTree 获取菜单树
+func (s *Service) ListMenuTree(ctx context.Context) ([]*rbac.MenuTreeNode, error) {
+	menus, err := s.menuRepo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return buildMenuTree(menus, ""), nil
+}
+
+// CreateMenu 创建菜单
+func (s *Service) CreateMenu(ctx context.Context, cmd CreateMenuCmd) (*MenuDTO, error) {
+	// 检查 key 是否已存在
+	existing, _ := s.menuRepo.FindByKey(ctx, cmd.Key)
+	if existing != nil {
+		return nil, errors.New("菜单标识已存在")
+	}
+
+	m := rbac.NewMenu(cmd.Key, cmd.Label, cmd.Icon, cmd.Path, cmd.Permission, cmd.ParentID, cmd.SortOrder)
+	if err := s.menuRepo.Create(ctx, m); err != nil {
+		return nil, err
+	}
+	return toMenuDTO(m), nil
+}
+
+// UpdateMenu 更新菜单
+func (s *Service) UpdateMenu(ctx context.Context, cmd UpdateMenuCmd) (*MenuDTO, error) {
+	m, err := s.menuRepo.FindByID(ctx, cmd.MenuID)
+	if err != nil {
+		return nil, err
+	}
+
+	m.Update(cmd.Label, cmd.Icon, cmd.Path, cmd.Permission)
+	if err := s.menuRepo.Update(ctx, m); err != nil {
+		return nil, err
+	}
+	return toMenuDTO(m), nil
+}
+
+// DeleteMenu 删除菜单
+func (s *Service) DeleteMenu(ctx context.Context, menuID string) error {
+	return s.menuRepo.Delete(ctx, menuID)
+}
+
+// ToggleMenuStatus 切换菜单状态
+func (s *Service) ToggleMenuStatus(ctx context.Context, menuID string) error {
+	m, err := s.menuRepo.FindByID(ctx, menuID)
+	if err != nil {
+		return err
+	}
+	m.ToggleStatus()
+	return s.menuRepo.Update(ctx, m)
+}
+
+// UpdateMenuSort 更新菜单排序
+func (s *Service) UpdateMenuSort(ctx context.Context, cmd SortMenuCmd) error {
+	for _, item := range cmd.Items {
+		if err := s.menuRepo.UpdateSort(ctx, item.ID, item.SortOrder); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // GetUserPermissions 获取用户权限（登录时使用）
 func (s *Service) GetUserPermissions(ctx context.Context, userID string) (*rbac.UserPermission, error) {
 	// 1. 查用户角色
@@ -236,6 +304,37 @@ func (s *Service) GetUserPermissions(ctx context.Context, userID string) (*rbac.
 }
 
 // ---- 命令对象 ----
+
+// CreateMenuCmd 创建菜单命令
+type CreateMenuCmd struct {
+	Key        string
+	Label      string
+	Icon       string
+	Path       string
+	Permission string
+	ParentID   string
+	SortOrder  int
+}
+
+// UpdateMenuCmd 更新菜单命令
+type UpdateMenuCmd struct {
+	MenuID     string
+	Label      string
+	Icon       string
+	Path       string
+	Permission string
+}
+
+// SortMenuCmd 菜单排序命令
+type SortMenuCmd struct {
+	Items []SortMenuItem
+}
+
+// SortMenuItem 排序项
+type SortMenuItem struct {
+	ID        string
+	SortOrder int
+}
 
 // CreateUserCmd 创建用户命令
 type CreateUserCmd struct {
@@ -299,6 +398,22 @@ type RoleDTO struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// MenuDTO 菜单数据传输对象
+type MenuDTO struct {
+	ID         string     `json:"id"`
+	Key        string     `json:"key"`
+	Label      string     `json:"label"`
+	Icon       string     `json:"icon"`
+	Path       string     `json:"path"`
+	Permission string     `json:"permission"`
+	ParentID   string     `json:"parent_id"`
+	SortOrder  int        `json:"sort_order"`
+	Status     bool       `json:"status"`
+	Children   []*MenuDTO `json:"children,omitempty"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+}
+
 // ---- 转换函数 ----
 
 func toUserDTO(u *user.User) *UserDTO {
@@ -337,4 +452,42 @@ func rolesToBriefs(roles []*rbac.Role) []rbac.RoleBrief {
 		})
 	}
 	return briefs
+}
+
+func toMenuDTO(m *rbac.Menu) *MenuDTO {
+	return &MenuDTO{
+		ID:         m.ID,
+		Key:        m.Key,
+		Label:      m.Label,
+		Icon:       m.Icon,
+		Path:       m.Path,
+		Permission: m.Permission,
+		ParentID:   m.ParentID,
+		SortOrder:  m.SortOrder,
+		Status:     m.Status,
+		CreatedAt:  m.CreatedAt,
+		UpdatedAt:  m.UpdatedAt,
+	}
+}
+
+func buildMenuTree(menus []*rbac.Menu, parentID string) []*rbac.MenuTreeNode {
+	var tree []*rbac.MenuTreeNode
+	for _, m := range menus {
+		if m.ParentID == parentID {
+			node := &rbac.MenuTreeNode{
+				ID:         m.ID,
+				Key:        m.Key,
+				Label:      m.Label,
+				Icon:       m.Icon,
+				Path:       m.Path,
+				Permission: m.Permission,
+				ParentID:   m.ParentID,
+				SortOrder:  m.SortOrder,
+				Status:     m.Status,
+				Children:   buildMenuTree(menus, m.ID),
+			}
+			tree = append(tree, node)
+		}
+	}
+	return tree
 }

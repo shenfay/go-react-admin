@@ -45,6 +45,7 @@ var PermissionMenuMap = map[string]string{
 	"user:update":           "user-management",
 	"permission:manage":     "permission-management",
 	"permission:view":       "permission-management",
+	"menu:manage":           "menu-management",
 	"profile:view":          "profile",
 	"operation:log":         "operation-log",
 	"setting:manage":        "system-settings",
