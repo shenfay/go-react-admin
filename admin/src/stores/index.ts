@@ -60,7 +60,7 @@ export const useAppStore = create<AppState>()(
       ...initialUserState,
 
       // Layout
-      sidebarCollapsed: false,
+      sidebarCollapsed: true,
       setSidebarCollapsed: collapsed => set({ sidebarCollapsed: collapsed }),
       toggleSidebar: () => set(state => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
@@ -106,10 +106,10 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'kiqi-admin-storage',
-      version: 4,
+      version: 5,
       migrate: (_persistedState: unknown, version: number) => {
-        if (version < 4) {
-          return initialUserState as AppState & { sidebarCollapsed: boolean }
+        if (version < 5) {
+          return { ...(_persistedState as object), sidebarCollapsed: true } as AppState & { sidebarCollapsed: boolean }
         }
         return _persistedState as AppState & { sidebarCollapsed: boolean }
       },

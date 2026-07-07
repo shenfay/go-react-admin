@@ -1,14 +1,10 @@
-import { Breadcrumb, Button, Dropdown } from 'antd'
-import { SearchOutlined, QuestionCircleOutlined, UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useAppStore } from '@/stores'
+import { Breadcrumb, Button } from 'antd'
+import { SearchOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { useLocation } from 'react-router-dom'
 import { menuConfig } from '@/config/menu'
-import { message } from 'antd'
 
 export default function TopBar() {
   const location = useLocation()
-  const navigate = useNavigate()
-  const { username, logout } = useAppStore()
 
   const findBreadcrumb = () => {
     const result: { title: string }[] = [{ title: '首页' }]
@@ -25,29 +21,6 @@ export default function TopBar() {
   }
 
   const breadcrumbItems = findBreadcrumb()
-
-  const handleMenuClick = ({ key }: { key: string }) => {
-    switch (key) {
-      case 'profile':
-        navigate('/profile')
-        break
-      case 'settings':
-        navigate('/settings')
-        break
-      case 'logout':
-        logout()
-        message.success('已退出登录')
-        navigate('/login', { replace: true })
-        break
-    }
-  }
-
-  const userMenuItems = [
-    { key: 'profile', icon: <UserOutlined />, label: '个人中心' },
-    { key: 'settings', icon: <SettingOutlined />, label: '系统设置' },
-    { type: 'divider' as const },
-    { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true },
-  ]
 
   return (
     <div
@@ -126,46 +99,6 @@ export default function TopBar() {
             color: 'var(--text-secondary)',
           }}
         />
-        <Dropdown menu={{ items: userMenuItems, onClick: handleMenuClick }} placement="bottomRight">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '4px 12px',
-              cursor: 'pointer',
-              borderRadius: 'var(--radius-sm)',
-              transition: 'background 0.15s',
-              marginLeft: 4,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'var(--hover-bg)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent'
-            }}
-          >
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #4ECDC4, #44B09E)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              {username?.charAt(0) || 'U'}
-            </div>
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>
-              {username || '用户'}
-            </span>
-          </div>
-        </Dropdown>
       </div>
     </div>
   )

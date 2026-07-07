@@ -1,14 +1,18 @@
 import { useState } from 'react'
-import { Layout, Menu, Badge, Avatar, Button } from 'antd'
+import { Layout, Menu, Badge, Avatar, Button, Dropdown } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   BellOutlined,
+  UserOutlined,
+  SettingOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAppStore } from '@/stores'
 import { menuConfig, getIcon } from '@/config/menu'
 import type { MenuItem } from '@/config/menu'
+import { message } from 'antd'
 
 const { Sider } = Layout
 
@@ -52,7 +56,7 @@ function renderMenuItems(items: MenuItem[], userMenus: string[], isLogin: boolea
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { sidebarCollapsed, toggleSidebar, username, isLogin, menus } = useAppStore()
+  const { sidebarCollapsed, toggleSidebar, username, isLogin, menus, logout } = useAppStore()
   const [openKeys, setOpenKeys] = useState<string[]>(['overview', 'growth', 'card-engine', 'companion', 'acceptance', 'points-system', 'user', 'system'])
 
   const filteredMenu = renderMenuItems(menuConfig, menus, isLogin, sidebarCollapsed)
@@ -65,6 +69,29 @@ export default function Sidebar() {
       navigate(item.path)
     }
   }
+
+  const handleUserMenuClick = ({ key }: { key: string }) => {
+    switch (key) {
+      case 'profile':
+        navigate('/profile')
+        break
+      case 'settings':
+        navigate('/settings')
+        break
+      case 'logout':
+        logout()
+        message.success('已退出登录')
+        navigate('/login', { replace: true })
+        break
+    }
+  }
+
+  const userMenuItems = [
+    { key: 'profile', icon: <UserOutlined />, label: '个人中心' },
+    { key: 'settings', icon: <SettingOutlined />, label: '系统设置' },
+    { type: 'divider' as const },
+    { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true },
+  ]
 
   const selectedKey = menuConfig
     .flatMap(m => m.children || [m])
@@ -196,62 +223,66 @@ export default function Sidebar() {
           }}
         >
           {sidebarCollapsed ? (
-            <Avatar
-              size={32}
-              style={{
-                background: 'linear-gradient(135deg, #4ECDC4, #44B09E)',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {username?.charAt(0) || '管'}
-            </Avatar>
-          ) : (
-            <>
-              <div
+            <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} placement="topLeft">
+              <Avatar
+                size={32}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: 4,
-                  borderRadius: 'var(--radius-sm)',
+                  background: 'linear-gradient(135deg, #4ECDC4, #44B09E)',
+                  fontSize: 13,
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  transition: 'background 0.15s',
-                  flex: 1,
-                  minWidth: 0,
-                  overflow: 'hidden',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'var(--hover-bg)'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'transparent'
                 }}
               >
-                <Avatar
-                  size={28}
+                {username?.charAt(0) || '管'}
+              </Avatar>
+            </Dropdown>
+          ) : (
+            <>
+              <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} placement="topLeft">
+                <div
                   style={{
-                    background: 'linear-gradient(135deg, #4ECDC4, #44B09E)',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    minWidth: 28,
-                  }}
-                >
-                  {username?.charAt(0) || '管'}
-                </Avatar>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: 'var(--text-primary)',
-                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: 4,
+                    borderRadius: 'var(--radius-sm)',
+                    cursor: 'pointer',
+                    transition: 'background 0.15s',
+                    flex: 1,
+                    minWidth: 0,
                     overflow: 'hidden',
                   }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--hover-bg)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'transparent'
+                  }}
                 >
-                  {username || '管理员'}
-                </span>
-              </div>
+                  <Avatar
+                    size={28}
+                    style={{
+                      background: 'linear-gradient(135deg, #4ECDC4, #44B09E)',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      minWidth: 28,
+                    }}
+                  >
+                    {username?.charAt(0) || '管'}
+                  </Avatar>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: 'var(--text-primary)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {username || '管理员'}
+                  </span>
+                </div>
+              </Dropdown>
               <div
                 style={{
                   width: 28,
