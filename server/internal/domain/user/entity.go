@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/shenfay/kiqi/pkg/utils"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // User 用户聚合根
@@ -25,7 +24,14 @@ type User struct {
 // NewUser 创建新用户
 // 邮箱格式无效或密码不符合要求时返回错误
 func NewUser(email, name, password string) (*User, error) {
-	hashedPassword, err := HashPassword(password)
+	// 使用 Email 值对象验证邮箱格式
+	emailVO, err := NewEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// 使用 Password 值对象处理密码哈希
+	passwordVO, err := NewPassword(password)
 	if err != nil {
 		return nil, err
 	}
@@ -33,9 +39,9 @@ func NewUser(email, name, password string) (*User, error) {
 	now := utils.Now()
 	return &User{
 		ID:             utils.GenerateID(),
-		Email:          email,
+		Email:          emailVO.String(),
 		Name:           name,
-		Password:       hashedPassword,
+		Password:       passwordVO.Hash(),
 		EmailVerified:  false,
 		Locked:         false,
 		FailedAttempts: 0,
@@ -53,8 +59,7 @@ func (u *User) UpdateName(newName string) error {
 
 // VerifyPassword 验证密码是否匹配
 func (u *User) VerifyPassword(password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-	return err == nil
+	return verifyPasswordHash(u.Password, password)
 }
 
 // IsLocked 检查账户是否因登录失败次数过多而被锁定
@@ -103,9 +108,13 @@ func (u *User) ChangePassword(newPassword string) error {
 	return nil
 }
 
-// UpdateEmail 更新邮箱
+// UpdateEmail 更新邮箱（通过 Email 值对象验证格式）
 func (u *User) UpdateEmail(newEmail string) error {
-	u.Email = newEmail
+	emailVO, err := NewEmail(newEmail)
+	if err != nil {
+		return err
+	}
+	u.Email = emailVO.String()
 	u.UpdatedAt = utils.Now()
 	return nil
 }
