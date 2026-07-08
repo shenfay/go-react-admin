@@ -1,6 +1,15 @@
-import { Table, Tag, Space, Button } from 'antd'
-import { CheckOutlined, CloseOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Space, Button, Select } from 'antd'
+import { CheckOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const statusOptions = [
+  { label: '全部状态', value: '' },
+  { label: '待验收', value: 'pending' },
+  { label: '已通过', value: 'approved' },
+  { label: '已退回', value: 'rejected' },
+  { label: '自动通过', value: 'auto_passed' },
+]
 
 const columns = [
   { title: '卡片内容', dataIndex: 'content', key: 'content', ellipsis: true },
@@ -41,9 +50,26 @@ const columns = [
 ]
 
 export default function Acceptance() {
+  const [statusFilter, setStatusFilter] = useState('')
+
   return (
-    <DataPanel title="验收管理">
-      <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+    <DataPanel
+      title="验收管理"
+      filters={
+        <>
+          <FilterSearch placeholder="搜索卡片内容..." />
+          <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
+          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+        </>
+      }
+    >
+      <Table
+        columns={columns}
+        dataSource={[]}
+        rowKey="id"
+        locale={{ emptyText: '暂无数据' }}
+        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+      />
     </DataPanel>
   )
 }

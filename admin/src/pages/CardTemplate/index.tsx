@@ -1,6 +1,22 @@
-import { Table, Tag, Button } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Button, Select } from 'antd'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const typeOptions = [
+  { label: '全部类型', value: '' },
+  { label: '闪念卡', value: 'flash' },
+  { label: '归因卡', value: 'cause' },
+  { label: '消化卡', value: 'digest' },
+  { label: '费曼卡', value: 'feynman' },
+  { label: '每日三件事', value: 'daily3' },
+]
+
+const acceptanceOptions = [
+  { label: '全部验收方式', value: '' },
+  { label: '自动通过', value: 'auto' },
+  { label: '家长验收', value: 'manual' },
+]
 
 const columns = [
   { title: '模板名称', dataIndex: 'name', key: 'name' },
@@ -39,16 +55,33 @@ const columns = [
 ]
 
 export default function CardTemplate() {
+  const [typeFilter, setTypeFilter] = useState('')
+  const [acceptanceFilter, setAcceptanceFilter] = useState('')
+
   return (
     <DataPanel
       title="卡片模板管理"
-      extra={
+      filters={
+        <>
+          <FilterSearch placeholder="搜索模板名称..." />
+          <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 140 }} options={typeOptions} />
+          <Select value={acceptanceFilter} onChange={setAcceptanceFilter} style={{ width: 140 }} options={acceptanceOptions} />
+          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+        </>
+      }
+      toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
           新增模板
         </Button>
       }
     >
-      <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+      <Table
+        columns={columns}
+        dataSource={[]}
+        rowKey="id"
+        locale={{ emptyText: '暂无数据' }}
+        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+      />
     </DataPanel>
   )
 }

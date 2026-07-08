@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Tag, Space, Button, Modal, Form, Input, Select, message, Switch, Popconfirm } from 'antd'
-import { ProTable } from '@ant-design/pro-components'
-import type { ProColumns } from '@ant-design/pro-components'
-import { PlusOutlined, EditOutlined } from '@ant-design/icons'
+import { Tag, Space, Button, Modal, Form, Input, Select, message, Switch, Popconfirm, Table } from 'antd'
+import type { TableColumnsType } from 'antd'
+import { PlusOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { getUserList, createUser, updateUser, toggleUserStatus } from '@/services/user'
 import { getRoleList } from '@/services/role'
 import type { User, Role } from '@/types'
@@ -15,6 +15,8 @@ export default function UserManagement() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [keyword, setKeyword] = useState('')
+  const [roleFilter, setRoleFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [form] = Form.useForm()
@@ -103,22 +105,9 @@ export default function UserManagement() {
     }
   }
 
-  const columns: ProColumns<User>[] = [
+  const columns: TableColumnsType<User> = [
     { title: '姓名', dataIndex: 'name', key: 'name', width: 140 },
-    {
-      title: '邮箱',
-      dataIndex: 'email',
-      key: 'email',
-      ellipsis: true,
-      copyable: true,
-    },
-    {
-      title: '搜索',
-      dataIndex: 'keyword',
-      key: 'keyword',
-      hideInTable: true,
-      fieldProps: { placeholder: '搜索姓名 / 邮箱' },
-    },
+    { title: '邮箱', dataIndex: 'email', key: 'email', ellipsis: true },
     {
       title: '角色',
       dataIndex: 'roles',
@@ -179,43 +168,56 @@ export default function UserManagement() {
   ]
 
   return (
-    <div style={{ padding: '0 4px' }}>
-      <ProTable<User>
-        headerTitle="用户管理"
-        dataSource={users}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        search={{
-          labelWidth: 'auto',
-          defaultCollapsed: false,
-          style: { marginBottom: 0 },
-        }}
-        onSubmit={(params) => {
-          setPage(1)
-          setKeyword(params.keyword || '')
-        }}
-        onReset={() => {
-          setPage(1)
-          setKeyword('')
-        }}
-        options={{
-          reload: () => fetchUsers(),
-        }}
-        toolBarRender={() => [
-          <Button key="add" type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+    <div>
+      <DataPanel
+        title="用户管理"
+        filters={
+          <>
+            <FilterSearch placeholder="搜索姓名 / 邮箱..." />
+            <Select
+              value={roleFilter}
+              onChange={setRoleFilter}
+              style={{ width: 140 }}
+              options={[
+                { label: '全部角色', value: '' },
+                ...roles.map(r => ({ label: r.name, value: r.id })),
+              ]}
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: 120 }}
+              options={[
+                { label: '全部状态', value: '' },
+                { label: '活跃', value: 'active' },
+                { label: '已禁用', value: 'locked' },
+              ]}
+            />
+            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }} onClick={() => fetchUsers()}>查询</Button>
+          </>
+        }
+        toolbarActions={
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加用户
-          </Button>,
-        ]}
-        pagination={{
-          current: page,
-          pageSize,
-          total,
-          showSizeChanger: true,
-          showTotal: t => `共 ${t} 条`,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps) },
-        }}
-      />
+          </Button>
+        }
+      >
+        <Table<User>
+          dataSource={users}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: t => `共 ${t} 条记录`,
+            onChange: (p, ps) => { setPage(p); setPageSize(ps) },
+          }}
+        />
+      </DataPanel>
 
       <Modal
         title={editingUser ? '编辑用户' : '添加用户'}

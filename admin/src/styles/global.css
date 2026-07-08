@@ -112,6 +112,7 @@ body {
   font-size: 13px !important;
   font-weight: 500 !important;
   height: 34px !important;
+  transition: all 0.15s ease !important;
 }
 
 .ant-btn-primary {
@@ -121,9 +122,9 @@ body {
   box-shadow: none !important;
 }
 
-.ant-btn-primary:hover {
-  background: var(--brand-dark) !important;
-  border-color: var(--brand-dark) !important;
+.ant-btn.ant-btn-primary:not(:disabled):hover {
+  background: var(--brand-dark-hover) !important;
+  border-color: var(--brand-dark-hover) !important;
 }
 
 .ant-btn-default {

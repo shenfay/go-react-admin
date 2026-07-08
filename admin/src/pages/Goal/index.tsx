@@ -1,6 +1,14 @@
-import { Table, Tag, Button } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Button, Select } from 'antd'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const statusOptions = [
+  { label: '全部状态', value: '' },
+  { label: '进行中', value: 'active' },
+  { label: '已完成', value: 'completed' },
+  { label: '已归档', value: 'archived' },
+]
 
 const columns = [
   { title: '目标名称', dataIndex: 'name', key: 'name' },
@@ -29,16 +37,31 @@ const columns = [
 ]
 
 export default function Goal() {
+  const [statusFilter, setStatusFilter] = useState('')
+
   return (
     <DataPanel
       title="目标管理"
-      extra={
+      filters={
+        <>
+          <FilterSearch placeholder="搜索目标名称..." />
+          <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
+          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+        </>
+      }
+      toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
           新增目标
         </Button>
       }
     >
-      <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+      <Table
+        columns={columns}
+        dataSource={[]}
+        rowKey="id"
+        locale={{ emptyText: '暂无数据' }}
+        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+      />
     </DataPanel>
   )
 }

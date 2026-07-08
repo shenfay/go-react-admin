@@ -16,8 +16,9 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
+  SearchOutlined,
 } from '@ant-design/icons'
-import DataPanel, { IconButton } from '@/components/DataPanel'
+import DataPanel, { IconButton, FilterSearch } from '@/components/DataPanel'
 import {
   getMenuTree,
   createMenu,
@@ -52,6 +53,7 @@ export default function MenuManagement() {
   const [editingItem, setEditingItem] = useState<MenuNode | null>(null)
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [keyword, setKeyword] = useState('')
   const [form] = Form.useForm()
 
   /** 加载菜单树 */
@@ -84,7 +86,7 @@ export default function MenuManagement() {
   }
   flatten(menuTree)
 
-  /** 新增顶级菜单 */
+  /** 新增菜单 */
   const handleAddRoot = () => {
     setEditingItem(null)
     form.resetFields()
@@ -256,9 +258,15 @@ export default function MenuManagement() {
     <div>
       <DataPanel
         title="菜单管理"
-        extra={
+        filters={
+          <>
+            <FilterSearch placeholder="搜索菜单名称..." />
+            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          </>
+        }
+        toolbarActions={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRoot}>
-            新增顶级菜单
+            新增菜单
           </Button>
         }
         >

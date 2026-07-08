@@ -1,6 +1,14 @@
-import { Table, Tag, Button } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Button, Select } from 'antd'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const approvalOptions = [
+  { label: '全部审批', value: '' },
+  { label: '自动通过', value: 'auto' },
+  { label: '通知家长', value: 'notify' },
+  { label: '需审批', value: 'approve' },
+]
 
 const columns = [
   { title: '商品名称', dataIndex: 'name', key: 'name' },
@@ -35,16 +43,31 @@ const columns = [
 ]
 
 export default function ShopItem() {
+  const [approvalFilter, setApprovalFilter] = useState('')
+
   return (
     <DataPanel
       title="商品管理"
-      extra={
+      filters={
+        <>
+          <FilterSearch placeholder="搜索商品名称..." />
+          <Select value={approvalFilter} onChange={setApprovalFilter} style={{ width: 140 }} options={approvalOptions} />
+          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+        </>
+      }
+      toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
           新增商品
         </Button>
       }
     >
-      <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+      <Table
+        columns={columns}
+        dataSource={[]}
+        rowKey="id"
+        locale={{ emptyText: '暂无数据' }}
+        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+      />
     </DataPanel>
   )
 }

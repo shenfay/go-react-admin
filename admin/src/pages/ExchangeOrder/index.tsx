@@ -1,6 +1,15 @@
-import { Table, Tag, Space, Button } from 'antd'
-import { CheckOutlined, CloseOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Space, Button, Select } from 'antd'
+import { CheckOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const statusOptions = [
+  { label: '全部状态', value: '' },
+  { label: '待处理', value: 'pending' },
+  { label: '已通过', value: 'approved' },
+  { label: '已拒绝', value: 'rejected' },
+  { label: '已完成', value: 'completed' },
+]
 
 const columns = [
   { title: '兑换者', dataIndex: 'childName', key: 'childName' },
@@ -46,9 +55,26 @@ const columns = [
 ]
 
 export default function ExchangeOrder() {
+  const [statusFilter, setStatusFilter] = useState('')
+
   return (
-    <DataPanel title="兑换订单">
-      <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+    <DataPanel
+      title="兑换订单"
+      filters={
+        <>
+          <FilterSearch placeholder="搜索兑换者/商品..." />
+          <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
+          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+        </>
+      }
+    >
+      <Table
+        columns={columns}
+        dataSource={[]}
+        rowKey="id"
+        locale={{ emptyText: '暂无数据' }}
+        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+      />
     </DataPanel>
   )
 }

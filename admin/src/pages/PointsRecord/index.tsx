@@ -1,6 +1,13 @@
-import { Table, Tag, Statistic, Row, Col, Card } from 'antd'
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Statistic, Row, Col, Card, Button, Select } from 'antd'
+import { ArrowUpOutlined, ArrowDownOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const typeOptions = [
+  { label: '全部类型', value: '' },
+  { label: '获得', value: 'earn' },
+  { label: '消费', value: 'spend' },
+]
 
 const columns = [
   { title: '用户', dataIndex: 'userName', key: 'userName' },
@@ -34,6 +41,8 @@ const columns = [
 ]
 
 export default function PointsRecord() {
+  const [typeFilter, setTypeFilter] = useState('')
+
   return (
     <div>
       <div style={{ padding: '20px 28px 0' }}>
@@ -55,8 +64,24 @@ export default function PointsRecord() {
           </Col>
         </Row>
       </div>
-      <DataPanel title="积分流水" style={{ marginTop: 16 }}>
-        <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+      <DataPanel
+        title="积分流水"
+        style={{ marginTop: 16 }}
+        filters={
+          <>
+            <FilterSearch placeholder="搜索用户/来源..." />
+            <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={typeOptions} />
+            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          </>
+        }
+      >
+        <Table
+          columns={columns}
+          dataSource={[]}
+          rowKey="id"
+          locale={{ emptyText: '暂无数据' }}
+          pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+        />
       </DataPanel>
     </div>
   )

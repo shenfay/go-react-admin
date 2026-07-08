@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { getMenuTree, type MenuNode } from '@/services/menu'
 import {
   getRoleList,
@@ -65,6 +65,7 @@ export default function PermissionManagement() {
   const [loading, setLoading] = useState(false)
   const [permLoading, setPermLoading] = useState(false)
   const [menuData, setMenuData] = useState<MenuNode[]>([])
+  const [keyword, setKeyword] = useState('')
   const [form] = Form.useForm()
 
   const permissionTree = buildPermissionTree(menuData)
@@ -266,7 +267,13 @@ export default function PermissionManagement() {
     <div>
       <DataPanel
         title="角色管理"
-        extra={
+        filters={
+          <>
+            <FilterSearch placeholder="搜索角色名称..." />
+            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          </>
+        }
+        toolbarActions={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRole}>
             新增角色
           </Button>

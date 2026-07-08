@@ -1,6 +1,15 @@
-import { Table, Tag, Button } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
-import DataPanel from '@/components/DataPanel'
+import { useState } from 'react'
+import { Table, Tag, Button, Select } from 'antd'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
+
+const personalityOptions = [
+  { label: '全部性格', value: '' },
+  { label: '探索型', value: 'explorer' },
+  { label: '守护型', value: 'guardian' },
+  { label: '创造型', value: 'creator' },
+  { label: '思考型', value: 'thinker' },
+]
 
 const columns = [
   { title: '伙伴名称', dataIndex: 'name', key: 'name' },
@@ -24,16 +33,31 @@ const columns = [
 ]
 
 export default function Companion() {
+  const [personalityFilter, setPersonalityFilter] = useState('')
+
   return (
     <DataPanel
       title="伙伴模板管理"
-      extra={
+      filters={
+        <>
+          <FilterSearch placeholder="搜索伙伴名称..." />
+          <Select value={personalityFilter} onChange={setPersonalityFilter} style={{ width: 140 }} options={personalityOptions} />
+          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+        </>
+      }
+      toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
           新增伙伴
         </Button>
       }
     >
-      <Table columns={columns} dataSource={[]} locale={{ emptyText: '暂无数据' }} />
+      <Table
+        columns={columns}
+        dataSource={[]}
+        rowKey="id"
+        locale={{ emptyText: '暂无数据' }}
+        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+      />
     </DataPanel>
   )
 }
