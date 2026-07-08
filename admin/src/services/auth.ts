@@ -2,21 +2,7 @@
  * 认证相关 API
  */
 import request from '@/utils/request'
-import type { LoginRequest, LoginResponse, UserPermission } from '@/types'
-
-/** 菜单树节点（后端返回） */
-export interface MenuTreeNode {
-  id: string
-  key: string
-  label: string
-  icon: string
-  path: string
-  permission: string
-  parent_id: string
-  sort_order: number
-  status: boolean
-  children?: MenuTreeNode[]
-}
+import type { LoginRequest, LoginResponse, UserPermission, MenuItem } from '@/types'
 
 /** 登录 */
 export async function login(data: LoginRequest): Promise<LoginResponse> {
@@ -34,7 +20,7 @@ export async function getPermissions(): Promise<UserPermission> {
 }
 
 /** 获取当前用户菜单树 */
-export async function getUserMenuTree(): Promise<MenuTreeNode[]> {
+export async function getUserMenuTree(): Promise<MenuItem[]> {
   return request.get('/v1/auth/menus')
 }
 

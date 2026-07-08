@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
 import { PlusOutlined, SearchOutlined, SettingOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
-import { getMenuTree, type MenuNode } from '@/services/menu'
+import { getMenuTree } from '@/services/menu'
+import type { MenuItem } from '@/types'
 import {
   getRoleList,
   createRole,
@@ -24,7 +25,7 @@ type PermTreeNode = {
 }
 
 /** 从后端菜单数据生成权限树 */
-function buildPermissionTree(menus: MenuNode[]): PermTreeNode[] {
+function buildPermissionTree(menus: MenuItem[]): PermTreeNode[] {
   const tree: PermTreeNode[] = []
   const seenKeys = new Set<string>()
 
@@ -86,7 +87,7 @@ export default function PermissionManagement() {
   const [editingRole, setEditingRole] = useState<Role | null>(null)
   const [loading, setLoading] = useState(false)
   const [permLoading, setPermLoading] = useState(false)
-  const [menuData, setMenuData] = useState<MenuNode[]>([])
+  const [menuData, setMenuData] = useState<MenuItem[]>([])
   const [keyword, setKeyword] = useState('')
   const [form] = Form.useForm()
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Table, Tag, Statistic, Row, Col, Card, Button, Select } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
+import { DEFAULT_PAGINATION } from '@/config/pagination'
 
 const typeOptions = [
   { label: '全部类型', value: '' },
@@ -79,7 +80,7 @@ export default function PointsRecord() {
           dataSource={[]}
           rowKey="id"
           locale={{ emptyText: '暂无数据' }}
-          pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+          pagination={DEFAULT_PAGINATION}
         />
       </DataPanel>
     </div>

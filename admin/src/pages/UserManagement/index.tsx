@@ -3,37 +3,28 @@ import { Tag, Space, Button, Modal, Form, Input, Select, message, Switch, Popcon
 import type { TableColumnsType } from 'antd'
 import { PlusOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
+import { DEFAULT_PAGINATION } from '@/config/pagination'
+import { useCrudList } from '@/hooks/useCrudList'
 import { getUserList, createUser, updateUser, toggleUserStatus } from '@/services/user'
 import { getRoleList } from '@/services/role'
 import type { User, Role } from '@/types'
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<User[]>([])
+  const {
+    loading, dataSource: users, total, page, pageSize,
+    fetchData: fetchUsers, handlePageChange,
+    isModalOpen, editingItem: editingUser, form,
+    handleAdd, handleEdit, handleCancel,
+  } = useCrudList<User>(
+    async ({ page: p, pageSize: ps }) => {
+      const res = await getUserList({ page: p, page_size: ps, keyword })
+      return { data: res.users || [], total: res.total || 0 }
+    },
+  )
+
   const [roles, setRoles] = useState<Role[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
   const [keyword, setKeyword] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [form] = Form.useForm()
-
-  const fetchUsers = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await getUserList({ page, page_size: pageSize, keyword })
-      setUsers(res.users || [])
-      setTotal(res.total || 0)
-    } catch {
-      setUsers([])
-      setTotal(0)
-    } finally {
-      setLoading(false)
-    }
-  }, [page, pageSize, keyword])
 
   const fetchRoles = async () => {
     try {
@@ -45,27 +36,25 @@ export default function UserManagement() {
   }
 
   useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
-
-  useEffect(() => {
     fetchRoles()
   }, [])
 
-  const handleAdd = () => {
-    setEditingUser(null)
-    form.resetFields()
-    setIsModalOpen(true)
-  }
+  // keyword 变化时重新加载
+  const fetchWithKeyword = useCallback(async () => {
+    const res = await getUserList({ page, page_size: pageSize, keyword })
+    return { data: res.users || [], total: res.total || 0 }
+  }, [page, pageSize, keyword])
 
-  const handleEdit = (record: User) => {
-    setEditingUser(record)
-    form.setFieldsValue({
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchWithKeyword]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleEditUser = (record: User) => {
+    handleEdit(record, {
       name: record.name,
       email: record.email,
       role_ids: record.roles?.map(r => r.id) || [],
     })
-    setIsModalOpen(true)
   }
 
   const handleSubmit = async () => {
@@ -87,8 +76,7 @@ export default function UserManagement() {
         })
         message.success('用户已创建')
       }
-      setIsModalOpen(false)
-      form.resetFields()
+      handleCancel()
       fetchUsers()
     } catch {
       // validation or API error
@@ -153,7 +141,7 @@ export default function UserManagement() {
       width: 120,
       render: (_: unknown, record: User) => (
         <Space size={12}>
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditUser(record)}>
             编辑
           </Button>
           <Popconfirm
@@ -173,7 +161,7 @@ export default function UserManagement() {
         title="用户管理"
         filters={
           <>
-            <FilterSearch placeholder="搜索姓名 / 邮箱..." />
+            <FilterSearch value={keyword} onChange={setKeyword} placeholder="搜索姓名 / 邮箱..." onSearch={() => fetchUsers()} />
             <Select
               value={roleFilter}
               onChange={setRoleFilter}
@@ -181,16 +169,6 @@ export default function UserManagement() {
               options={[
                 { label: '全部角色', value: '' },
                 ...roles.map(r => ({ label: r.name, value: r.id })),
-              ]}
-            />
-            <Select
-              value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: 120 }}
-              options={[
-                { label: '全部状态', value: '' },
-                { label: '活跃', value: 'active' },
-                { label: '已禁用', value: 'locked' },
               ]}
             />
             <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }} onClick={() => fetchUsers()}>查询</Button>
@@ -211,10 +189,8 @@ export default function UserManagement() {
             current: page,
             pageSize,
             total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: t => `共 ${t} 条记录`,
-            onChange: (p, ps) => { setPage(p); setPageSize(ps) },
+            ...DEFAULT_PAGINATION,
+            onChange: handlePageChange,
           }}
         />
       </DataPanel>
@@ -223,7 +199,7 @@ export default function UserManagement() {
         title={editingUser ? '编辑用户' : '添加用户'}
         open={isModalOpen}
         onOk={handleSubmit}
-        onCancel={() => { setIsModalOpen(false); form.resetFields() }}
+        onCancel={handleCancel}
         width={520}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>

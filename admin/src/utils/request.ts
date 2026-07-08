@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios'
 import { message } from 'antd'
+import type { ApiResponse } from '@/types'
 
 // 创建 axios 实例
 const request = axios.create({
@@ -28,9 +29,13 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response: AxiosResponse) => {
-    // HTTP 2xx 即为成功，直接返回 data 字段
+    // 检查是否为标准 ApiResponse 结构（含 code + data 字段）
     const { data } = response
-    return data?.data !== undefined ? data.data : data
+    if (data && typeof data === 'object' && 'code' in data && 'data' in data) {
+      return (data as ApiResponse).data
+    }
+    // 非标准响应，直接返回
+    return data
   },
   (error: AxiosError<{ code?: string; message?: string }>) => {
     const { response } = error
@@ -43,7 +48,13 @@ request.interceptors.response.use(
           return Promise.reject(error)
         }
         message.error(msg || '登录已过期，请重新登录')
+        // 统一清理：localStorage + Zustand store
         localStorage.removeItem('admin-token')
+        localStorage.removeItem('admin-refresh-token')
+        // 延迟导入避免循环依赖
+        import('@/stores').then(({ useAppStore }) => {
+          useAppStore.getState().logout()
+        })
         window.location.href = '/login'
       } else {
         // 直接使用后端返回的中文消息

@@ -51,7 +51,7 @@ export default function Login() {
       <div
         style={{
           flex: '0 0 61.8%',
-          background: 'linear-gradient(135deg, #4ECDC4 0%, #2C9E9D 50%, #1A7A7A 100%)',
+          background: 'linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-mid) 50%, var(--brand-gradient-end) 100%)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -176,13 +176,13 @@ export default function Login() {
               style={{
                 fontSize: 24,
                 fontWeight: 600,
-                color: '#1a1a1a',
+                color: 'var(--text-primary)',
                 margin: '0 0 8px',
               }}
             >
               欢迎回来
             </h2>
-            <p style={{ fontSize: 14, color: '#999', margin: 0 }}>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
               请登录您的管理后台账号
             </p>
           </div>
@@ -230,7 +230,7 @@ export default function Login() {
             </Form.Item>
           </Form>
 
-          <div style={{ textAlign: 'center', fontSize: 12, color: '#bbb' }}>
+          <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-icon)' }}>
             请联系管理员获取登录凭据
           </div>
         </div>

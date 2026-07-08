@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Table, Tag, Space, Button, Select } from 'antd'
 import { CheckOutlined, CloseOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
+import { DEFAULT_PAGINATION } from '@/config/pagination'
 
 const statusOptions = [
   { label: '全部状态', value: '' },
@@ -73,7 +74,7 @@ export default function ExchangeOrder() {
         dataSource={[]}
         rowKey="id"
         locale={{ emptyText: '暂无数据' }}
-        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+        pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>
   )

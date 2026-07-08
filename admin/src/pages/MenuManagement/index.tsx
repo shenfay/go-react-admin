@@ -25,14 +25,14 @@ import {
   updateMenu,
   deleteMenu,
   toggleMenuStatus,
-  type MenuNode,
 } from '@/services/menu'
+import type { MenuItem } from '@/types'
 
 
 export default function MenuManagement() {
-  const [menuTree, setMenuTree] = useState<MenuNode[]>([])
+  const [menuTree, setMenuTree] = useState<MenuItem[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<MenuNode | null>(null)
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [keyword, setKeyword] = useState('')
@@ -59,8 +59,8 @@ export default function MenuManagement() {
   }, [fetchMenus])
 
   /** 扁平化菜单列表 */
-  const flatMenus: MenuNode[] = []
-  function flatten(nodes: MenuNode[]) {
+  const flatMenus: MenuItem[] = []
+  function flatten(nodes: MenuItem[]) {
     for (const node of nodes) {
       flatMenus.push(node)
       if (node.children) flatten(node.children)
@@ -86,7 +86,7 @@ export default function MenuManagement() {
   }
 
   /** 编辑 */
-  const handleEdit = (record: MenuNode) => {
+  const handleEdit = (record: MenuItem) => {
     setEditingItem(record)
     form.setFieldsValue({
       parent_id: record.parent_id || '',
@@ -100,7 +100,7 @@ export default function MenuManagement() {
   }
 
   /** 删除 */
-  const handleDelete = async (record: MenuNode) => {
+  const handleDelete = async (record: MenuItem) => {
     try {
       await deleteMenu(record.id)
       message.success('已删除')
@@ -111,7 +111,7 @@ export default function MenuManagement() {
   }
 
   /** 切换状态 */
-  const handleToggleStatus = async (record: MenuNode) => {
+  const handleToggleStatus = async (record: MenuItem) => {
     try {
       await toggleMenuStatus(record.id)
       message.success('状态已更新')
@@ -197,7 +197,7 @@ export default function MenuManagement() {
       dataIndex: 'status',
       key: 'status',
       width: 80,
-      render: (v: boolean, record: MenuNode) => (
+      render: (v: boolean, record: MenuItem) => (
         <Switch
           checked={v}
           size="small"
@@ -209,7 +209,7 @@ export default function MenuManagement() {
       title: '操作',
       key: 'action',
       width: 140,
-      render: (_: unknown, record: MenuNode) => (
+      render: (_: unknown, record: MenuItem) => (
         <Space size={4}>
           <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAddChild(record.key)}>
             新增子菜单

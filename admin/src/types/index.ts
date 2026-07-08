@@ -96,43 +96,25 @@ export interface LoginResponse {
   permissions?: UserPermission
 }
 
-// 菜单树节点
-export interface MenuTreeNode {
+// 菜单项（后端返回的完整结构）
+export interface MenuItem {
+  id: string
+  key: string
+  label: string
+  icon: string
+  path: string
+  permission: string
+  parent_id: string
+  sort_order: number
+  status: boolean
+  children?: MenuItem[]
+  created_at?: string
+  updated_at?: string
+}
+
+// 菜单树展示节点（用于 Ant Design Tree 等组件）
+export interface MenuTreeDisplayNode {
   key: string
   title: string
-  children?: MenuTreeNode[]
-}
-
-// 活动记录
-export interface Activity {
-  id: string
-  user: string
-  action: string
-  status: string
-  time: string
-}
-
-// 服务状态
-export interface ServiceStatus {
-  name: string
-  health: number
-  status: string
-}
-
-// 数据源
-export interface DataSource {
-  name: string
-  type: string
-  status: string
-  lastSync: string
-  size: string
-}
-
-// 统计卡片
-export interface StatCardData {
-  label: string
-  value: string | number
-  change: number
-  changeLabel: string
-  color: string
+  children?: MenuTreeDisplayNode[]
 }

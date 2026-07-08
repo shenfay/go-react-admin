@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Table, Tag, Button, Select } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
+import { DEFAULT_PAGINATION } from '@/config/pagination'
 
 const statusOptions = [
   { label: '全部状态', value: '' },
@@ -60,7 +61,7 @@ export default function Goal() {
         dataSource={[]}
         rowKey="id"
         locale={{ emptyText: '暂无数据' }}
-        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+        pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>
   )

@@ -1,24 +1,37 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import { Spin } from 'antd'
 import MainLayout from '@/components/Layout'
 import PermissionGuard from '@/components/PermissionGuard'
+
+// 登录页同步加载（首屏关键路径）
 import Login from '@/pages/Login'
-import Dashboard from '@/pages/Dashboard'
-import Family from '@/pages/Family'
-import Goal from '@/pages/Goal'
-import CardTemplate from '@/pages/CardTemplate'
-import CardInstance from '@/pages/CardInstance'
-import Companion from '@/pages/Companion'
-import Acceptance from '@/pages/Acceptance'
-import PointsRecord from '@/pages/PointsRecord'
-import ShopItem from '@/pages/ShopItem'
-import ExchangeOrder from '@/pages/ExchangeOrder'
-import UserManagement from '@/pages/UserManagement'
-import PermissionManagement from '@/pages/PermissionManagement'
-import MenuManagement from '@/pages/MenuManagement'
-import Profile from '@/pages/Profile'
-import OperationLog from '@/pages/OperationLog'
-import SystemSettings from '@/pages/SystemSettings'
-import DesignSystem from '@/pages/DesignSystem'
+
+// 业务页面懒加载
+const Dashboard = lazy(() => import('@/pages/Dashboard'))
+const Family = lazy(() => import('@/pages/Family'))
+const Goal = lazy(() => import('@/pages/Goal'))
+const CardTemplate = lazy(() => import('@/pages/CardTemplate'))
+const CardInstance = lazy(() => import('@/pages/CardInstance'))
+const Companion = lazy(() => import('@/pages/Companion'))
+const Acceptance = lazy(() => import('@/pages/Acceptance'))
+const PointsRecord = lazy(() => import('@/pages/PointsRecord'))
+const ShopItem = lazy(() => import('@/pages/ShopItem'))
+const ExchangeOrder = lazy(() => import('@/pages/ExchangeOrder'))
+const UserManagement = lazy(() => import('@/pages/UserManagement'))
+const PermissionManagement = lazy(() => import('@/pages/PermissionManagement'))
+const MenuManagement = lazy(() => import('@/pages/MenuManagement'))
+const Profile = lazy(() => import('@/pages/Profile'))
+const OperationLog = lazy(() => import('@/pages/OperationLog'))
+const SystemSettings = lazy(() => import('@/pages/SystemSettings'))
+const DesignSystem = lazy(() => import('@/pages/DesignSystem'))
+
+/** 懒加载 fallback 加载指示器 */
+const PageLoading = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 200 }}>
+    <Spin size="large" />
+  </div>
+)
 
 const router = createBrowserRouter([
   {
@@ -29,7 +42,9 @@ const router = createBrowserRouter([
     path: '/',
     element: (
       <MainLayout>
-        <Outlet />
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
       </MainLayout>
     ),
     children: [

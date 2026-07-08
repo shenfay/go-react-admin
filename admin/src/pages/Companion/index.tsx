@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Table, Tag, Button, Select } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
+import { DEFAULT_PAGINATION } from '@/config/pagination'
 
 const personalityOptions = [
   { label: '全部性格', value: '' },
@@ -56,7 +57,7 @@ export default function Companion() {
         dataSource={[]}
         rowKey="id"
         locale={{ emptyText: '暂无数据' }}
-        pagination={{ showSizeChanger: true, showQuickJumper: true, showTotal: (total) => `共 ${total} 条记录` }}
+        pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>
   )

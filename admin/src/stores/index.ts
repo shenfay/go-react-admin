@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { UserPermission, RoleBrief } from '@/types'
-import type { MenuTreeNode } from '@/services/auth'
+import type { UserPermission, RoleBrief, MenuItem } from '@/types'
 
 interface UserState {
   userId: string | null
@@ -11,7 +10,7 @@ interface UserState {
   roles: RoleBrief[]
   permissions: string[]
   menus: string[]
-  menuTree: MenuTreeNode[]
+  menuTree: MenuItem[]
   isLogin: boolean
 }
 
@@ -35,7 +34,7 @@ interface AppState extends UserState, LayoutState {
   logout: () => void
   setUserInfo: (info: Partial<UserState>) => void
   updatePermissions: (perms: UserPermission) => void
-  setMenuTree: (tree: MenuTreeNode[]) => void
+  setMenuTree: (tree: MenuItem[]) => void
 }
 
 const initialUserState: UserState = {

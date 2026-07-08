@@ -8,7 +8,7 @@ import {
   ShopOutlined,
 } from '@ant-design/icons'
 
-const statCardStyle = { borderRadius: 12, borderColor: '#efeae2' }
+const statCardStyle = { borderRadius: 12, borderColor: 'var(--border-light)' }
 
 export default function Dashboard() {
   return (
@@ -21,7 +21,7 @@ export default function Dashboard() {
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card style={statCardStyle}>
-            <Statistic title="活跃目标" value={0} prefix={<AimOutlined />} valueStyle={{ color: '#3b6fdf' }} />
+            <Statistic title="活跃目标" value={0} prefix={<AimOutlined />} valueStyle={{ color: 'var(--blue)' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
@@ -33,17 +33,17 @@ export default function Dashboard() {
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} sm={12} lg={8}>
           <Card style={statCardStyle}>
-            <Statistic title="待验收" value={0} prefix={<CheckCircleOutlined />} valueStyle={{ color: '#f59e0b' }} />
+            <Statistic title="待验收" value={0} prefix={<CheckCircleOutlined />} valueStyle={{ color: 'var(--yellow)' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card style={statCardStyle}>
-            <Statistic title="今日发放积分" value={0} prefix={<StarOutlined />} valueStyle={{ color: '#22c55e' }} />
+            <Statistic title="今日发放积分" value={0} prefix={<StarOutlined />} valueStyle={{ color: 'var(--green)' }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card style={statCardStyle}>
-            <Statistic title="待处理兑换" value={0} prefix={<ShopOutlined />} valueStyle={{ color: '#6b6258' }} />
+            <Statistic title="待处理兑换" value={0} prefix={<ShopOutlined />} valueStyle={{ color: 'var(--text-secondary)' }} />
           </Card>
         </Col>
       </Row>

@@ -2,25 +2,10 @@
  * 菜单管理 API
  */
 import request from '@/utils/request'
-
-/** 菜单节点 */
-export interface MenuNode {
-  id: string
-  key: string
-  label: string
-  icon: string
-  path: string
-  permission: string
-  parent_id: string
-  sort_order: number
-  status: boolean
-  children?: MenuNode[]
-  created_at: string
-  updated_at: string
-}
+import type { MenuItem } from '@/types'
 
 /** 获取菜单树 */
-export async function getMenuTree(): Promise<MenuNode[]> {
+export async function getMenuTree(): Promise<MenuItem[]> {
   return request.get('/v1/admin/menus')
 }
 
@@ -33,7 +18,7 @@ export async function createMenu(data: {
   permission?: string
   parent_id?: string
   sort_order?: number
-}): Promise<MenuNode> {
+}): Promise<MenuItem> {
   return request.post('/v1/admin/menus', data)
 }
 
@@ -46,7 +31,7 @@ export async function updateMenu(
     path?: string
     permission?: string
   }
-): Promise<MenuNode> {
+): Promise<MenuItem> {
   return request.put(`/v1/admin/menus/${id}`, data)
 }
 

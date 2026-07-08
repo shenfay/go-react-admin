@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Table, Tag, Select, Button } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import DataPanel from '@/components/DataPanel'
+import { DEFAULT_PAGINATION } from '@/config/pagination'
+import { useCrudList } from '@/hooks/useCrudList'
 import { getOperationLogs, type OperationLogRecord } from '@/services/operationLog'
 
 // 分类选项（对应后端 category 字段）
@@ -53,41 +55,26 @@ function formatTime(dateStr: string): string {
 }
 
 export default function OperationLog() {
-  const [loading, setLoading] = useState(false)
-  const [dataSource, setDataSource] = useState<OperationLogRecord[]>([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
   const [categoryFilter, setCategoryFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await getOperationLogs({
-        category: categoryFilter || undefined,
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-      })
-      setDataSource(res.data || [])
-      // 后端暂未返回 total，用 data length 推断是否有下一页
-      setTotal(res.data?.length >= pageSize ? page * pageSize + 1 : (page - 1) * pageSize + (res.data?.length || 0))
-    } catch {
-      setDataSource([])
-      setTotal(0)
-    } finally {
-      setLoading(false)
-    }
-  }, [categoryFilter, page, pageSize])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  const { loading, dataSource, total, page, pageSize, fetchData, handlePageChange } =
+    useCrudList<OperationLogRecord>(
+      async ({ page: p, pageSize: ps }) => {
+        const res = await getOperationLogs({
+          category: categoryFilter || undefined,
+          limit: ps,
+          offset: (p - 1) * ps,
+        })
+        const data = res.data || []
+        // 后端暂未返回 total，用 data length 推断是否有下一页
+        const inferredTotal = data.length >= ps ? p * ps + 1 : (p - 1) * ps + data.length
+        return { data, total: inferredTotal }
+      },
+    )
 
   // 筛选变更时重置到第一页
   const handleCategoryChange = (v: string) => {
     setCategoryFilter(v)
-    setPage(1)
   }
 
   const columns = [
@@ -164,16 +151,6 @@ export default function OperationLog() {
               style={{ width: 140 }}
               options={categoryOptions}
             />
-            <Select
-              value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: 120 }}
-              options={[
-                { label: '全部结果', value: '' },
-                { label: '成功', value: 'SUCCESS' },
-                { label: '失败', value: 'FAILED' },
-              ]}
-            />
             <Button
               icon={<ReloadOutlined />}
               onClick={fetchData}
@@ -193,13 +170,8 @@ export default function OperationLog() {
             current: page,
             pageSize,
             total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (t) => `共 ${t} 条记录`,
-            onChange: (p, ps) => {
-              setPage(p)
-              setPageSize(ps)
-            },
+            ...DEFAULT_PAGINATION,
+            onChange: handlePageChange,
           }}
         />
       </DataPanel>
