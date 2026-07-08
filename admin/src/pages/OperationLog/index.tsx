@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Table, Tag, Select, DatePicker, Button } from 'antd'
-import { SearchOutlined, ExportOutlined, ReloadOutlined } from '@ant-design/icons'
-import DataPanel, { FilterSearch, IconButton } from '@/components/DataPanel'
+import { SearchOutlined, ExportOutlined } from '@ant-design/icons'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
 
 const { RangePicker } = DatePicker
 
@@ -97,12 +97,11 @@ export default function OperationLog() {
               ]}
             />
             <RangePicker />
-            <Button type="primary" icon={<SearchOutlined />}>查询</Button>
-            <Button icon={<ExportOutlined />}>导出</Button>
+            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
           </>
         }
         toolbarActions={
-          <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} title="刷新" />
+          <Button icon={<ExportOutlined />}>导出</Button>
         }
       >
         <Table
