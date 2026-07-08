@@ -232,6 +232,7 @@
 | 当前页背景 | #2b2b2b (--brand-dark) |
 | 当前页文字 | #ffffff |
 | 分页项 hover | background #f5f2ed, border #d4cdc0 |
+| 激活项 hover | 保持 #2b2b2b 背景，opacity 0.85 | 不变色 |
 
 ---
 
@@ -277,7 +278,44 @@
 
 ---
 
-## 9. 交互规范 (Interaction)
+## 9. 筛选栏与工具栏规范 (Filters & Toolbar)
+
+### 三个区域的职责分工
+
+| 区域 | 位置 | 典型内容 | 对齐 |
+|------|------|----------|------|
+| filters | 标题下方筛选栏 | 搜索框(FilterSearch)、Select下拉、日期选择、查询/重置按钮 | 左对齐 |
+| toolbarActions | 筛选栏右侧 | 导出、刷新等辅助操作 | 右对齐 |
+| extra | 标题右侧 | 新建XX等主要操作 | 右对齐(标题行) |
+
+### filters 区域规范
+
+| 属性 | 值 |
+|------|-----|
+| 搜索框 | FilterSearch 组件，最大宽度 320px，左侧带搜索图标 |
+| 查询按钮 | Default 次要按钮，icon 带 SearchOutlined |
+| 重置按钮 | 白色背景次按钮 |
+| 间隔 | 组件之间 gap 12px |
+
+### toolbarActions 规范
+
+| 属性 | 值 |
+|------|-----|
+| 按钮类型 | Default 次要按钮（非 Primary），34px 高 |
+| 典型操作 | 导出(ExportOutlined)、刷新(ReloadOutlined) |
+| 对齐 | 右对齐 |
+
+### extra 规范
+
+| 属性 | 值 |
+|------|-----|
+| 按钮类型 | Primary 主按钮 |
+| 典型操作 | 新增XX |
+| 位置 | 页面标题右侧 |
+
+---
+
+## 10. 交互规范 (Interaction)
 
 ### 悬浮 (hover) 规则
 
@@ -301,7 +339,7 @@
 
 ---
 
-## 10. CSS 变量参考
+## 11. CSS 变量参考
 
 完整的 CSS 变量定义见 `admin/src/styles/theme.css`，全局覆盖见 `admin/src/styles/global.css`。
 
