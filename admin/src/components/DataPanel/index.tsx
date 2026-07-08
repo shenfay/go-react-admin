@@ -24,8 +24,8 @@ export const iconButtonStyle: React.CSSProperties = {
   width: 34,
   height: 34,
   borderRadius: 8,
-  border: '1px solid #e8e2d8',
-  background: '#faf8f5',
+  border: '1px solid var(--border-color)',
+  background: 'var(--bg-light)',
   cursor: 'pointer',
   display: 'inline-flex',
   alignItems: 'center',
@@ -39,15 +39,7 @@ export function IconButton({ icon, onClick, title }: { icon: ReactNode; onClick?
       type="button"
       title={title}
       onClick={onClick}
-      style={iconButtonStyle}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = '#f0ece6'
-        e.currentTarget.style.borderColor = '#d4cdc0'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = '#faf8f5'
-        e.currentTarget.style.borderColor = '#e8e2d8'
-      }}
+      className="icon-btn"
     >
       {icon}
     </button>

@@ -116,9 +116,9 @@ export default function UserManagement() {
       render: (_: unknown, record: User) => (
         <Space wrap size={4}>
           {(record.roles || []).map(r => (
-            <Tag key={r.code} style={{ background: '#edf2ff', color: '#3b6fdf', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{r.name}</Tag>
+            <Tag key={r.code} style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{r.name}</Tag>
           ))}
-          {(!record.roles || record.roles.length === 0) && <Tag style={{ background: '#f5f2ed', color: '#b0a89a', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>未分配</Tag>}
+          {(!record.roles || record.roles.length === 0) && <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>未分配</Tag>}
         </Space>
       ),
     },
@@ -131,10 +131,10 @@ export default function UserManagement() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{
             width: 7, height: 7, borderRadius: '50%',
-            background: record.locked ? '#d4cdc0' : '#22c55e',
+            background: record.locked ? 'var(--border-hover)' : 'var(--green)',
             display: 'inline-block',
           }} />
-          <span style={{ color: '#2b2b2b', fontSize: 13 }}>{record.locked ? '已禁用' : '活跃'}</span>
+          <span style={{ color: 'var(--text-primary)' }}>{record.locked ? '已禁用' : '活跃'}</span>
         </div>
       ),
     },
@@ -144,8 +144,8 @@ export default function UserManagement() {
       key: 'created_at',
       width: 180,
       render: (_: unknown, record: User) => record.created_at
-        ? <span style={{ color: '#6b6258' }}>{new Date(record.created_at).toLocaleString('zh-CN')}</span>
-        : <span style={{ color: '#b0a89a' }}>-</span>,
+        ? <span style={{ color: 'var(--text-secondary)' }}>{new Date(record.created_at).toLocaleString('zh-CN')}</span>
+        : <span style={{ color: 'var(--text-muted)' }}>-</span>,
     },
     {
       title: '操作',
@@ -153,9 +153,9 @@ export default function UserManagement() {
       width: 120,
       render: (_: unknown, record: User) => (
         <Space size={12}>
-          <a onClick={() => handleEdit(record)} style={{ fontSize: 13, color: '#6b6258' }}>
+          <Button type="link" onClick={() => handleEdit(record)} style={{ color: 'var(--text-secondary)' }}>
             <EditOutlined style={{ marginRight: 4 }} />编辑
-          </a>
+          </Button>
           <Popconfirm
             title={record.locked ? '确定启用该用户？' : '确定禁用该用户？'}
             onConfirm={() => handleToggleStatus(record)}
@@ -193,7 +193,7 @@ export default function UserManagement() {
                 { label: '已禁用', value: 'locked' },
               ]}
             />
-            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }} onClick={() => fetchUsers()}>查询</Button>
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }} onClick={() => fetchUsers()}>查询</Button>
           </>
         }
         toolbarActions={

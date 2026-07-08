@@ -49,7 +49,7 @@ export default function OperationLog() {
       title: '模块',
       dataIndex: 'module',
       key: 'module',
-      render: (v: string) => <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>,
+      render: (v: string) => <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{v}</Tag>,
     },
     { title: '操作', dataIndex: 'action', key: 'action' },
     { title: '详情', dataIndex: 'detail', key: 'detail' },
@@ -60,13 +60,13 @@ export default function OperationLog() {
       key: 'result',
       render: (v: string) => {
         const colorMap: Record<string, { bg: string; color: string }> = {
-          成功: { bg: '#dcfce7', color: '#166534' },
-          拒绝: { bg: '#fef3c7', color: '#92400e' },
-          失败: { bg: '#fef2f2', color: '#e74c3c' },
+          成功: { bg: 'var(--green-light)', color: 'var(--green-text)' },
+          拒绝: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
+          失败: { bg: 'var(--red-light)', color: 'var(--red-text)' },
         }
-        const c = colorMap[v] || { bg: '#f5f2ed', color: '#6b6258' }
+        const c = colorMap[v] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
         return (
-          <Tag style={{ background: c.bg, color: c.color, border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>
+          <Tag style={{ background: c.bg, color: c.color }}>{v}</Tag>
         )
       },
     },
@@ -97,7 +97,7 @@ export default function OperationLog() {
               ]}
             />
             <RangePicker />
-            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
           </>
         }
         toolbarActions={

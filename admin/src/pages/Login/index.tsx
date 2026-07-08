@@ -201,9 +201,9 @@ export default function Login() {
               ]}
             >
               <Input
-                prefix={<MailOutlined style={{ color: '#bbb' }} />}
+                prefix={<MailOutlined style={{ color: 'var(--text-icon)' }} />}
                 placeholder="邮箱"
-                style={{ borderRadius: 8, height: 44 }}
+                style={{ height: 44 }}
               />
             </Form.Item>
 
@@ -212,9 +212,9 @@ export default function Login() {
               rules={[{ required: true, message: '请输入密码' }]}
             >
               <Input.Password
-                prefix={<LockOutlined style={{ color: '#bbb' }} />}
+                prefix={<LockOutlined style={{ color: 'var(--text-icon)' }} />}
                 placeholder="密码"
-                style={{ borderRadius: 8, height: 44 }}
+                style={{ height: 44 }}
               />
             </Form.Item>
 
@@ -224,12 +224,6 @@ export default function Login() {
                 htmlType="submit"
                 loading={loading}
                 block
-                style={{
-                  height: 44,
-                  borderRadius: 8,
-                  fontSize: 15,
-                  fontWeight: 500,
-                }}
               >
                 登 录
               </Button>

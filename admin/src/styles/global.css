@@ -233,6 +233,13 @@ body {
   height: auto !important;
 }
 
+/* 大尺寸输入框不受 34px 限制（如登录页） */
+.ant-input-affix-wrapper-lg,
+.ant-input-lg {
+  height: auto !important;
+  line-height: 1.5 !important;
+}
+
 .ant-select-single .ant-select-selector .ant-select-selection-item,
 .ant-select-single .ant-select-selector .ant-select-selection-placeholder {
   line-height: 32px !important;
@@ -499,4 +506,25 @@ body {
   color: var(--text-secondary) !important;
   background: var(--hover-bg-light) !important;
   border-radius: var(--radius-sm) !important;
+}
+
+/* ========================================
+   IconButton — DataPanel 图标按钮
+   ======================================== */
+.icon-btn {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-light) !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.icon-btn:hover {
+  background: var(--hover-bg) !important;
+  border-color: var(--border-hover) !important;
 }

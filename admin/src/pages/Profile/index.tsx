@@ -26,15 +26,15 @@ export default function Profile() {
       <DataPanel title="" compact>
         <div style={{ padding: '20px 28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            <Avatar size={80} icon={<UserOutlined />} style={{ background: '#2b2b2b', flexShrink: 0 }} />
+            <Avatar size={80} icon={<UserOutlined />} style={{ background: 'var(--brand-dark)', flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 20, fontWeight: 600, color: '#2b2b2b', marginBottom: 4 }}>
+              <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
                 {username || '用户'}
               </div>
-              <div style={{ color: '#6b6258', marginBottom: 8 }}>{email || ''}</div>
+              <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{email || ''}</div>
               <div style={{ display: 'flex', gap: 8 }}>
-                {roles.map(r => <Tag key={r.code} style={{ background: '#edf2ff', color: '#3b6fdf', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{r.name}</Tag>)}
-                {roles.length === 0 && <Tag style={{ background: '#f5f2ed', color: '#b0a89a', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>未分配角色</Tag>}
+                {roles.map(r => <Tag key={r.code} style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{r.name}</Tag>)}
+                {roles.length === 0 && <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>未分配角色</Tag>}
               </div>
             </div>
           </div>
@@ -139,17 +139,17 @@ export default function Profile() {
             ),
             children: (
               <div style={{ padding: '16px 0' }}>
-                <div style={{ color: '#6b6258', marginBottom: 16 }}>
+                <div style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
                   配置您需要接收的系统通知类型
                 </div>
                 <Form layout="vertical" style={{ maxWidth: 500 }}>
                   <Form.Item label="邮件通知" name="emailNotify">
-                    <div style={{ color: '#6b6258', fontSize: 13, marginBottom: 8 }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
                       接收系统告警和任务状态更新的邮件通知
                     </div>
                   </Form.Item>
                   <Form.Item label="短信通知" name="smsNotify">
-                    <div style={{ color: '#6b6258', fontSize: 13, marginBottom: 8 }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
                       接收紧急告警的短信通知
                     </div>
                   </Form.Item>

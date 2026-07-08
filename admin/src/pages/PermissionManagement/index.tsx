@@ -245,7 +245,7 @@ export default function PermissionManagement() {
       dataIndex: 'code',
       key: 'code',
       width: 120,
-      render: (v: string) => <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>,
+      render: (v: string) => <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{v}</Tag>,
     },
     { title: '描述', dataIndex: 'description', key: 'description' },
     {
@@ -267,10 +267,10 @@ export default function PermissionManagement() {
       width: 200,
       render: (_: unknown, record: Role) => (
         <Space size={4}>
-          <Button type="link" size="small" onClick={() => handleSelectRole(record)} style={{ color: '#6b6258', fontSize: 13 }}>
+          <Button type="link" size="small" onClick={() => handleSelectRole(record)} style={{ color: 'var(--text-secondary)' }}>
             配置权限
           </Button>
-          <Button type="link" size="small" onClick={() => handleEditRole(record)} style={{ color: '#6b6258', fontSize: 13 }}>
+          <Button type="link" size="small" onClick={() => handleEditRole(record)} style={{ color: 'var(--text-secondary)' }}>
             编辑
           </Button>
           <Popconfirm
@@ -292,7 +292,7 @@ export default function PermissionManagement() {
         filters={
           <>
             <FilterSearch placeholder="搜索角色名称..." />
-            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
           </>
         }
         toolbarActions={

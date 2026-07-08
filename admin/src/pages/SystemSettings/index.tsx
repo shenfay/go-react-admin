@@ -110,10 +110,10 @@ export default function SystemSettings() {
           <Tabs items={tabItems} />
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-            <Button type="primary" loading={loading} onClick={handleSave} size="large">
+            <Button type="primary" loading={loading} onClick={handleSave}>
               保存设置
             </Button>
-            <Button onClick={() => form.resetFields()} size="large">
+            <Button onClick={() => form.resetFields()}>
               重置
             </Button>
           </div>

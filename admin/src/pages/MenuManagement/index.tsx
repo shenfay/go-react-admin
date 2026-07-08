@@ -169,28 +169,28 @@ export default function MenuManagement() {
       dataIndex: 'key',
       key: 'key',
       width: 160,
-      render: (v: string) => <Tag style={{ background: '#edf2ff', color: '#3b6fdf', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag>,
+      render: (v: string) => <Tag style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{v}</Tag>,
     },
     {
       title: '图标',
       dataIndex: 'icon',
       key: 'icon',
       width: 160,
-      render: (v: string) => v ? <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag> : <span style={{ color: '#b0a89a' }}>-</span>,
+      render: (v: string) => v ? <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{v}</Tag> : <span style={{ color: 'var(--text-muted)' }}>-</span>,
     },
     {
       title: '路由路径',
       dataIndex: 'path',
       key: 'path',
       width: 160,
-      render: (v: string) => v || <span style={{ color: '#b0a89a' }}>—</span>,
+      render: (v: string) => v || <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
       title: '权限标识',
       dataIndex: 'permission',
       key: 'permission',
       width: 180,
-      render: (v: string) => v ? <Tag style={{ background: '#dcfce7', color: '#166534', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{v}</Tag> : <span style={{ color: '#b0a89a' }}>-</span>,
+      render: (v: string) => v ? <Tag style={{ background: 'var(--green-light)', color: 'var(--green-text)' }}>{v}</Tag> : <span style={{ color: 'var(--text-muted)' }}>-</span>,
     },
     {
       title: '状态',
@@ -213,12 +213,12 @@ export default function MenuManagement() {
         <Space size={4}>
           <IconButton
             title="添加子菜单"
-            icon={<PlusOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
+            icon={<PlusOutlined style={{ fontSize: 14, color: 'var(--text-icon)' }} />}
             onClick={() => handleAddChild(record.key)}
           />
           <IconButton
             title="编辑"
-            icon={<EditOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
+            icon={<EditOutlined style={{ fontSize: 14, color: 'var(--text-icon)' }} />}
             onClick={() => handleEdit(record)}
           />
           <Popconfirm
@@ -228,7 +228,7 @@ export default function MenuManagement() {
           >
             <IconButton
               title="删除"
-              icon={<DeleteOutlined style={{ fontSize: 14, color: '#b0a89a' }} />}
+              icon={<DeleteOutlined style={{ fontSize: 14, color: 'var(--text-icon)' }} />}
             />
           </Popconfirm>
         </Space>
@@ -243,7 +243,7 @@ export default function MenuManagement() {
         filters={
           <>
             <FilterSearch placeholder="搜索菜单名称..." />
-            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
           </>
         }
         toolbarActions={
