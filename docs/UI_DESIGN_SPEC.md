@@ -192,6 +192,45 @@
 | normal | transparent | #6b6258 |
 | hover | #E4E0D8 (--active-bg) | #6b6258 |
 
+### 表格操作按钮 (Table Action Buttons)
+
+适用于表格「操作」列中的编辑、配置、删除等动作按钮。
+
+**统一模式：**
+
+```tsx
+<Button type="link" size="small" icon={<EditOutlined />}>编辑</Button>
+<Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
+```
+
+**规范明细：**
+
+| 属性 | 值 |
+|------|-----|
+| 按钮类型 | `link` |
+| 尺寸 | `small` |
+| 图标 | 通过 `icon` 属性传入，与文字间 gap 1px |
+| 文字 | 中文动词（编辑、配置权限、查看、通过、退回等） |
+| 非危险操作色 | #3d5a80（CSS 覆盖 `.ant-btn-link:not(.ant-btn-dangerous)`） |
+| 危险操作颜色 | 保持 antd 默认红色（`danger` prop） |
+| 间距 | gap 1px（CSS `gap` 属性，非 margin） |
+| 按钮间分隔线 | `::before` 伪元素，1px 高，14px 高，#e8e2d8 色 |
+
+**分隔线实现（CSS in global.css）：**
+
+```css
+.ant-table-tbody td .ant-space-item + .ant-space-item::before {
+  content: '';
+  width: 1px;
+  height: 14px;
+  background: var(--border-color);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+```
+
+非表格场景使用 `<Space size={0} className="action-btn-group">` 包裹按钮组以应用相同分隔线。
+
 ---
 
 ## 6. 表格规范 (Table)
