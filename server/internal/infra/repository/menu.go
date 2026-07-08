@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/shenfay/kiqi/internal/domain/rbac"
+	"github.com/shenfay/kiqi/internal/domain/shared"
 )
 
 // MenuPO 菜单持久化对象
@@ -127,7 +128,7 @@ func (r *menuRepository) FindByID(ctx context.Context, id string) (*rbac.Menu, e
 	err := r.db.WithContext(ctx).First(&po, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, shared.ErrNotFound
 		}
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (r *menuRepository) FindByKey(ctx context.Context, key string) (*rbac.Menu,
 	err := r.db.WithContext(ctx).Where("key = ?", key).First(&po).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, shared.ErrNotFound
 		}
 		return nil, err
 	}

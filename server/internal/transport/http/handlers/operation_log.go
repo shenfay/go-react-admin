@@ -2,18 +2,18 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // OperationLogHandler 统一操作日志 HTTP 处理器（查询）
 type OperationLogHandler struct {
-	operationLogRepo repository.OperationLogRepository
+	operationLogRepo operation.LogRepository
 }
 
 // NewOperationLogHandler 创建操作日志处理器
-func NewOperationLogHandler(operationLogRepo repository.OperationLogRepository) *OperationLogHandler {
+func NewOperationLogHandler(operationLogRepo operation.LogRepository) *OperationLogHandler {
 	return &OperationLogHandler{
 		operationLogRepo: operationLogRepo,
 	}
@@ -34,7 +34,7 @@ func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
 	category := c.Query("category")
 	action := c.Query("action")
 
-	var logs []*repository.OperationLog
+	var logs []*operation.OperationLog
 	var err error
 
 	switch {

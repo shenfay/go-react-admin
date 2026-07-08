@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/hibiken/asynq"
-	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/pkg/constants"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
@@ -14,11 +14,11 @@ import (
 
 // OperationLogHandler 统一操作日志 Worker 处理器
 type OperationLogHandler struct {
-	repo repository.OperationLogRepository
+	repo operation.LogRepository
 }
 
 // NewOperationLogHandler 创建操作日志处理器
-func NewOperationLogHandler(repo repository.OperationLogRepository) *OperationLogHandler {
+func NewOperationLogHandler(repo operation.LogRepository) *OperationLogHandler {
 	return &OperationLogHandler{repo: repo}
 }
 
@@ -42,7 +42,7 @@ func (h *OperationLogHandler) processOperationLog(ctx context.Context, task *asy
 		return err
 	}
 
-	log := &repository.OperationLog{
+	log := &operation.OperationLog{
 		UserID:    utils.ToString(payload["user_id"]),
 		Email:     utils.ToString(payload["email"]),
 		Action:    utils.ToString(payload["action"]),
@@ -88,7 +88,7 @@ func (h *OperationLogHandler) processDomainEvent(ctx context.Context, task *asyn
 	eventType := task.Type()
 	action, category, status := mapEventToActionCategoryStatus(eventType)
 
-	log := &repository.OperationLog{
+	log := &operation.OperationLog{
 		UserID:    utils.ToString(payload["user_id"]),
 		Email:     utils.ToString(payload["email"]),
 		Action:    action,

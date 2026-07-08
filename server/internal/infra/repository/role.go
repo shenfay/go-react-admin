@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/shenfay/kiqi/internal/domain/rbac"
+	"github.com/shenfay/kiqi/internal/domain/shared"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
@@ -109,7 +110,7 @@ func (r *roleRepository) FindByID(ctx context.Context, id string) (*rbac.Role, e
 	err := r.db.WithContext(ctx).First(&po, "id = ?", id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, shared.ErrNotFound
 		}
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (r *roleRepository) FindByCode(ctx context.Context, code string) (*rbac.Rol
 	err := r.db.WithContext(ctx).Where("code = ?", code).First(&po).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, shared.ErrNotFound
 		}
 		return nil, err
 	}

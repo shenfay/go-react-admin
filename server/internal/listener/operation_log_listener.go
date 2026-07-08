@@ -3,9 +3,9 @@ package listener
 import (
 	"context"
 
+	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
-	"github.com/shenfay/kiqi/internal/infra/repository"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
@@ -40,11 +40,11 @@ var eventStatusMap = map[string]string{
 // OperationLogListener 统一操作日志事件监听器
 // 替代原 AuditLogListener 和 ActivityLogListener，统一处理所有操作日志
 type OperationLogListener struct {
-	repo repository.OperationLogRepository
+	repo operation.LogRepository
 }
 
 // NewOperationLogListener 创建操作日志监听器实例
-func NewOperationLogListener(repo repository.OperationLogRepository) *OperationLogListener {
+func NewOperationLogListener(repo operation.LogRepository) *OperationLogListener {
 	return &OperationLogListener{repo: repo}
 }
 
@@ -75,7 +75,7 @@ func (l *OperationLogListener) getStatus(eventName string) string {
 // HandleUserRegistered 处理用户注册事件
 func (l *OperationLogListener) HandleUserRegistered(ctx context.Context, evt events.DomainEvent) error {
 	e := evt.(*user.UserRegistered)
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:   e.UserID,
 		Email:    e.Email,
 		Action:   l.getAction(e.EventName()),
@@ -93,7 +93,7 @@ func (l *OperationLogListener) HandleUserLoggedIn(ctx context.Context, evt event
 	e := evt.(*user.UserLoggedIn)
 	uaInfo := utils.ParseUserAgent(e.UserAgent)
 
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:    e.UserID,
 		Email:     e.Email,
 		Action:    l.getAction(e.EventName()),
@@ -120,7 +120,7 @@ func (l *OperationLogListener) HandleUserLoggedIn(ctx context.Context, evt event
 func (l *OperationLogListener) HandleLoginFailed(ctx context.Context, evt events.DomainEvent) error {
 	e := evt.(*user.LoginFailed)
 
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:   e.UserID,
 		Email:    e.Email,
 		Action:   l.getAction(e.EventName()),
@@ -140,7 +140,7 @@ func (l *OperationLogListener) HandleLoginFailed(ctx context.Context, evt events
 func (l *OperationLogListener) HandleAccountLocked(ctx context.Context, evt events.DomainEvent) error {
 	e := evt.(*user.AccountLocked)
 
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:   e.UserID,
 		Email:    e.Email,
 		Action:   l.getAction(e.EventName()),
@@ -158,7 +158,7 @@ func (l *OperationLogListener) HandleAccountLocked(ctx context.Context, evt even
 // HandleUserLoggedOut 处理用户登出事件
 func (l *OperationLogListener) HandleUserLoggedOut(ctx context.Context, evt events.DomainEvent) error {
 	e := evt.(*user.UserLoggedOut)
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:   e.UserID,
 		Email:    e.Email,
 		Action:   l.getAction(e.EventName()),
@@ -174,7 +174,7 @@ func (l *OperationLogListener) HandleUserLoggedOut(ctx context.Context, evt even
 // HandleTokenRefreshed 处理Token刷新事件（已脱敏，不记录 token 明文）
 func (l *OperationLogListener) HandleTokenRefreshed(ctx context.Context, evt events.DomainEvent) error {
 	e := evt.(*user.TokenRefreshed)
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:   e.UserID,
 		Action:   l.getAction(e.EventName()),
 		Category: l.getCategory(e.EventName()),
@@ -188,7 +188,7 @@ func (l *OperationLogListener) HandleTokenRefreshed(ctx context.Context, evt eve
 // HandleUserProfileUpdated 处理用户资料更新事件
 func (l *OperationLogListener) HandleUserProfileUpdated(ctx context.Context, evt events.DomainEvent) error {
 	e := evt.(*user.UserProfileUpdated)
-	return l.repo.Save(ctx, &repository.OperationLog{
+	return l.repo.Save(ctx, &operation.OperationLog{
 		UserID:   e.UserID,
 		Email:    e.Email,
 		Action:   l.getAction(e.EventName()),

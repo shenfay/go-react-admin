@@ -172,19 +172,10 @@ func (r *userRepository) Create(ctx context.Context, u *user.User) error {
 	return r.db.WithContext(ctx).Create(po).Error
 }
 
-// Save 保存用户（创建或更新）
+// Save 保存用户（使用 GORM Save 的 UPSERT 语义，避免 SELECT-then-INSERT 竞态）
 func (r *userRepository) Save(ctx context.Context, u *user.User) error {
-	// 先尝试查找
-	_, err := r.FindByID(ctx, u.ID)
-	if err != nil {
-		if errors.Is(err, userErr.ErrNotFound) {
-			// 不存在则创建
-			return r.Create(ctx, u)
-		}
-		return err
-	}
-	// 存在则更新
-	return r.Update(ctx, u)
+	po := ToPO(u)
+	return r.db.WithContext(ctx).Save(po).Error
 }
 
 func (r *userRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
