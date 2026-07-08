@@ -62,34 +62,13 @@ export function FilterSearch({ value, onChange, placeholder = '搜索...', onSea
   onSearch?: () => void
 }) {
   return (
-    <div style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
-      <SearchOutlined
-        style={{
-          position: 'absolute',
-          left: 10,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: 14,
-          color: '#c4bdb0',
-          pointerEvents: 'none',
-        }}
-      />
+    <div style={{ flex: 1, maxWidth: 320 }}>
       <Input
+        prefix={<SearchOutlined style={{ color: 'var(--text-icon)', fontSize: 14 }} />}
         value={value}
         onChange={e => onChange?.(e.target.value)}
         onPressEnter={onSearch}
         placeholder={placeholder}
-        style={{
-          height: 34,
-          paddingLeft: 32,
-          paddingRight: 12,
-          borderRadius: 8,
-          border: '1px solid #e8e2d8',
-          background: '#ffffff',
-          fontSize: 13,
-        }}
-        onFocus={e => { e.target.style.borderColor = '#2b2b2b' }}
-        onBlur={e => { e.target.style.borderColor = '#e8e2d8' }}
       />
     </div>
   )

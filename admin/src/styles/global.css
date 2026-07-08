@@ -140,6 +140,41 @@ body {
   border-color: var(--brand-dark-hover) !important;
 }
 
+/* Danger primary button */
+.ant-btn-primary.ant-btn-dangerous {
+  background: var(--red) !important;
+  border-color: var(--red) !important;
+}
+
+.ant-btn-primary.ant-btn-dangerous:not(:disabled):hover {
+  background: #c0392b !important;
+  border-color: #c0392b !important;
+}
+
+.ant-btn-default.ant-btn-dangerous {
+  color: var(--red) !important;
+  border-color: var(--red) !important;
+}
+
+.ant-btn-default.ant-btn-dangerous:not(:disabled):hover {
+  background: #fef2f2 !important;
+  border-color: var(--red) !important;
+  color: var(--red) !important;
+}
+
+/* Disabled primary button - no hover effects */
+.ant-btn-primary:disabled {
+  background: var(--border-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-icon) !important;
+}
+
+.ant-btn-primary:disabled:hover {
+  background: var(--border-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-icon) !important;
+}
+
 .ant-btn-default {
   background: transparent !important;
   border-color: var(--border-color) !important;
@@ -150,6 +185,18 @@ body {
   background: var(--hover-bg-light) !important;
   border-color: var(--border-hover) !important;
   color: var(--text-secondary) !important;
+}
+
+.ant-btn-default:disabled {
+  background: transparent !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-icon) !important;
+}
+
+.ant-btn-default:disabled:hover {
+  background: transparent !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-icon) !important;
 }
 
 .ant-btn-text {
@@ -170,15 +217,31 @@ body {
    Inputs — 输入类控件
    ======================================== */
 .ant-input,
-.ant-select-selector,
-.ant-picker {
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-input-number-affix-wrapper,
+.ant-picker,
+.ant-select-single .ant-select-selector {
   border-radius: var(--radius-sm) !important;
   border-color: var(--border-color) !important;
   font-size: 13px !important;
+  height: 34px !important;
+}
+
+/* 带 prefix/suffix 时内层 input 由 wrapper 控制高度，不叠加 34px */
+.ant-input-affix-wrapper .ant-input {
+  height: auto !important;
+}
+
+.ant-select-single .ant-select-selector .ant-select-selection-item,
+.ant-select-single .ant-select-selector .ant-select-selection-placeholder {
+  line-height: 32px !important;
 }
 
 .ant-input:focus,
 .ant-input-focused,
+.ant-input-affix-wrapper-focused,
+.ant-input-affix-wrapper:focus-within,
 .ant-select-focused .ant-select-selector,
 .ant-picker-focused {
   border-color: var(--brand-dark) !important;
@@ -318,14 +381,22 @@ body {
 .ant-pagination .ant-pagination-item {
   width: 30px !important;
   height: 30px !important;
-  border-radius: var(--radius-sm) !important;
+  border-radius: 6px !important;
   border-color: var(--border-color) !important;
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: all 0.15s ease !important;
 }
 
 .ant-pagination .ant-pagination-item a {
   font-size: 13px !important;
   color: var(--text-secondary) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
   transition: color 0.15s ease !important;
 }
 
@@ -339,6 +410,7 @@ body {
 .ant-pagination .ant-pagination-item-active {
   background: var(--brand-dark) !important;
   border-color: var(--brand-dark) !important;
+  font-weight: 700 !important;
 }
 
 /* 激活项 hover — 保持深色背景，微调透明度 */
