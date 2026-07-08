@@ -15,6 +15,7 @@ type Config struct {
 	JWT      JWTConfig      `mapstructure:"jwt"`
 	Asynq    AsynqConfig    `mapstructure:"asynq"`
 	Logger   LoggerConfig   `mapstructure:"logger"`
+	CORS     CORSConfig     `mapstructure:"cors"`
 }
 
 // ServerConfig HTTP 服务器配置
@@ -75,6 +76,15 @@ type LoggerConfig struct {
 	Level      string `mapstructure:"level"`
 	Format     string `mapstructure:"format"` // json, console
 	OutputPath string `mapstructure:"output_path"`
+}
+
+// CORSConfig 跨域配置
+type CORSConfig struct {
+	AllowedOrigins   []string `mapstructure:"allowed_origins"`
+	AllowedMethods   []string `mapstructure:"allowed_methods"`
+	AllowedHeaders   []string `mapstructure:"allowed_headers"`
+	AllowCredentials bool     `mapstructure:"allow_credentials"`
+	MaxAge           int      `mapstructure:"max_age"`
 }
 
 // Load 加载配置
@@ -140,4 +150,11 @@ func setDefaults() {
 	viper.SetDefault("logger.level", "debug")
 	viper.SetDefault("logger.format", "console")
 	viper.SetDefault("logger.output_path", "stdout")
+
+	// CORS
+	viper.SetDefault("cors.allowed_origins", []string{"*"})
+	viper.SetDefault("cors.allowed_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	viper.SetDefault("cors.allowed_headers", []string{"Authorization", "Content-Type", "X-Requested-With"})
+	viper.SetDefault("cors.allow_credentials", true)
+	viper.SetDefault("cors.max_age", 3600)
 }

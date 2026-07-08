@@ -2,17 +2,20 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/shenfay/kiqi/internal/infra/config"
 	"github.com/shenfay/kiqi/internal/transport/http/middleware"
 	"github.com/shenfay/kiqi/pkg/metrics"
 )
 
 // Middlewares 注册全局中间件
-func Middlewares(engine *gin.Engine, m *metrics.Metrics) {
+func Middlewares(engine *gin.Engine, m *metrics.Metrics, corsCfg config.CORSConfig) {
 	// CORS 中间件
 	engine.Use(middleware.CORSMiddleware(middleware.CORSConfig{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Authorization", "Content-Type"},
+		AllowedOrigins:   corsCfg.AllowedOrigins,
+		AllowedMethods:   corsCfg.AllowedMethods,
+		AllowedHeaders:   corsCfg.AllowedHeaders,
+		AllowCredentials: corsCfg.AllowCredentials,
+		MaxAge:           corsCfg.MaxAge,
 	}))
 
 	// Prometheus 监控中间件

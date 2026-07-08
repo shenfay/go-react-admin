@@ -55,33 +55,50 @@ import (
 
 func main() {
 	// 1. 加载配置
-	cfg, err := config.Load("development")
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+	cfg, err := config.Load(env)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// 2. 初始化日志系统
+	// 2. 安全检查：JWT Secret 不允许使用默认值
+	if cfg.JWT.Secret == "your-jwt-secret-key-change-in-production" {
+		log.Fatalf("FATAL: JWT secret is using the default value. Please set a secure JWT_SECRET in your configuration.")
+	}
+
+	// 3. 初始化日志系统
 	if err := pkglogger.Init(cfg.Logger.Level); err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 	defer pkglogger.Sync() // 优雅关闭，确保所有日志写入磁盘
 
-	pkglogger.Info("Starting application initialization...")
+	pkglogger.Info("Starting application initialization...",
+		"env", env,
+	)
 
-	// 3. 初始化 Prometheus 指标
+	// 4. 初始化 Prometheus 指标
 	m := metrics.NewMetrics(prometheus.DefaultRegisterer)
 	pkglogger.Info("✓ Prometheus metrics initialized")
 
-	// 4. 初始化数据库
+	// 5. 初始化数据库
 	db, err := initDatabase(cfg.Database, m)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	defer func() {
+		if sqlDB, _ := db.DB(); sqlDB != nil {
+			sqlDB.Close()
+		}
+	}()
 
-	// 5. 初始化 Redis
+	// 6. 初始化 Redis
 	redisClient := initRedis(cfg.Redis)
+	defer redisClient.Close()
 
-	// 4. 初始化 Asynq Client
+	// 7. 初始化 Asynq Client
 	asynqClient := asynq.NewClient(asynq.RedisClientOpt{
 		Addr: cfg.Asynq.Addr,
 	})
@@ -89,14 +106,14 @@ func main() {
 
 	pkglogger.Info("✓ Asynq client initialized")
 
-	// 5. 创建进程内事件总线 + 桥接器
+	// 8. 创建进程内事件总线 + 桥接器
 	inProcessBus := events.NewInProcessBus()
 
 	bridge := messaging.NewBridge(asynqClient)
 	bridge.SubscribeTo(inProcessBus)
 	pkglogger.Info("✓ InProcessBus and Bridge initialized")
 
-	// 6. 初始化服务依赖
+	// 9. 初始化服务依赖
 	userRepo := repository.NewUserRepository(db)
 	roleRepo := repository.NewRoleRepository(db)
 	menuRepo := repository.NewMenuRepository(db)
@@ -128,22 +145,22 @@ func main() {
 	operationLogRepo := repository.NewOperationLogRepository(db)
 	operationLogHandler := handlers.NewOperationLogHandler(operationLogRepo)
 
-	// 5. 设置 Gin 模式
+	// 10. 设置 Gin 模式
 	if cfg.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// 6. 创建路由引擎
+	// 11. 创建路由引擎
 	engine := gin.New()
 
-	// 7. 注册中间件
-	transhttp.Middlewares(engine, m)
+	// 12. 注册中间件
+	transhttp.Middlewares(engine, m, cfg.CORS)
 
-	// 8. 创建并配置路由器
+	// 13. 创建并配置路由器
 	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, operationLogHandler, tokenService, enforcer)
 	apiRouter.Setup()
 
-	// 7. 创建 HTTP 服务器
+	// 14. 创建 HTTP 服务器
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler:      engine,
@@ -152,22 +169,22 @@ func main() {
 		IdleTimeout:  cfg.Server.IdleTimeout,
 	}
 
-	// 8. 在 goroutine 中启动服务器
+	// 15. 在 goroutine 中启动服务器
 	go func() {
-		log.Printf("Starting server on port %s", srv.Addr)
+		log.Printf("Starting server on port %s (env=%s)", srv.Addr, env)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
 
-	// 9. 等待中断信号
+	// 16. 等待中断信号
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	log.Println("Shutting down server...")
 
-	// 10. 优雅关闭
+	// 17. 优雅关闭
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

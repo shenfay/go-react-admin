@@ -30,6 +30,12 @@ func CORSMiddleware(config CORSConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.GetHeader("Origin")
 
+		// 非跨域请求（无 Origin 头）直接放行
+		if origin == "" {
+			c.Next()
+			return
+		}
+
 		// 检查来源是否允许
 		allowed := false
 		for _, o := range config.AllowedOrigins {
