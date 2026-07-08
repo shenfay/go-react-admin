@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons'
-import DataPanel, { IconButton } from '@/components/DataPanel'
+import { PlusOutlined } from '@ant-design/icons'
+import DataPanel from '@/components/DataPanel'
 import { getMenuTree, type MenuNode } from '@/services/menu'
 import {
   getRoleList,
@@ -271,10 +271,7 @@ export default function PermissionManagement() {
             新增角色
           </Button>
         }
-        toolbarActions={
-          <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} onClick={() => fetchRoles()} title="刷新" />
-        }
-      >
+        >
         <Table
           dataSource={roles}
           columns={columns}

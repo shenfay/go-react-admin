@@ -287,21 +287,32 @@ body {
   height: 30px !important;
   border-radius: var(--radius-sm) !important;
   border-color: var(--border-color) !important;
+  transition: all 0.15s ease !important;
 }
 
 .ant-pagination .ant-pagination-item a {
   font-size: 13px !important;
   color: var(--text-secondary) !important;
+  transition: color 0.15s ease !important;
 }
 
-.ant-pagination .ant-pagination-item:hover {
+/* 非激活项 hover */
+.ant-pagination .ant-pagination-item:not(.ant-pagination-item-active):hover {
   background: var(--hover-bg-light) !important;
   border-color: #d4cdc0 !important;
 }
 
+/* 激活项 */
 .ant-pagination .ant-pagination-item-active {
   background: var(--brand-dark) !important;
   border-color: var(--brand-dark) !important;
+}
+
+/* 激活项 hover — 保持深色背景，微调透明度 */
+.ant-pagination .ant-pagination-item-active:hover {
+  background: var(--brand-dark) !important;
+  border-color: var(--brand-dark) !important;
+  opacity: 0.85;
 }
 
 .ant-pagination .ant-pagination-item-active a {

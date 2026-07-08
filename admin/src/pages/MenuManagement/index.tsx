@@ -16,7 +16,6 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  ReloadOutlined,
 } from '@ant-design/icons'
 import DataPanel, { IconButton } from '@/components/DataPanel'
 import {
@@ -262,10 +261,7 @@ export default function MenuManagement() {
             新增顶级菜单
           </Button>
         }
-        toolbarActions={
-          <IconButton icon={<ReloadOutlined style={{ fontSize: 16, color: '#6b6258' }} />} onClick={() => fetchMenus()} title="刷新" />
-        }
-      >
+        >
         <Table
           dataSource={menuTree}
           columns={columns}
