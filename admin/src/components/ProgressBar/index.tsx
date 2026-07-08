@@ -14,7 +14,7 @@ export default function ProgressBar({ percent, status = 'normal' }: ProgressBarP
     <div
       style={{
         height: 6,
-        background: '#EBEBEB',
+        background: 'var(--progress-bg)',
         borderRadius: 3,
         overflow: 'hidden',
         flex: 1,

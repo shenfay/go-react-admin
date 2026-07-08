@@ -47,64 +47,18 @@ body {
 
 /* ========================================
    Ant Design Overrides — 组件样式覆盖
+   仅保留无法通过 ConfigProvider theme token 设置的规则
    ======================================== */
 
-/* Layout — 布局 */
-.ant-layout {
-  background: var(--main-bg) !important;
-}
-
-.ant-layout-sider {
-  background: var(--sidebar-bg) !important;
-}
-
-.ant-menu {
-  background: transparent !important;
-  border-right: none !important;
-}
-
-.ant-menu-item {
-  border-radius: var(--radius-sm) !important;
-  margin: 2px 8px !important;
-  color: var(--text-secondary) !important;
-}
-
-.ant-menu-item:hover {
-  background: var(--active-bg) !important;
-  color: var(--text-primary) !important;
-}
-
-.ant-menu-item-selected {
-  background: var(--active-bg) !important;
-  color: var(--text-primary) !important;
-  font-weight: 500 !important;
-}
-
+/* Menu — 去除选中项下划线指示器 */
 .ant-menu-item-selected::after {
   display: none !important;
 }
 
-.ant-menu-submenu-title {
-  border-radius: var(--radius-sm) !important;
-  margin: 2px 8px !important;
-  color: var(--text-secondary) !important;
-}
-
-.ant-menu-submenu-title:hover {
-  background: var(--active-bg) !important;
-  color: var(--text-primary) !important;
-}
-
-/* Card — 卡片 */
-.ant-card {
-  border-radius: var(--radius-md) !important;
-  border-color: var(--border-light) !important;
-}
-
+/* Card — 表头最小高度与底部分割线 */
 .ant-card-head {
-  border-bottom-color: var(--border-light) !important;
-  padding: 14px 20px !important;
   min-height: auto !important;
+  border-bottom-color: var(--border-light) !important;
 }
 
 .ant-card-head-title {
@@ -112,169 +66,56 @@ body {
   font-weight: 600 !important;
 }
 
-.ant-card-body {
-  padding: 16px 20px !important;
-}
-
-/* ========================================
-   Buttons — 按钮体系
-   ======================================== */
+/* Button — 过渡动画 & 主按钮阴影 */
 .ant-btn {
-  border-radius: var(--radius-sm) !important;
-  font-family: var(--font-family) !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  height: 34px !important;
   transition: all 0.15s ease !important;
 }
 
 .ant-btn-primary {
-  background: var(--brand-dark) !important;
-  border-color: var(--brand-dark) !important;
-  color: var(--bg-white) !important;
   box-shadow: none !important;
 }
 
-.ant-btn.ant-btn-primary:not(:disabled):hover {
-  background: var(--brand-dark-hover) !important;
-  border-color: var(--brand-dark-hover) !important;
-}
-
-/* Danger primary button */
-.ant-btn-primary.ant-btn-dangerous {
-  background: var(--red) !important;
-  border-color: var(--red) !important;
-}
-
+/* Danger primary button hover */
 .ant-btn-primary.ant-btn-dangerous:not(:disabled):hover {
-  background: #c0392b !important;
-  border-color: #c0392b !important;
-}
-
-.ant-btn-default.ant-btn-dangerous {
-  color: var(--red) !important;
-  border-color: var(--red) !important;
+  background: var(--red-dark) !important;
+  border-color: var(--red-dark) !important;
 }
 
 .ant-btn-default.ant-btn-dangerous:not(:disabled):hover {
-  background: #fef2f2 !important;
-  border-color: var(--red) !important;
-  color: var(--red) !important;
+  background: var(--red-light) !important;
 }
 
-/* Disabled primary button - no hover effects */
-.ant-btn-primary:disabled {
-  background: var(--border-color) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-icon) !important;
-}
-
-.ant-btn-primary:disabled:hover {
-  background: var(--border-color) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-icon) !important;
-}
-
-.ant-btn-default {
-  background: transparent !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-secondary) !important;
-}
-
-.ant-btn-default:hover {
-  background: var(--hover-bg-light) !important;
-  border-color: var(--border-hover) !important;
-  color: var(--text-secondary) !important;
-}
-
-.ant-btn-default:disabled {
-  background: transparent !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-icon) !important;
-}
-
-.ant-btn-default:disabled:hover {
-  background: transparent !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-icon) !important;
-}
-
-.ant-btn-text {
-  color: var(--text-secondary) !important;
-}
-
-.ant-btn-text:hover {
-  background: var(--active-bg) !important;
-}
-
-/* Sidebar Toggle Button */
-.sidebar-toggle-btn:hover {
-  background: var(--active-bg) !important;
-  color: var(--text-primary) !important;
-}
-
-/* ========================================
-   Inputs — 输入类控件
-   ======================================== */
-.ant-input,
-.ant-input-affix-wrapper,
-.ant-input-number,
-.ant-input-number-affix-wrapper,
-.ant-picker,
-.ant-select-single .ant-select-selector {
-  border-radius: var(--radius-sm) !important;
-  border-color: var(--border-color) !important;
-  font-size: 13px !important;
-  height: 34px !important;
-}
-
-/* 带 prefix/suffix 时内层 input 由 wrapper 控制高度，不叠加 34px */
+/* 大尺寸输入框不受 34px 限制 */
 .ant-input-affix-wrapper .ant-input {
   height: auto !important;
 }
 
-/* 大尺寸输入框不受 34px 限制（如登录页） */
 .ant-input-affix-wrapper-lg,
 .ant-input-lg {
   height: auto !important;
   line-height: 1.5 !important;
 }
 
-.ant-select-single .ant-select-selector .ant-select-selection-item,
-.ant-select-single .ant-select-selector .ant-select-selection-placeholder {
-  line-height: 32px !important;
-}
-
+/* 输入框 focus 无 box-shadow */
 .ant-input:focus,
 .ant-input-focused,
 .ant-input-affix-wrapper-focused,
 .ant-input-affix-wrapper:focus-within,
 .ant-select-focused .ant-select-selector,
 .ant-picker-focused {
-  border-color: var(--brand-dark) !important;
   box-shadow: none !important;
 }
 
-.ant-input::placeholder {
-  color: var(--text-icon) !important;
-}
-
 /* ========================================
-   Table — 表格
+   Table — 表格（补充 theme token 无法覆盖的规则）
    ======================================== */
 .ant-table {
-  font-size: 13px !important;
   table-layout: fixed !important;
 }
 
 .ant-table-thead > tr > th {
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  color: var(--table-header-text) !important;
-  background: var(--table-header-bg) !important;
-  border-bottom-color: var(--table-border) !important;
-  padding: 12px 14px !important;
   text-transform: uppercase !important;
+  font-weight: 600 !important;
 }
 
 .ant-table-thead > tr > th:first-child {
@@ -285,23 +126,12 @@ body {
   padding-right: 18px !important;
 }
 
-.ant-table-tbody > tr > td {
-  border-bottom-color: var(--table-row-divider) !important;
-  padding: 13px 14px !important;
-  color: var(--text-primary) !important;
-  font-size: 13px !important;
-}
-
 .ant-table-tbody > tr > td:first-child {
   padding-left: 18px !important;
 }
 
 .ant-table-tbody > tr > td:last-child {
   padding-right: 18px !important;
-}
-
-.ant-table-tbody > tr:hover > td {
-  background: var(--table-hover-bg) !important;
 }
 
 .ant-table-tbody > tr:last-child > td {
@@ -312,12 +142,10 @@ body {
    Tag — 标签
    ======================================== */
 .ant-tag {
-  border-radius: 6px !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
   border: none !important;
-  padding: 2px 10px !important;
+  font-weight: 500 !important;
   line-height: 20px !important;
+  padding: 2px 10px !important;
 }
 
 /* ========================================
@@ -333,51 +161,7 @@ body {
 }
 
 /* ========================================
-   Breadcrumb — 面包屑
-   ======================================== */
-.ant-breadcrumb {
-  font-size: 13px !important;
-}
-
-.ant-breadcrumb a {
-  color: var(--text-muted) !important;
-}
-
-.ant-breadcrumb-separator {
-  color: var(--text-muted) !important;
-  margin: 0 4px !important;
-}
-
-.ant-breadcrumb li:last-child {
-  color: var(--text-secondary) !important;
-  font-weight: 500 !important;
-}
-
-/* ========================================
-   Form — 表单
-   ======================================== */
-.ant-form-item-label > label {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-}
-
-/* ========================================
-   Modal — 模态框
-   ======================================== */
-.ant-modal-content,
-.ant-modal-header {
-  border-radius: var(--radius-md) !important;
-}
-
-/* ========================================
-   Dropdown — 下拉菜单
-   ======================================== */
-.ant-dropdown-menu {
-  border-radius: var(--radius-sm) !important;
-}
-
-/* ========================================
-   Pagination — 分页
+   Pagination — 分页（补充 theme token 无法覆盖的规则）
    ======================================== */
 .ant-pagination {
   padding: 12px 18px !important;
@@ -388,7 +172,6 @@ body {
 .ant-pagination .ant-pagination-item {
   width: 30px !important;
   height: 30px !important;
-  border-radius: 6px !important;
   border-color: var(--border-color) !important;
   font-weight: 500 !important;
   display: inline-flex !important;
@@ -415,15 +198,11 @@ body {
 
 /* 激活项 */
 .ant-pagination .ant-pagination-item-active {
-  background: var(--brand-dark) !important;
-  border-color: var(--brand-dark) !important;
   font-weight: 700 !important;
 }
 
-/* 激活项 hover — 保持深色背景，微调透明度 */
+/* 激活项 hover */
 .ant-pagination .ant-pagination-item-active:hover {
-  background: var(--brand-dark) !important;
-  border-color: var(--brand-dark) !important;
   opacity: 0.85;
 }
 
@@ -433,18 +212,14 @@ body {
 
 .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
 .ant-pagination .ant-pagination-next .ant-pagination-item-link {
-  border-radius: var(--radius-sm) !important;
   border-color: var(--border-color) !important;
 }
 
 .ant-pagination .ant-pagination-options-size-changer .ant-select-selector {
-  border-radius: 6px !important;
-  border-color: var(--border-color) !important;
   padding: 3px 6px !important;
 }
 
 .ant-pagination .ant-pagination-total-text {
-  font-size: 13px !important;
   color: var(--text-muted) !important;
 }
 
@@ -452,7 +227,6 @@ body {
 
 /* Card container */
 .ant-pro-table .ant-pro-card {
-  border-radius: var(--radius-md) !important;
   border: 1px solid var(--border-light) !important;
   overflow: hidden;
 }
@@ -477,12 +251,7 @@ body {
   margin-bottom: 0 !important;
 }
 
-.ant-pro-table .ant-pro-table-search .ant-input,
-.ant-pro-table .ant-pro-table-search .ant-select-selector {
-  height: 34px !important;
-}
-
-/* Toolbar (headerTitle + toolBarRender) */
+/* Toolbar */
 .ant-pro-table .ant-pro-table-list-toolbar {
   padding: 12px 20px !important;
 }
@@ -505,7 +274,6 @@ body {
 .ant-pro-table .ant-pro-table-list-toolbar .ant-pro-table-list-toolbar-option-button:hover {
   color: var(--text-secondary) !important;
   background: var(--hover-bg-light) !important;
-  border-radius: var(--radius-sm) !important;
 }
 
 /* ========================================
@@ -544,10 +312,10 @@ body {
 
 /* 链接型按钮颜色 — 排除危险操作 */
 .ant-btn-link:not(.ant-btn-dangerous) {
-  color: #3d5a80 !important;
+  color: var(--blue) !important;
 }
 
-/* 通用操作按钮组分隔线（用于设计规范展示页等非表格场景） */
+/* 通用操作按钮组分隔线 */
 .action-btn-group .ant-space-item {
   display: inline-flex !important;
   align-items: center;
@@ -575,4 +343,10 @@ body {
   background: var(--border-color);
   margin-right: 4px;
   flex-shrink: 0;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn:hover {
+  background: var(--active-bg) !important;
+  color: var(--text-primary) !important;
 }

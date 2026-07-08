@@ -60,6 +60,7 @@
 
   /* 红 — 失败/拒绝/异常 */
   --red: #e74c3c;
+  --red-dark: #c0392b;
   --red-light: #fef2f2;
   --red-text: #e74c3c;
 
@@ -80,6 +81,15 @@
 
   /* 进度条背景 */
   --progress-bg: #EBEBEB;
+
+  /* 头像渐变 */
+  --avatar-gradient-start: #4ECDC4;
+  --avatar-gradient-end: #44B09E;
+
+  /* 登录页品牌渐变 */
+  --brand-gradient-start: #4ECDC4;
+  --brand-gradient-mid: #2C9E9D;
+  --brand-gradient-end: #1A7A7A;
 
   /* ========================================
      7. Table — 表格

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Layout } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
@@ -17,6 +17,11 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate()
   const { isLogin, setMenuTree } = useAppStore()
+  const [contentKey, setContentKey] = useState(0)
+
+  const handleRefresh = useCallback(() => {
+    setContentKey(k => k + 1)
+  }, [])
 
   // 未登录时跳转到登录页
   useEffect(() => {
@@ -46,9 +51,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <Layout style={{ minHeight: '100vh' }}>
       <Sidebar />
       <Layout style={{ height: '100vh' }}>
-        <TopBar />
+        <TopBar onRefresh={handleRefresh} />
         <Content style={{ overflow: 'hidden', height: 'calc(100vh - 50px)', display: 'flex', flexDirection: 'column' }}>
-          <PageContainer>{children}</PageContainer>
+          <PageContainer key={contentKey}>{children}</PageContainer>
         </Content>
       </Layout>
     </Layout>
