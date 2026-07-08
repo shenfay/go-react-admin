@@ -1,3 +1,7 @@
+/* ========================================
+   Reset & Base — 全局重置与基础
+   ======================================== */
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -20,7 +24,9 @@ body {
   height: 100vh;
 }
 
-/* Scrollbar */
+/* ========================================
+   Scrollbar — 滚动条
+   ======================================== */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -39,7 +45,11 @@ body {
   background: var(--text-muted);
 }
 
-/* Ant Design Overrides */
+/* ========================================
+   Ant Design Overrides — 组件样式覆盖
+   ======================================== */
+
+/* Layout — 布局 */
 .ant-layout {
   background: var(--main-bg) !important;
 }
@@ -85,6 +95,7 @@ body {
   color: var(--text-primary) !important;
 }
 
+/* Card — 卡片 */
 .ant-card {
   border-radius: var(--radius-md) !important;
   border-color: var(--border-light) !important;
@@ -105,7 +116,9 @@ body {
   padding: 16px 20px !important;
 }
 
-/* Buttons */
+/* ========================================
+   Buttons — 按钮体系
+   ======================================== */
 .ant-btn {
   border-radius: var(--radius-sm) !important;
   font-family: var(--font-family) !important;
@@ -118,7 +131,7 @@ body {
 .ant-btn-primary {
   background: var(--brand-dark) !important;
   border-color: var(--brand-dark) !important;
-  color: #ffffff !important;
+  color: var(--bg-white) !important;
   box-shadow: none !important;
 }
 
@@ -135,7 +148,7 @@ body {
 
 .ant-btn-default:hover {
   background: var(--hover-bg-light) !important;
-  border-color: #d4cdc0 !important;
+  border-color: var(--border-hover) !important;
   color: var(--text-secondary) !important;
 }
 
@@ -147,12 +160,15 @@ body {
   background: var(--active-bg) !important;
 }
 
+/* Sidebar Toggle Button */
 .sidebar-toggle-btn:hover {
   background: var(--active-bg) !important;
   color: var(--text-primary) !important;
 }
 
-/* Inputs */
+/* ========================================
+   Inputs — 输入类控件
+   ======================================== */
 .ant-input,
 .ant-select-selector,
 .ant-picker {
@@ -173,7 +189,9 @@ body {
   color: var(--text-icon) !important;
 }
 
-/* Table */
+/* ========================================
+   Table — 表格
+   ======================================== */
 .ant-table {
   font-size: 13px !important;
   table-layout: fixed !important;
@@ -220,7 +238,9 @@ body {
   border-bottom: none !important;
 }
 
-/* Tag */
+/* ========================================
+   Tag — 标签
+   ======================================== */
 .ant-tag {
   border-radius: 6px !important;
   font-size: 12px !important;
@@ -230,17 +250,21 @@ body {
   line-height: 20px !important;
 }
 
-/* Progress */
+/* ========================================
+   Progress — 进度条
+   ======================================== */
 .ant-progress-inner {
   border-radius: 3px !important;
-  background: #EBEBEB !important;
+  background: var(--progress-bg) !important;
 }
 
 .ant-progress-bg {
   border-radius: 3px !important;
 }
 
-/* Breadcrumb */
+/* ========================================
+   Breadcrumb — 面包屑
+   ======================================== */
 .ant-breadcrumb {
   font-size: 13px !important;
 }
@@ -259,24 +283,32 @@ body {
   font-weight: 500 !important;
 }
 
-/* Form */
+/* ========================================
+   Form — 表单
+   ======================================== */
 .ant-form-item-label > label {
   font-size: 13px !important;
   font-weight: 500 !important;
 }
 
-/* Modal */
+/* ========================================
+   Modal — 模态框
+   ======================================== */
 .ant-modal-content,
 .ant-modal-header {
   border-radius: var(--radius-md) !important;
 }
 
-/* Dropdown */
+/* ========================================
+   Dropdown — 下拉菜单
+   ======================================== */
 .ant-dropdown-menu {
   border-radius: var(--radius-sm) !important;
 }
 
-/* Pagination */
+/* ========================================
+   Pagination — 分页
+   ======================================== */
 .ant-pagination {
   padding: 12px 18px !important;
   border-top: 1px solid var(--table-border) !important;
@@ -300,7 +332,7 @@ body {
 /* 非激活项 hover */
 .ant-pagination .ant-pagination-item:not(.ant-pagination-item-active):hover {
   background: var(--hover-bg-light) !important;
-  border-color: #d4cdc0 !important;
+  border-color: var(--border-hover) !important;
 }
 
 /* 激活项 */
@@ -317,7 +349,7 @@ body {
 }
 
 .ant-pagination .ant-pagination-item-active a {
-  color: #ffffff !important;
+  color: var(--bg-white) !important;
 }
 
 .ant-pagination .ant-pagination-prev .ant-pagination-item-link,

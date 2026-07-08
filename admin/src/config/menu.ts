@@ -18,6 +18,7 @@ import {
   SettingOutlined,
   ProfileOutlined,
   MenuOutlined,
+  BuildOutlined,
 } from '@ant-design/icons'
 import React, { type ReactNode } from 'react'
 
@@ -37,6 +38,7 @@ const iconMap: Record<string, ReactNode> = {
   SettingOutlined: React.createElement(SettingOutlined),
   ProfileOutlined: React.createElement(ProfileOutlined),
   MenuOutlined: React.createElement(MenuOutlined),
+  BuildOutlined: React.createElement(BuildOutlined),
 }
 
 export function getIcon(name: string): ReactNode {

@@ -18,6 +18,7 @@ import MenuManagement from '@/pages/MenuManagement'
 import Profile from '@/pages/Profile'
 import OperationLog from '@/pages/OperationLog'
 import SystemSettings from '@/pages/SystemSettings'
+import DesignSystem from '@/pages/DesignSystem'
 
 const router = createBrowserRouter([
   {
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
       {
         path: 'operation-log',
         element: <PermissionGuard permission="operation:log"><OperationLog /></PermissionGuard>,
+      },
+      {
+        path: 'design-system',
+        element: <DesignSystem />,
       },
       {
         path: 'settings',

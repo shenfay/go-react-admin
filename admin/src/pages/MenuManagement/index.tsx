@@ -28,24 +28,6 @@ import {
   type MenuNode,
 } from '@/services/menu'
 
-/** 可选图标列表 */
-const ICON_OPTIONS = [
-  'DashboardOutlined',
-  'TeamOutlined',
-  'AimOutlined',
-  'FileTextOutlined',
-  'SmileOutlined',
-  'CheckCircleOutlined',
-  'StarOutlined',
-  'ShopOutlined',
-  'SwapOutlined',
-  'UserOutlined',
-  'LockOutlined',
-  'AuditOutlined',
-  'SettingOutlined',
-  'ProfileOutlined',
-  'MenuOutlined',
-]
 
 export default function MenuManagement() {
   const [menuTree, setMenuTree] = useState<MenuNode[]>([])
@@ -327,12 +309,7 @@ export default function MenuManagement() {
           </div>
           <div style={{ display: 'flex', gap: 16 }}>
             <Form.Item label="图标" name="icon" style={{ flex: 1 }}>
-              <Select
-                placeholder="选择图标"
-                allowClear
-                showSearch
-                options={ICON_OPTIONS.map(name => ({ value: name, label: name }))}
-              />
+              <Input placeholder="如：BuildOutlined" />
             </Form.Item>
             <Form.Item label="路由路径" name="path" style={{ flex: 1 }}>
               <Input placeholder="如：/dashboard" />

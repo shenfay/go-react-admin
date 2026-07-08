@@ -1,5 +1,7 @@
 package rbac
 
+import "strings"
+
 // RolePermission 角色权限值对象（权限由 Casbin 管理，此处仅保留领域模型）
 type RolePermission struct {
 	RoleID        string `json:"role_id"`
@@ -72,9 +74,14 @@ func DeriveMenus(permissions []string) []string {
 func DeriveMenusFromMenus(permissions []string, menus []*Menu) []string {
 	// 构建 permission → menu_key 动态映射
 	permToMenu := make(map[string]string)
+	// 所有有效的菜单 key 集合，用于兜底匹配
+	menuKeySet := make(map[string]bool)
 	for _, m := range menus {
-		if m.Status && m.Permission != "" {
-			permToMenu[m.Permission] = m.Key
+		if m.Status {
+			if m.Permission != "" {
+				permToMenu[m.Permission] = m.Key
+			}
+			menuKeySet[m.Key] = true
 		}
 	}
 
@@ -86,6 +93,12 @@ func DeriveMenusFromMenus(permissions []string, menus []*Menu) []string {
 		} else if menu, ok := PermissionMenuMap[perm]; ok {
 			// fallback 到静态映射
 			menuSet[menu] = true
+		} else if idx := strings.LastIndex(perm, ":"); idx > 0 {
+			// 兜底：从 permission 中提取 key 前缀匹配菜单
+			// 如 "design-system:view" → "design-system"
+			if key := perm[:idx]; menuKeySet[key] {
+				menuSet[key] = true
+			}
 		}
 	}
 	result := make([]string, 0, len(menuSet))

@@ -16,43 +16,65 @@ import type { Role } from '@/types'
 
 const { TextArea } = Input
 
+type PermTreeNode = {
+  title: string
+  key: string
+  permission?: string
+  children?: PermTreeNode[]
+}
+
 /** 从后端菜单数据生成权限树 */
-function buildPermissionTree(menus: MenuNode[]) {
-  return menus
-    .filter(m => m.status)
-    .map(group => ({
-      title: group.label,
-      key: group.key,
-      children: (group.children || [])
-        .filter(c => c.status)
-        .map(item => ({
-          title: item.label,
-          key: item.key,
-          permission: item.permission || '',
-        })),
-    }))
-    .filter(group => group.children && group.children.length > 0)
+function buildPermissionTree(menus: MenuNode[]): PermTreeNode[] {
+  const tree: PermTreeNode[] = []
+  const seenKeys = new Set<string>()
+
+  for (const menu of menus) {
+    if (!menu.status || seenKeys.has(menu.key)) continue
+    seenKeys.add(menu.key)
+
+    const children = (menu.children || [])
+      .filter(c => c.status && !seenKeys.has(c.key))
+      .map(item => {
+        seenKeys.add(item.key)
+        return { title: item.label, key: item.key, permission: item.permission || `${item.key}:view` }
+      })
+
+    if (children.length > 0) {
+      tree.push({ title: menu.label, key: menu.key, children })
+    } else {
+      // 无子菜单 → 作为叶子节点，可勾选
+      tree.push({ title: menu.label, key: menu.key, permission: menu.permission || `${menu.key}:view` })
+    }
+  }
+  return tree
 }
 
 /** 从权限树中提取所有叶子节点的 key */
-function getAllLeafKeys(treeData: ReturnType<typeof buildPermissionTree>): string[] {
+function getAllLeafKeys(treeData: PermTreeNode[]): string[] {
   const keys: string[] = []
-  treeData.forEach(group => {
-    group.children?.forEach(item => {
-      keys.push(item.key)
-    })
-  })
+  for (const node of treeData) {
+    if (node.children) {
+      node.children.forEach(item => keys.push(item.key))
+    } else {
+      // 无子节点的顶层菜单也是叶子
+      keys.push(node.key)
+    }
+  }
   return keys
 }
 
 /** 构建 key -> permission 映射 */
-function buildKeyPermMap(treeData: ReturnType<typeof buildPermissionTree>): Record<string, string> {
+function buildKeyPermMap(treeData: PermTreeNode[]): Record<string, string> {
   const map: Record<string, string> = {}
-  treeData.forEach(group => {
-    group.children?.forEach(item => {
-      map[item.key] = item.permission || `${item.key}:view`
-    })
-  })
+  for (const node of treeData) {
+    if (node.children) {
+      node.children.forEach(item => {
+        map[item.key] = item.permission || `${item.key}:view`
+      })
+    } else {
+      map[node.key] = node.permission || `${node.key}:view`
+    }
+  }
   return map
 }
 
