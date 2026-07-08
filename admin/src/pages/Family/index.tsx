@@ -21,10 +21,10 @@ const columns = [
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{
           width: 7, height: 7, borderRadius: '50%',
-          background: status === 'active' ? '#22c55e' : '#d4cdc0',
+          background: status === 'active' ? 'var(--green)' : 'var(--border-hover)',
           display: 'inline-block',
         }} />
-        <span style={{ color: '#2b2b2b', fontSize: 13 }}>{status === 'active' ? '活跃' : '未激活'}</span>
+        <span style={{ color: 'var(--text-primary)' }}>{status === 'active' ? '活跃' : '未激活'}</span>
       </div>
     ),
   },
@@ -41,7 +41,7 @@ export default function Family() {
         <>
           <FilterSearch placeholder="搜索家庭名称..." />
           <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
         </>
       }
       toolbarActions={

@@ -24,7 +24,7 @@ const columns = [
         creator: '创造型',
         thinker: '思考型',
       }
-      return <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{labelMap[personality] || personality}</Tag>
+      return <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{labelMap[personality] || personality}</Tag>
     },
   },
   { title: '解锁等级', dataIndex: 'unlockLevel', key: 'unlockLevel' },
@@ -42,7 +42,7 @@ export default function Companion() {
         <>
           <FilterSearch placeholder="搜索伙伴名称..." />
           <Select value={personalityFilter} onChange={setPersonalityFilter} style={{ width: 140 }} options={personalityOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
         </>
       }
       toolbarActions={

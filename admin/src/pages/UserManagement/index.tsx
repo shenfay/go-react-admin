@@ -153,8 +153,8 @@ export default function UserManagement() {
       width: 120,
       render: (_: unknown, record: User) => (
         <Space size={12}>
-          <Button type="link" onClick={() => handleEdit(record)} style={{ color: 'var(--text-secondary)' }}>
-            <EditOutlined style={{ marginRight: 4 }} />编辑
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+            编辑
           </Button>
           <Popconfirm
             title={record.locked ? '确定启用该用户？' : '确定禁用该用户？'}

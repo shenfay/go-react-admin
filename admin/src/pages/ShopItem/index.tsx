@@ -17,7 +17,7 @@ const columns = [
     title: '积分价格',
     dataIndex: 'price',
     key: 'price',
-    render: (price: number) => <Tag style={{ background: '#fef3c7', color: '#92400e', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{price} 积分</Tag>,
+    render: (price: number) => <Tag style={{ background: 'var(--yellow-light)', color: 'var(--yellow-text)' }}>{price} 积分</Tag>,
   },
   {
     title: '审批级别',
@@ -30,12 +30,12 @@ const columns = [
         approve: '需审批',
       }
       const colorMap: Record<string, { bg: string; color: string }> = {
-        auto: { bg: '#dcfce7', color: '#166534' },
-        notify: { bg: '#fef3c7', color: '#92400e' },
-        approve: { bg: '#fef2f2', color: '#e74c3c' },
+        auto: { bg: 'var(--green-light)', color: 'var(--green-text)' },
+        notify: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
+        approve: { bg: 'var(--red-light)', color: 'var(--red-text)' },
       }
-      const c = colorMap[level] || { bg: '#f5f2ed', color: '#6b6258' }
-      return <Tag style={{ background: c.bg, color: c.color, border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{labelMap[level] || level}</Tag>
+      const c = colorMap[level] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
+      return <Tag style={{ background: c.bg, color: c.color }}>{labelMap[level] || level}</Tag>
     },
   },
   { title: '库存', dataIndex: 'stock', key: 'stock' },
@@ -52,7 +52,7 @@ export default function ShopItem() {
         <>
           <FilterSearch placeholder="搜索商品名称..." />
           <Select value={approvalFilter} onChange={setApprovalFilter} style={{ width: 140 }} options={approvalOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
         </>
       }
       toolbarActions={

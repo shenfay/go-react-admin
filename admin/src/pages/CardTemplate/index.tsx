@@ -32,7 +32,7 @@ const columns = [
         feynman: '费曼卡',
         daily3: '每日三件事',
       }
-      return <Tag style={{ background: '#f5f2ed', color: '#6b6258', border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{labelMap[type] || type}</Tag>
+      return <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{labelMap[type] || type}</Tag>
     },
   },
   { title: '难度系数', dataIndex: 'difficulty', key: 'difficulty' },
@@ -43,9 +43,8 @@ const columns = [
     key: 'acceptanceType',
     render: (type: string) => (
       <Tag style={{
-        background: type === 'auto' ? '#dcfce7' : '#fef3c7',
-        color: type === 'auto' ? '#166534' : '#92400e',
-        border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500,
+        background: type === 'auto' ? 'var(--green-light)' : 'var(--yellow-light)',
+        color: type === 'auto' ? 'var(--green-text)' : 'var(--yellow-text)',
       }}>
         {type === 'auto' ? '自动通过' : '家长验收'}
       </Tag>
@@ -66,7 +65,7 @@ export default function CardTemplate() {
           <FilterSearch placeholder="搜索模板名称..." />
           <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 140 }} options={typeOptions} />
           <Select value={acceptanceFilter} onChange={setAcceptanceFilter} style={{ width: 140 }} options={acceptanceOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
         </>
       }
       toolbarActions={

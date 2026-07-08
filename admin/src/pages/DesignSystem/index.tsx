@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SearchOutlined, ExportOutlined } from '@ant-design/icons'
+import { SearchOutlined, ExportOutlined, EditOutlined, SettingOutlined, DeleteOutlined } from '@ant-design/icons'
 import {
   Tag, Button, Input, Select, Switch, Table, Typography, Space, Tabs,
   Progress, Alert, Badge, Avatar, Card, Descriptions, Empty, Skeleton,
@@ -231,6 +231,21 @@ function Components() {
             <Button disabled>次按钮禁用</Button>
             <Button type="primary" loading>加载中</Button>
           </Space>
+        </div>
+      </div>
+
+      {/* 表格操作按钮 */}
+      <div>
+        <SectionTitle>表格操作按钮</SectionTitle>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Text style={{ fontSize: 13, color: 'var(--text-secondary)' }}>统一为 <Text code>Button type="link" size="small"</Text> + icon + 文字，危险操作使用 <Text code>danger</Text></Text>
+          <div style={{ background: 'var(--bg-light)', padding: '14px 20px', borderRadius: 12 }}>
+            <Space size={0} className="action-btn-group">
+              <Button type="link" size="small" icon={<EditOutlined />}>编辑</Button>
+              <Button type="link" size="small" icon={<SettingOutlined />}>配置权限</Button>
+              <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
+            </Space>
+          </div>
         </div>
       </div>
 

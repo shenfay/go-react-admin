@@ -96,7 +96,7 @@ export default function DataPanel({
                 style={{
                   fontSize: 20,
                   fontWeight: 600,
-                  color: '#2b2b2b',
+                  color: 'var(--text-primary)',
                   lineHeight: 1.3,
                   margin: 0,
                 }}
@@ -150,9 +150,9 @@ export default function DataPanel({
         <div style={{ padding: '0 28px 20px' }}>
           <div
             style={{
-              border: '1px solid #efeae2',
-              borderRadius: 12,
-              background: '#fff',
+              border: '1px solid var(--border-light)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-white)',
               overflow: 'hidden',
             }}
           >

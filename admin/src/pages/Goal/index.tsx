@@ -20,17 +20,17 @@ const columns = [
     key: 'status',
     render: (status: string) => {
       const colorMap: Record<string, { bg: string; color: string }> = {
-        active: { bg: '#dcfce7', color: '#166534' },
-        completed: { bg: '#edf2ff', color: '#3b6fdf' },
-        archived: { bg: '#f5f2ed', color: '#b0a89a' },
+        active: { bg: 'var(--green-light)', color: 'var(--green-text)' },
+        completed: { bg: 'var(--blue-light)', color: 'var(--blue-text)' },
+        archived: { bg: 'var(--gray-light)', color: 'var(--gray-text)' },
       }
       const labelMap: Record<string, string> = {
         active: '进行中',
         completed: '已完成',
         archived: '已归档',
       }
-      const c = colorMap[status] || { bg: '#f5f2ed', color: '#6b6258' }
-      return <Tag style={{ background: c.bg, color: c.color, border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500 }}>{labelMap[status] || status}</Tag>
+      const c = colorMap[status] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
+      return <Tag style={{ background: c.bg, color: c.color }}>{labelMap[status] || status}</Tag>
     },
   },
   { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt' },
@@ -46,7 +46,7 @@ export default function Goal() {
         <>
           <FilterSearch placeholder="搜索目标名称..." />
           <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
         </>
       }
       toolbarActions={

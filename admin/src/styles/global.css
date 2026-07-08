@@ -528,3 +528,51 @@ body {
   background: var(--hover-bg) !important;
   border-color: var(--border-hover) !important;
 }
+
+/* ========================================
+   Action Buttons — 表格操作按钮
+   ======================================== */
+
+/* 去除 icon 与文字间距 */
+.ant-btn-link.ant-btn-sm > .ant-btn-icon {
+  margin-inline-end: 0 !important;
+}
+
+.ant-btn-link.ant-btn-sm {
+  gap: 1px !important;
+}
+
+/* 链接型按钮颜色 — 排除危险操作 */
+.ant-btn-link:not(.ant-btn-dangerous) {
+  color: #3d5a80 !important;
+}
+
+/* 通用操作按钮组分隔线（用于设计规范展示页等非表格场景） */
+.action-btn-group .ant-space-item {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.action-btn-group .ant-space-item + .ant-space-item::before {
+  content: '';
+  width: 1px;
+  height: 14px;
+  background: var(--border-color);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+/* 连续操作按钮之间的分隔线 */
+.ant-table-tbody td .ant-space-item {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.ant-table-tbody td .ant-space-item + .ant-space-item::before {
+  content: '';
+  width: 1px;
+  height: 14px;
+  background: var(--border-color);
+  margin-right: 4px;
+  flex-shrink: 0;
+}

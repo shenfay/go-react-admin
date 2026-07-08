@@ -17,9 +17,8 @@ const columns = [
     key: 'type',
     render: (type: string) => (
       <Tag style={{
-        background: type === 'earn' ? '#dcfce7' : '#fef2f2',
-        color: type === 'earn' ? '#166534' : '#e74c3c',
-        border: 'none', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 500,
+        background: type === 'earn' ? 'var(--green-light)' : 'var(--red-light)',
+        color: type === 'earn' ? 'var(--green-text)' : 'var(--red-text)',
       }}>
         {type === 'earn' ? '获得' : '消费'}
       </Tag>
@@ -30,7 +29,7 @@ const columns = [
     dataIndex: 'points',
     key: 'points',
     render: (points: number, record: { type: string }) => (
-      <span style={{ color: record.type === 'earn' ? '#22c55e' : '#e74c3c', fontSize: 13 }}>
+      <span style={{ color: record.type === 'earn' ? 'var(--green)' : 'var(--red)', fontSize: 13 }}>
         {record.type === 'earn' ? '+' : '-'}{points}
       </span>
     ),
@@ -48,17 +47,17 @@ export default function PointsRecord() {
       <div style={{ padding: '20px 28px 0' }}>
         <Row gutter={16}>
           <Col span={8}>
-            <Card style={{ borderRadius: 12, borderColor: '#efeae2' }}>
-              <Statistic title="今日发放积分" value={0} prefix={<ArrowUpOutlined />} valueStyle={{ color: '#22c55e' }} />
+            <Card style={{ borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' }}>
+              <Statistic title="今日发放积分" value={0} prefix={<ArrowUpOutlined />} valueStyle={{ color: 'var(--green)' }} />
             </Card>
           </Col>
           <Col span={8}>
-            <Card style={{ borderRadius: 12, borderColor: '#efeae2' }}>
-              <Statistic title="今日消费积分" value={0} prefix={<ArrowDownOutlined />} valueStyle={{ color: '#e74c3c' }} />
+            <Card style={{ borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' }}>
+              <Statistic title="今日消费积分" value={0} prefix={<ArrowDownOutlined />} valueStyle={{ color: 'var(--red)' }} />
             </Card>
           </Col>
           <Col span={8}>
-            <Card style={{ borderRadius: 12, borderColor: '#efeae2' }}>
+            <Card style={{ borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' }}>
               <Statistic title="积分总余额" value={0} />
             </Card>
           </Col>
@@ -71,7 +70,7 @@ export default function PointsRecord() {
           <>
             <FilterSearch placeholder="搜索用户/来源..." />
             <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={typeOptions} />
-            <Button icon={<SearchOutlined />} style={{ color: '#2b2b2b' }}>查询</Button>
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
           </>
         }
       >

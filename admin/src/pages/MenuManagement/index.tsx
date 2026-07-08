@@ -18,7 +18,7 @@ import {
   DeleteOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import DataPanel, { IconButton, FilterSearch } from '@/components/DataPanel'
+import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import {
   getMenuTree,
   createMenu,
@@ -211,25 +211,20 @@ export default function MenuManagement() {
       width: 140,
       render: (_: unknown, record: MenuNode) => (
         <Space size={4}>
-          <IconButton
-            title="添加子菜单"
-            icon={<PlusOutlined style={{ fontSize: 14, color: 'var(--text-icon)' }} />}
-            onClick={() => handleAddChild(record.key)}
-          />
-          <IconButton
-            title="编辑"
-            icon={<EditOutlined style={{ fontSize: 14, color: 'var(--text-icon)' }} />}
-            onClick={() => handleEdit(record)}
-          />
+          <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAddChild(record.key)}>
+            新增子菜单
+          </Button>
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+            编辑
+          </Button>
           <Popconfirm
             title="确定删除该菜单？"
             description="子菜单将一并删除"
             onConfirm={() => handleDelete(record)}
           >
-            <IconButton
-              title="删除"
-              icon={<DeleteOutlined style={{ fontSize: 14, color: 'var(--text-icon)' }} />}
-            />
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+              删除
+            </Button>
           </Popconfirm>
         </Space>
       ),

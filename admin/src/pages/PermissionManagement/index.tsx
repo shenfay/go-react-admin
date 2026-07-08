@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined, SettingOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { getMenuTree, type MenuNode } from '@/services/menu'
 import {
@@ -267,10 +267,10 @@ export default function PermissionManagement() {
       width: 200,
       render: (_: unknown, record: Role) => (
         <Space size={4}>
-          <Button type="link" size="small" onClick={() => handleSelectRole(record)} style={{ color: 'var(--text-secondary)' }}>
+          <Button type="link" size="small" icon={<SettingOutlined />} onClick={() => handleSelectRole(record)}>
             配置权限
           </Button>
-          <Button type="link" size="small" onClick={() => handleEditRole(record)} style={{ color: 'var(--text-secondary)' }}>
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditRole(record)}>
             编辑
           </Button>
           <Popconfirm
@@ -278,7 +278,7 @@ export default function PermissionManagement() {
             description="删除后不可恢复"
             onConfirm={() => handleDeleteRole(record)}
           >
-            <Button type="link" size="small" danger style={{ fontSize: 13 }}>删除</Button>
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
         </Space>
       ),
