@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(50) PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(100) DEFAULT '',
     password VARCHAR(255) NOT NULL,
     email_verified BOOLEAN DEFAULT FALSE,
     locked BOOLEAN DEFAULT FALSE,
@@ -19,6 +20,7 @@ CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
 COMMENT ON TABLE users IS '用户表';
 COMMENT ON COLUMN users.id IS '用户 ID (ULID 格式)';
 COMMENT ON COLUMN users.email IS '邮箱（唯一）';
+COMMENT ON COLUMN users.name IS '用户名称';
 COMMENT ON COLUMN users.password IS '密码哈希值';
 COMMENT ON COLUMN users.email_verified IS '邮箱是否已验证';
 COMMENT ON COLUMN users.locked IS '账户是否被锁定';

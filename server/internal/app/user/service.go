@@ -6,7 +6,8 @@ import (
 
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
-	"github.com/shenfay/kiqi/pkg/utils"
+	"github.com/shenfay/kiqi/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // CreateUserCommand 创建用户命令
@@ -61,18 +62,11 @@ func (s *Service) CreateUser(ctx context.Context, cmd CreateUserCommand) (*UserD
 		return nil, err
 	}
 
-	// 3. 发布领域事件
-	if s.eventBus != nil {
-		evt := &user.UserRegistered{
-			UserID:    u.ID,
-			Email:     u.Email,
-			Timestamp: utils.Now(),
-		}
-		if err := s.eventBus.Publish(ctx, evt); err != nil {
-			// 事件发布失败不影响主流程
-			// TODO: 记录警告日志
-		}
-	}
+	// 3. 记录操作日志
+	s.recordOperation(ctx, "USER.REGISTER", "USER", "SUCCESS",
+		u.ID, u.Email, "", "", "", "", "",
+		map[string]interface{}{"email": u.Email},
+	)
 
 	// 4. 返回DTO
 	return toUserDTO(u), nil
@@ -106,17 +100,11 @@ func (s *Service) UpdateProfile(ctx context.Context, cmd UpdateProfileCommand) (
 		return nil, err
 	}
 
-	// 4. 发布领域事件
-	if s.eventBus != nil {
-		evt := &user.UserProfileUpdated{
-			UserID:    u.ID,
-			Email:     u.Email,
-			Timestamp: utils.Now(),
-		}
-		if err := s.eventBus.Publish(ctx, evt); err != nil {
-			// 事件发布失败不影响主流程
-		}
-	}
+	// 4. 记录操作日志
+	s.recordOperation(ctx, "USER.PROFILE.UPDATED", "USER", "SUCCESS",
+		u.ID, u.Email, "", "", "", "", "",
+		map[string]interface{}{"email": u.Email},
+	)
 
 	return toUserDTO(u), nil
 }
@@ -132,5 +120,25 @@ func toUserDTO(u *user.User) *UserDTO {
 		LastLoginAt:   u.LastLoginAt,
 		CreatedAt:     u.CreatedAt,
 		UpdatedAt:     u.UpdatedAt,
+	}
+}
+
+// recordOperation 统一操作日志记录方法
+// 发布 OperationEvent 到事件总线，通过 Bridge → Asynq → Worker 异步写入数据库
+// 日志记录失败不影响主流程，仅输出 warn 级别日志
+func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email, ip, userAgent, device, browser, os string, metadata map[string]interface{}) {
+	if s.eventBus == nil {
+		return
+	}
+	evt := events.NewOperationEvent(action, category, status).
+		WithUser(userID, email).
+		WithRequestInfo(ip, userAgent, device, browser, os).
+		WithMetadata(metadata)
+	if err := s.eventBus.Publish(ctx, evt); err != nil {
+		logger.Warn("Failed to record operation log",
+			zap.String("action", action),
+			zap.String("user_id", userID),
+			zap.Error(err),
+		)
 	}
 }

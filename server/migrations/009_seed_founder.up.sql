@@ -1,5 +1,5 @@
 -- ============================================
--- 添加创始人角色和账号
+-- 初始化创始人账号
 -- ============================================
 
 -- 1. 插入创始人角色
@@ -41,5 +41,6 @@ INSERT INTO casbin_rule (ptype, v0, v1) VALUES
     ('p', 'role_founder', 'menu:manage'),
     ('p', 'role_founder', 'profile:view'),
     ('p', 'role_founder', 'operation:log'),
+    ('p', 'role_founder', 'design:view'),
     ('p', 'role_founder', 'setting:manage')
 ON CONFLICT DO NOTHING;

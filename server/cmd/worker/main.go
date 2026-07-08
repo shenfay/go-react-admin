@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"os"
 	"os/signal"
@@ -14,25 +13,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/shenfay/kiqi/internal/domain/shared/events"
-	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/infra/config"
 	"github.com/shenfay/kiqi/internal/infra/repository"
-	"github.com/shenfay/kiqi/internal/listener"
+	workerhandlers "github.com/shenfay/kiqi/internal/transport/worker/handlers"
+	"github.com/shenfay/kiqi/pkg/constants"
 	"github.com/shenfay/kiqi/pkg/logger"
 )
-
-// eventRegistry 领域事件反序列化注册表
-// 将事件名称映射到对应的空实例构造函数
-var eventRegistry = map[string]func() events.DomainEvent{
-	"user.registered":      func() events.DomainEvent { return &user.UserRegistered{} },
-	"user.logged_in":       func() events.DomainEvent { return &user.UserLoggedIn{} },
-	"user.login_failed":    func() events.DomainEvent { return &user.LoginFailed{} },
-	"user.account_locked":  func() events.DomainEvent { return &user.AccountLocked{} },
-	"user.logged_out":      func() events.DomainEvent { return &user.UserLoggedOut{} },
-	"user.token_refreshed": func() events.DomainEvent { return &user.TokenRefreshed{} },
-	"user.profile_updated": func() events.DomainEvent { return &user.UserProfileUpdated{} },
-}
 
 func main() {
 	// 1. 加载配置
@@ -75,25 +61,32 @@ func main() {
 	}
 	logger.Info("Database connection established")
 
-	// 4. 初始化仓储
-	auditLogRepo := repository.NewAuditLogRepository(db)
-	activityLogRepo := repository.NewActivityLogRepository(db)
+	// 4. 初始化仓储（统一操作日志）
+	operationLogRepo := repository.NewOperationLogRepository(db)
 
-	// 5. 创建领域事件监听器（直接写 DB）
-	auditLogListener := listener.NewAuditLogListener(auditLogRepo)
-	activityLogListener := listener.NewActivityLogListener(activityLogRepo)
+	// 5. 创建统一操作日志处理器
+	operationLogHandler := workerhandlers.NewOperationLogHandler(operationLogRepo)
 
 	// 6. 注册 Asynq 任务处理器
 	mux := asynq.NewServeMux()
 
-	// 为每个领域事件注册通用处理器
-	mux.HandleFunc("user.registered", createEventHandler(activityLogListener.HandleUserRegistered))
-	mux.HandleFunc("user.logged_in", createEventHandler(auditLogListener.HandleUserLoggedIn))
-	mux.HandleFunc("user.login_failed", createEventHandler(auditLogListener.HandleLoginFailed))
-	mux.HandleFunc("user.account_locked", createEventHandler(auditLogListener.HandleAccountLocked))
-	mux.HandleFunc("user.logged_out", createEventHandler(activityLogListener.HandleUserLoggedOut))
-	mux.HandleFunc("user.token_refreshed", createEventHandler(activityLogListener.HandleTokenRefreshed))
-	mux.HandleFunc("user.profile_updated", createEventHandler(auditLogListener.HandleUserLoggedIn))
+	// 注册统一操作日志处理器（处理 log:operation 任务）
+	mux.HandleFunc(string(constants.AsynqTaskOperationLog), operationLogHandler.ProcessTask)
+
+	// 兼容旧领域事件（user.registered, user.logged_in 等）
+	// 这些事件类型也会被 OperationLogHandler 处理
+	for _, eventName := range []constants.EventName{
+		constants.EventUserRegistered,
+		constants.EventUserLoggedIn,
+		constants.EventUserLoginFailed,
+		constants.EventUserAccountLocked,
+		constants.EventUserLoggedOut,
+		constants.EventUserTokenRefreshed,
+		constants.EventUserProfileUpdated,
+		constants.EventOperationLog, // 统一操作日志事件
+	} {
+		mux.HandleFunc(string(eventName), operationLogHandler.ProcessTask)
+	}
 
 	// 7. 创建 Asynq 服务器
 	srv := asynq.NewServer(
@@ -107,6 +100,7 @@ func main() {
 			Queues: map[string]int{
 				"critical": 6,
 				"default":  3,
+				"logs":     4, // 操作日志专用队列
 				"low":      1,
 			},
 			StrictPriority: true,
@@ -134,26 +128,4 @@ func main() {
 	// 10. 优雅关闭
 	srv.Shutdown()
 	logger.Info("Worker stopped gracefully")
-}
-
-// createEventHandler 创建 Asynq 任务处理器
-// 使用 registry 反序列化事件载荷，然后调用 listener 处理
-func createEventHandler(handler events.Handler) asynq.HandlerFunc {
-	return func(ctx context.Context, task *asynq.Task) error {
-		eventName := task.Type()
-
-		constructor, ok := eventRegistry[eventName]
-		if !ok {
-			logger.Warn("Unknown event type: ", eventName)
-			return nil
-		}
-
-		evt := constructor()
-		if err := json.Unmarshal(task.Payload(), evt); err != nil {
-			logger.Error("Failed to unmarshal event: ", eventName, ", error: ", err)
-			return err
-		}
-
-		return handler(ctx, evt)
-	}
 }

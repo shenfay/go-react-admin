@@ -48,6 +48,7 @@ const (
 	EventUserLoggedOut      EventName = "user.logged_out"
 	EventUserTokenRefreshed EventName = "user.token_refreshed"
 	EventUserProfileUpdated EventName = "user.profile_updated"
+	EventOperationLog       EventName = "operation.log" // 统一操作日志事件
 )
 
 // Asynq 任务类型
@@ -58,6 +59,7 @@ const (
 	AsynqTaskLogUserRegistration    = "auth:log_user_registration"
 	AsynqTaskLogLoginAttempt        = "auth:log_login_attempt"
 	AsynqTaskCleanupExpiredTokens   = "auth:cleanup_expired_tokens"
+	AsynqTaskOperationLog           = "log:operation" // 统一操作日志任务类型
 )
 
 // 队列名称
@@ -65,4 +67,5 @@ const (
 	QueueCritical QueueName = "critical"
 	QueueDefault  QueueName = "default"
 	QueueLow      QueueName = "low"
+	QueueLogs     QueueName = "logs" // 操作日志专用队列
 )

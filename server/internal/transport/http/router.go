@@ -11,11 +11,12 @@ import (
 
 // Router 路由配置
 type Router struct {
-	engine       *gin.Engine
-	authHandler  *handlers.AuthHandler
-	adminHandler *handlers.AdminHandler
-	tokenService authentication.TokenService
-	enforcer     *authorize.Enforcer
+	engine              *gin.Engine
+	authHandler         *handlers.AuthHandler
+	adminHandler        *handlers.AdminHandler
+	operationLogHandler *handlers.OperationLogHandler
+	tokenService        authentication.TokenService
+	enforcer            *authorize.Enforcer
 }
 
 // NewRouter 创建路由器
@@ -23,15 +24,17 @@ func NewRouter(
 	engine *gin.Engine,
 	authHandler *handlers.AuthHandler,
 	adminHandler *handlers.AdminHandler,
+	operationLogHandler *handlers.OperationLogHandler,
 	tokenService authentication.TokenService,
 	enforcer *authorize.Enforcer,
 ) *Router {
 	return &Router{
-		engine:       engine,
-		authHandler:  authHandler,
-		adminHandler: adminHandler,
-		tokenService: tokenService,
-		enforcer:     enforcer,
+		engine:              engine,
+		authHandler:         authHandler,
+		adminHandler:        adminHandler,
+		operationLogHandler: operationLogHandler,
+		tokenService:        tokenService,
+		enforcer:            enforcer,
 	}
 }
 
@@ -55,6 +58,7 @@ func (r *Router) Setup() {
 		r.setupAuthRoutes(v1)
 		r.setupUserRoutes(v1)
 		r.setupAdminRoutes(v1)
+		r.setupOperationLogRoutes(v1)
 	}
 
 	// 注册 Swagger UI 路由（开发环境）
@@ -135,5 +139,19 @@ func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
 	{
 		auth.GET("/permissions", r.adminHandler.GetCurrentUserPermissions)
 		auth.GET("/menus", r.adminHandler.GetUserMenuTree)
+	}
+}
+
+// setupOperationLogRoutes 配置操作日志路由（需要认证 + 管理员权限）
+func (r *Router) setupOperationLogRoutes(v1 *gin.RouterGroup) {
+	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
+		TokenService: r.tokenService,
+	})
+	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
+
+	operationLogs := v1.Group("/operation-logs")
+	operationLogs.Use(authMiddleware, permMiddleware)
+	{
+		r.operationLogHandler.RegisterRoutes(operationLogs)
 	}
 }

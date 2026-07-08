@@ -11,8 +11,9 @@ import (
 	"github.com/shenfay/kiqi/internal/infra/authorize"
 	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
+	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/metrics"
-	"github.com/shenfay/kiqi/pkg/utils"
+	"go.uber.org/zap"
 )
 
 // JWTClaims JWT 自定义声明
@@ -119,12 +120,11 @@ func (s *Service) Register(ctx context.Context, cmd RegisterCommand) (*ServiceAu
 		return nil, err
 	}
 
-	// 4. 发布领域事件（异步）
-	s.eventBus.Publish(ctx, &user.UserRegistered{
-		UserID:    u.ID,
-		Email:     u.Email,
-		Timestamp: utils.Now(),
-	})
+	// 4. 记录操作日志
+	s.recordOperation(ctx, "USER.REGISTER", "USER", "SUCCESS",
+		u.ID, u.Email, "", "", "", "", "",
+		map[string]interface{}{"email": u.Email},
+	)
 
 	return &ServiceAuthResponse{
 		User:         u,
@@ -197,15 +197,11 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		// 日志已在 StoreDeviceInfo 内部处理
 	}
 
-	// 7. 发布领域事件（异步）
-	s.eventBus.Publish(ctx, &user.UserLoggedIn{
-		UserID:    u.ID,
-		Email:     u.Email,
-		IP:        cmd.IP,
-		UserAgent: cmd.UserAgent,
-		Device:    cmd.DeviceType,
-		Timestamp: utils.Now(),
-	})
+	// 7. 记录操作日志
+	s.recordOperation(ctx, "AUTH.LOGIN.SUCCESS", "AUTH", "SUCCESS",
+		u.ID, u.Email, cmd.IP, cmd.UserAgent, cmd.DeviceType, "", "",
+		nil,
+	)
 
 	// 8. 查询用户权限（通过 Casbin）
 	var permissions *rbac.UserPermission
@@ -254,14 +250,13 @@ func (s *Service) Logout(ctx context.Context, cmd LogoutCommand) error {
 		return err
 	}
 
-	// 2. 发布领域事件（异步）
+	// 2. 记录操作日志
 	u, err := s.userRepo.FindByID(ctx, cmd.UserID)
 	if err == nil {
-		s.eventBus.Publish(ctx, &user.UserLoggedOut{
-			UserID:    u.ID,
-			Email:     u.Email,
-			Timestamp: utils.Now(),
-		})
+		s.recordOperation(ctx, "AUTH.LOGOUT", "AUTH", "SUCCESS",
+			u.ID, u.Email, "", "", "", "", "",
+			nil,
+		)
 	}
 
 	return nil
@@ -308,13 +303,11 @@ func (s *Service) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*S
 		return nil, err
 	}
 
-	// 7. 发布领域事件
-	s.eventBus.Publish(ctx, &user.TokenRefreshed{
-		UserID:    u.ID,
-		OldToken:  cmd.RefreshToken,
-		NewToken:  tokens.RefreshToken,
-		Timestamp: utils.Now(),
-	})
+	// 7. 记录操作日志（已脱敏，不记录 token 明文）
+	s.recordOperation(ctx, "AUTH.TOKEN.REFRESHED", "AUTH", "SUCCESS",
+		u.ID, u.Email, "", "", "", "", "",
+		nil,
+	)
 
 	return &ServiceAuthResponse{
 		User:         u,
@@ -327,4 +320,24 @@ func (s *Service) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*S
 // GetUserByID 根据 ID 获取用户
 func (s *Service) GetUserByID(ctx context.Context, userID string) (*user.User, error) {
 	return s.userRepo.FindByID(ctx, userID)
+}
+
+// recordOperation 统一操作日志记录方法
+// 发布 OperationEvent 到事件总线，通过 Bridge → Asynq → Worker 异步写入数据库
+// 日志记录失败不影响主流程，仅输出 warn 级别日志
+func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email, ip, userAgent, device, browser, os string, metadata map[string]interface{}) {
+	if s.eventBus == nil {
+		return
+	}
+	evt := events.NewOperationEvent(action, category, status).
+		WithUser(userID, email).
+		WithRequestInfo(ip, userAgent, device, browser, os).
+		WithMetadata(metadata)
+	if err := s.eventBus.Publish(ctx, evt); err != nil {
+		logger.Warn("Failed to record operation log",
+			zap.String("action", action),
+			zap.String("user_id", userID),
+			zap.Error(err),
+		)
+	}
 }

@@ -1,72 +1,152 @@
-import { useState } from 'react'
-import { Table, Tag, Select, DatePicker, Button } from 'antd'
-import { SearchOutlined, ExportOutlined } from '@ant-design/icons'
-import DataPanel, { FilterSearch } from '@/components/DataPanel'
+import { useState, useEffect, useCallback } from 'react'
+import { Table, Tag, Select, Button } from 'antd'
+import { ReloadOutlined } from '@ant-design/icons'
+import DataPanel from '@/components/DataPanel'
+import { getOperationLogs, type OperationLogRecord } from '@/services/operationLog'
 
-const { RangePicker } = DatePicker
+// 分类选项（对应后端 category 字段）
+const categoryOptions = [
+  { label: '全部分类', value: '' },
+  { label: '认证', value: 'AUTH' },
+  { label: '用户', value: 'USER' },
+  { label: '系统', value: 'SYSTEM' },
+  { label: '业务', value: 'BIZ' },
+]
 
-interface LogRecord {
-  id: string
-  user: string
-  module: string
-  action: string
-  detail: string
-  ip: string
-  result: string
-  time: string
+// 分类标签颜色映射
+const categoryColorMap: Record<string, string> = {
+  AUTH: 'blue',
+  USER: 'green',
+  SYSTEM: 'purple',
+  BIZ: 'orange',
 }
 
-const logData: LogRecord[] = [
-  { id: '1', user: '张小明', module: '用户管理', action: '创建用户', detail: '创建用户「李华」', ip: '192.168.1.100', result: '成功', time: '2026-05-27 10:30:00' },
-  { id: '2', user: '李雪', module: '权限管理', action: '修改角色', detail: '编辑角色「编辑」的权限', ip: '192.168.1.101', result: '成功', time: '2026-05-27 10:15:00' },
-  { id: '3', user: '王磊', module: '系统设置', action: '修改配置', detail: '修改邮件服务器配置', ip: '192.168.1.102', result: '成功', time: '2026-05-27 09:50:00' },
-  { id: '4', user: '陈芳', module: '用户管理', action: '禁用用户', detail: '禁用用户「赵六」', ip: '192.168.1.103', result: '成功', time: '2026-05-27 09:30:00' },
-  { id: '5', user: '赵鹏', module: '数据安全', action: '导出数据', detail: '导出 1000 条用户数据', ip: '192.168.1.104', result: '拒绝', time: '2026-05-27 09:20:00' },
-  { id: '6', user: '张小明', module: 'API 管理', action: '更新接口', detail: '更新接口 /api/v1/user/detail', ip: '192.168.1.100', result: '成功', time: '2026-05-27 09:00:00' },
-  { id: '7', user: '系统', module: '任务调度', action: '任务执行', detail: 'ETL 任务「用户数据同步」执行失败', ip: '-', result: '失败', time: '2026-05-27 08:45:00' },
-  { id: '8', user: '李雪', module: '内容管理', action: '发布内容', detail: '发布文章「Q2 运营报告」', ip: '192.168.1.101', result: '成功', time: '2026-05-27 08:30:00' },
-]
+// action 中文映射
+const actionLabelMap: Record<string, string> = {
+  'AUTH.LOGIN.SUCCESS': '登录成功',
+  'AUTH.LOGIN.FAILED': '登录失败',
+  'AUTH.LOGOUT': '退出登录',
+  'AUTH.TOKEN.REFRESHED': '刷新令牌',
+  'AUTH.ACCOUNT.LOCKED': '账户锁定',
+  'USER.REGISTER': '用户注册',
+  'USER.PROFILE.UPDATED': '更新资料',
+  'SYSTEM.CONFIG.UPDATED': '更新配置',
+  'SYSTEM.PERMISSION.CHANGED': '权限变更',
+}
 
-const moduleOptions = [
-  { label: '全部模块', value: '' },
-  { label: '用户管理', value: '用户管理' },
-  { label: '权限管理', value: '权限管理' },
-  { label: '系统设置', value: '系统设置' },
-  { label: '数据安全', value: '数据安全' },
-  { label: 'API 管理', value: 'API 管理' },
-  { label: '任务调度', value: '任务调度' },
-  { label: '内容管理', value: '内容管理' },
-]
+function formatAction(action: string): string {
+  return actionLabelMap[action] || action
+}
+
+function formatTime(dateStr: string): string {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return d.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
 
 export default function OperationLog() {
-  const [moduleFilter, setModuleFilter] = useState('')
-  const [resultFilter, setResultFilter] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [dataSource, setDataSource] = useState<OperationLogRecord[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getOperationLogs({
+        category: categoryFilter || undefined,
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+      })
+      setDataSource(res.data || [])
+      // 后端暂未返回 total，用 data length 推断是否有下一页
+      setTotal(res.data?.length >= pageSize ? page * pageSize + 1 : (page - 1) * pageSize + (res.data?.length || 0))
+    } catch {
+      setDataSource([])
+      setTotal(0)
+    } finally {
+      setLoading(false)
+    }
+  }, [categoryFilter, page, pageSize])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  // 筛选变更时重置到第一页
+  const handleCategoryChange = (v: string) => {
+    setCategoryFilter(v)
+    setPage(1)
+  }
 
   const columns = [
-    { title: '时间', dataIndex: 'time', key: 'time', width: 170 },
-    { title: '操作人', dataIndex: 'user', key: 'user' },
     {
-      title: '模块',
-      dataIndex: 'module',
-      key: 'module',
-      render: (v: string) => <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{v}</Tag>,
+      title: '时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 170,
+      render: (v: string) => formatTime(v),
     },
-    { title: '操作', dataIndex: 'action', key: 'action' },
-    { title: '详情', dataIndex: 'detail', key: 'detail' },
-    { title: 'IP 地址', dataIndex: 'ip', key: 'ip' },
+    {
+      title: '操作人',
+      dataIndex: 'email',
+      key: 'email',
+      render: (v: string, record: OperationLogRecord) => v || record.user_id,
+    },
+    {
+      title: '分类',
+      dataIndex: 'category',
+      key: 'category',
+      width: 90,
+      render: (v: string) => (
+        <Tag color={categoryColorMap[v] || 'default'}>{v}</Tag>
+      ),
+    },
+    {
+      title: '操作',
+      dataIndex: 'action',
+      key: 'action',
+      render: (v: string) => formatAction(v),
+    },
+    {
+      title: 'IP 地址',
+      dataIndex: 'ip',
+      key: 'ip',
+      width: 140,
+      render: (v: string) => v || '-',
+    },
+    {
+      title: '设备',
+      dataIndex: 'device',
+      key: 'device',
+      width: 100,
+      render: (v: string) => v || '-',
+    },
     {
       title: '结果',
-      dataIndex: 'result',
-      key: 'result',
+      dataIndex: 'status',
+      key: 'status',
+      width: 80,
       render: (v: string) => {
-        const colorMap: Record<string, { bg: string; color: string }> = {
-          成功: { bg: 'var(--green-light)', color: 'var(--green-text)' },
-          拒绝: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
-          失败: { bg: 'var(--red-light)', color: 'var(--red-text)' },
-        }
-        const c = colorMap[v] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
+        const isSuccess = v === 'SUCCESS'
         return (
-          <Tag style={{ background: c.bg, color: c.color }}>{v}</Tag>
+          <Tag style={{
+            background: isSuccess ? 'var(--green-light)' : 'var(--red-light)',
+            color: isSuccess ? 'var(--green-text)' : 'var(--red-text)',
+          }}>
+            {isSuccess ? '成功' : '失败'}
+          </Tag>
         )
       },
     },
@@ -78,40 +158,48 @@ export default function OperationLog() {
         title="操作日志"
         filters={
           <>
-            <FilterSearch placeholder="搜索操作..." />
             <Select
-              value={moduleFilter}
-              onChange={setModuleFilter}
+              value={categoryFilter}
+              onChange={handleCategoryChange}
               style={{ width: 140 }}
-              options={moduleOptions}
+              options={categoryOptions}
             />
             <Select
-              value={resultFilter}
-              onChange={setResultFilter}
+              value={statusFilter}
+              onChange={setStatusFilter}
               style={{ width: 120 }}
               options={[
                 { label: '全部结果', value: '' },
-                { label: '成功', value: '成功' },
-                { label: '失败', value: '失败' },
-                { label: '拒绝', value: '拒绝' },
+                { label: '成功', value: 'SUCCESS' },
+                { label: '失败', value: 'FAILED' },
               ]}
             />
-            <RangePicker />
-            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={fetchData}
+              style={{ color: 'var(--text-primary)' }}
+            >
+              刷新
+            </Button>
           </>
-        }
-        toolbarActions={
-          <Button icon={<ExportOutlined />}>导出</Button>
         }
       >
         <Table
-          dataSource={logData}
+          dataSource={dataSource}
           columns={columns}
           rowKey="id"
+          loading={loading}
           pagination={{
+            current: page,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
+            showTotal: (t) => `共 ${t} 条记录`,
+            onChange: (p, ps) => {
+              setPage(p)
+              setPageSize(ps)
+            },
           }}
         />
       </DataPanel>

@@ -21,13 +21,15 @@ func NewBridge(client *asynq.Client) *DomainToIntegrationBridge {
 	return &DomainToIntegrationBridge{
 		client: client,
 		queueMap: map[constants.EventName]constants.QueueName{
-			constants.EventUserRegistered:     constants.QueueDefault,
-			constants.EventUserLoggedIn:       constants.QueueDefault,
-			constants.EventUserLoginFailed:    constants.QueueCritical,
-			constants.EventUserAccountLocked:  constants.QueueCritical,
-			constants.EventUserLoggedOut:      constants.QueueDefault,
-			constants.EventUserTokenRefreshed: constants.QueueDefault,
-			constants.EventUserProfileUpdated: constants.QueueDefault,
+			// 所有操作日志类事件统一路由到 logs 队列
+			constants.EventUserRegistered:     constants.QueueLogs,
+			constants.EventUserLoggedIn:       constants.QueueLogs,
+			constants.EventUserLoginFailed:    constants.QueueLogs,
+			constants.EventUserAccountLocked:  constants.QueueLogs,
+			constants.EventUserLoggedOut:      constants.QueueLogs,
+			constants.EventUserTokenRefreshed: constants.QueueLogs,
+			constants.EventUserProfileUpdated: constants.QueueLogs,
+			constants.EventOperationLog:       constants.QueueLogs, // 统一操作日志事件
 		},
 	}
 }

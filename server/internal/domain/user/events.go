@@ -146,17 +146,13 @@ func (e *UserLoggedOut) GetType() string         { return "user.logged_out" }
 // TokenRefreshed Token刷新事件
 type TokenRefreshed struct {
 	UserID    string    `json:"user_id"`
-	OldToken  string    `json:"old_token"`
-	NewToken  string    `json:"new_token"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
 // NewTokenRefreshedEvent 创建Token刷新事件
-func NewTokenRefreshedEvent(userID, oldToken, newToken string) *TokenRefreshed {
+func NewTokenRefreshedEvent(userID string) *TokenRefreshed {
 	return &TokenRefreshed{
 		UserID:    userID,
-		OldToken:  oldToken,
-		NewToken:  newToken,
 		Timestamp: time.Now(),
 	}
 }

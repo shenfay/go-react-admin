@@ -124,6 +124,10 @@ func main() {
 	adminService := admin.NewService(userRepo, roleRepo, menuRepo, enforcer)
 	adminHandler := handlers.NewAdminHandler(adminService)
 
+	// 创建操作日志服务
+	operationLogRepo := repository.NewOperationLogRepository(db)
+	operationLogHandler := handlers.NewOperationLogHandler(operationLogRepo)
+
 	// 5. 设置 Gin 模式
 	if cfg.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
@@ -136,7 +140,7 @@ func main() {
 	transhttp.Middlewares(engine, m)
 
 	// 8. 创建并配置路由器
-	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, tokenService, enforcer)
+	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, operationLogHandler, tokenService, enforcer)
 	apiRouter.Setup()
 
 	// 7. 创建 HTTP 服务器

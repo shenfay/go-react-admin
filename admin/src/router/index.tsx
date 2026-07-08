@@ -96,7 +96,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'design-system',
-        element: <DesignSystem />,
+        element: <PermissionGuard permission="design:view"><DesignSystem /></PermissionGuard>,
       },
       {
         path: 'settings',
