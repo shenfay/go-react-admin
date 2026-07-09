@@ -8,9 +8,9 @@ type OperationLog struct {
 	ID        string                 `json:"id"`
 	UserID    string                 `json:"user_id"`
 	Email     string                 `json:"email"`
-	Action    string                 `json:"action"`    // AUTH.LOGIN.SUCCESS / USER.PROFILE.UPDATED / ...
-	Category  string                 `json:"category"`  // AUTH / USER / SYSTEM / BIZ
-	Status    string                 `json:"status"`    // SUCCESS / FAILED
+	Action    string                 `json:"action"`   // AUTH.LOGIN.SUCCESS / USER.PROFILE.UPDATED / ...
+	Category  string                 `json:"category"` // AUTH / USER / SYSTEM / BIZ
+	Status    string                 `json:"status"`   // SUCCESS / FAILED
 	IP        string                 `json:"ip"`
 	UserAgent string                 `json:"user_agent"`
 	Device    string                 `json:"device"`

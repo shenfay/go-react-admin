@@ -61,8 +61,8 @@ func NewUserLoggedInEvent(userID, email, ip, userAgent, device string) *UserLogg
 	}
 }
 
-func (e *UserLoggedIn) EventName() string       { return "user.logged_in" }
-func (e *UserLoggedIn) OccurredAt() time.Time   { return e.Timestamp }
+func (e *UserLoggedIn) EventName() string     { return "user.logged_in" }
+func (e *UserLoggedIn) OccurredAt() time.Time { return e.Timestamp }
 
 // LoginFailed 登录失败事件
 type LoginFailed struct {
@@ -84,8 +84,8 @@ func NewLoginFailedEvent(userID, email, ip, reason string) *LoginFailed {
 	}
 }
 
-func (e *LoginFailed) EventName() string       { return "user.login_failed" }
-func (e *LoginFailed) OccurredAt() time.Time   { return e.Timestamp }
+func (e *LoginFailed) EventName() string     { return "user.login_failed" }
+func (e *LoginFailed) OccurredAt() time.Time { return e.Timestamp }
 
 // AccountLocked 账户锁定事件
 type AccountLocked struct {
@@ -107,8 +107,8 @@ func NewAccountLockedEvent(userID, email string, failedAttempts int, lockedUntil
 	}
 }
 
-func (e *AccountLocked) EventName() string       { return "user.account_locked" }
-func (e *AccountLocked) OccurredAt() time.Time   { return e.Timestamp }
+func (e *AccountLocked) EventName() string     { return "user.account_locked" }
+func (e *AccountLocked) OccurredAt() time.Time { return e.Timestamp }
 
 // UserLoggedOut 用户登出领域事件
 type UserLoggedOut struct {
@@ -126,8 +126,8 @@ func NewUserLoggedOutEvent(userID, email string) *UserLoggedOut {
 	}
 }
 
-func (e *UserLoggedOut) EventName() string       { return "user.logged_out" }
-func (e *UserLoggedOut) OccurredAt() time.Time   { return e.Timestamp }
+func (e *UserLoggedOut) EventName() string     { return "user.logged_out" }
+func (e *UserLoggedOut) OccurredAt() time.Time { return e.Timestamp }
 
 // TokenRefreshed Token刷新事件
 type TokenRefreshed struct {
@@ -143,8 +143,8 @@ func NewTokenRefreshedEvent(userID string) *TokenRefreshed {
 	}
 }
 
-func (e *TokenRefreshed) EventName() string       { return "user.token_refreshed" }
-func (e *TokenRefreshed) OccurredAt() time.Time   { return e.Timestamp }
+func (e *TokenRefreshed) EventName() string     { return "user.token_refreshed" }
+func (e *TokenRefreshed) OccurredAt() time.Time { return e.Timestamp }
 
 // UserProfileUpdated 用户资料更新事件
 type UserProfileUpdated struct {
@@ -162,6 +162,5 @@ func NewUserProfileUpdatedEvent(userID, email string) *UserProfileUpdated {
 	}
 }
 
-func (e *UserProfileUpdated) EventName() string       { return "user.profile_updated" }
-func (e *UserProfileUpdated) OccurredAt() time.Time   { return e.Timestamp }
-
+func (e *UserProfileUpdated) EventName() string     { return "user.profile_updated" }
+func (e *UserProfileUpdated) OccurredAt() time.Time { return e.Timestamp }

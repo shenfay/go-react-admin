@@ -14,17 +14,17 @@ import (
 
 // MenuPO 菜单持久化对象
 type MenuPO struct {
-	ID         string   `gorm:"primaryKey;type:varchar(50)" json:"id"`
-	Key        string   `gorm:"uniqueIndex;type:varchar(100);not null" json:"key"`
-	Label      string   `gorm:"type:varchar(100);not null" json:"label"`
-	Icon       string   `gorm:"type:varchar(100);default:''" json:"icon"`
-	Path       string   `gorm:"type:varchar(200);default:''" json:"path"`
-	Permission string   `gorm:"type:varchar(100);default:''" json:"permission"`
+	ID         string         `gorm:"primaryKey;type:varchar(50)" json:"id"`
+	Key        string         `gorm:"uniqueIndex;type:varchar(100);not null" json:"key"`
+	Label      string         `gorm:"type:varchar(100);not null" json:"label"`
+	Icon       string         `gorm:"type:varchar(100);default:''" json:"icon"`
+	Path       string         `gorm:"type:varchar(200);default:''" json:"path"`
+	Permission string         `gorm:"type:varchar(100);default:''" json:"permission"`
 	ParentID   sql.NullString `gorm:"type:varchar(50);index" json:"parent_id"`
-	SortOrder  int      `gorm:"default:0;index" json:"sort_order"`
-	Status     bool     `gorm:"default:true" json:"status"`
-	CreatedAt  TimeNull `json:"created_at"`
-	UpdatedAt  TimeNull `json:"updated_at"`
+	SortOrder  int            `gorm:"default:0;index" json:"sort_order"`
+	Status     bool           `gorm:"default:true" json:"status"`
+	CreatedAt  TimeNull       `json:"created_at"`
+	UpdatedAt  TimeNull       `json:"updated_at"`
 }
 
 func (MenuPO) TableName() string { return "menus" }
