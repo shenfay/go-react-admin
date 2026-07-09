@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/shenfay/kiqi/internal/domain/operation"
+	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
@@ -28,6 +29,18 @@ func (h *OperationLogHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 // ListOperationLogs 查询操作日志列表
 // 支持分页和可选的 category/action 筛选
+// @Summary 查询操作日志列表
+// @Tags OperationLogs
+// @Produce json
+// @Security BearerAuth
+// @Param limit query int false "每页条数" default(20)
+// @Param offset query int false "偏移量" default(0)
+// @Param category query string false "按分类筛选"
+// @Param action query string false "按操作筛选"
+// @Success 200 {object} middleware.SuccessResponse "操作日志列表"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /operation-logs [get]
 func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
 	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
 	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
@@ -59,6 +72,17 @@ func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
 }
 
 // GetUserOperationLogs 查询用户操作日志
+// @Summary 查询指定用户的操作日志
+// @Tags OperationLogs
+// @Produce json
+// @Security BearerAuth
+// @Param user_id path string true "用户ID"
+// @Param limit query int false "每页条数" default(20)
+// @Param offset query int false "偏移量" default(0)
+// @Success 200 {object} middleware.SuccessResponse "用户操作日志"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /operation-logs/user/{user_id} [get]
 func (h *OperationLogHandler) GetUserOperationLogs(c *gin.Context) {
 	userID := c.Param("user_id")
 	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
@@ -78,6 +102,17 @@ func (h *OperationLogHandler) GetUserOperationLogs(c *gin.Context) {
 }
 
 // GetCategoryOperationLogs 按分类查询操作日志
+// @Summary 按分类查询操作日志
+// @Tags OperationLogs
+// @Produce json
+// @Security BearerAuth
+// @Param category path string true "操作分类"
+// @Param limit query int false "每页条数" default(20)
+// @Param offset query int false "偏移量" default(0)
+// @Success 200 {object} middleware.SuccessResponse "分类操作日志"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /operation-logs/category/{category} [get]
 func (h *OperationLogHandler) GetCategoryOperationLogs(c *gin.Context) {
 	category := c.Param("category")
 	limit := utils.ToInt(c.DefaultQuery("limit", "20"))

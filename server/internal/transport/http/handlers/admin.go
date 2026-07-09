@@ -7,6 +7,7 @@ import (
 
 	"github.com/shenfay/kiqi/internal/app/admin"
 	"github.com/shenfay/kiqi/internal/domain/user"
+	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
 )
@@ -24,6 +25,19 @@ func NewAdminHandler(service *admin.Service) *AdminHandler {
 // ---- 用户管理 ----
 
 // ListUsers 用户列表
+// @Summary 获取用户列表（分页）
+// @Tags Admin/Users
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "页码" default(1)
+// @Param page_size query int false "每页条数" default(20)
+// @Param keyword query string false "搜索关键词"
+// @Param role_id query string false "角色ID"
+// @Param status query string false "状态筛选" Enums(active, locked)
+// @Success 200 {object} middleware.SuccessResponse "用户列表"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/users [get]
 func (h *AdminHandler) ListUsers(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
@@ -50,6 +64,18 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 }
 
 // CreateUser 创建用户
+// @Summary 管理员创建用户
+// @Tags Admin/Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body object{email=string,name=string,password=string,role_ids=[]string} true "用户创建数据"
+// @Success 201 {object} middleware.SuccessResponse "创建成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 409 {object} middleware.ErrorResponse "邮箱已存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/users [post]
 func (h *AdminHandler) CreateUser(c *gin.Context) {
 	var req struct {
 		Email    string   `json:"email" binding:"required,email"`
@@ -80,6 +106,19 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 }
 
 // UpdateUser 更新用户
+// @Summary 管理员更新用户信息
+// @Tags Admin/Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "用户ID"
+// @Param request body object{name=string,email=string,role_ids=[]string} true "用户更新数据"
+// @Success 200 {object} middleware.SuccessResponse "更新成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "用户不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/users/{id} [put]
 func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	userID := c.Param("id")
 
@@ -111,6 +150,19 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 }
 
 // ToggleUserStatus 启用/禁用用户
+// @Summary 切换用户启用/禁用状态
+// @Tags Admin/Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "用户ID"
+// @Param request body object{locked=bool} true "状态数据"
+// @Success 200 {object} middleware.SuccessResponse "状态已更新"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "用户不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/users/{id}/status [patch]
 func (h *AdminHandler) ToggleUserStatus(c *gin.Context) {
 	userID := c.Param("id")
 
@@ -134,6 +186,14 @@ func (h *AdminHandler) ToggleUserStatus(c *gin.Context) {
 // ---- 角色管理 ----
 
 // ListRoles 角色列表
+// @Summary 获取所有角色列表
+// @Tags Admin/Roles
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} middleware.SuccessResponse "角色列表"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles [get]
 func (h *AdminHandler) ListRoles(c *gin.Context) {
 	roles, err := h.service.ListRoles(c.Request.Context())
 	if err != nil {
@@ -145,6 +205,18 @@ func (h *AdminHandler) ListRoles(c *gin.Context) {
 }
 
 // CreateRole 创建角色
+// @Summary 创建新角色
+// @Tags Admin/Roles
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body object{name=string,code=string,description=string} true "角色创建数据"
+// @Success 201 {object} middleware.SuccessResponse "创建成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 409 {object} middleware.ErrorResponse "角色编码已存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles [post]
 func (h *AdminHandler) CreateRole(c *gin.Context) {
 	var req struct {
 		Name        string `json:"name" binding:"required"`
@@ -173,6 +245,19 @@ func (h *AdminHandler) CreateRole(c *gin.Context) {
 }
 
 // UpdateRole 更新角色
+// @Summary 更新角色信息
+// @Tags Admin/Roles
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "角色ID"
+// @Param request body object{name=string,description=string} true "角色更新数据"
+// @Success 200 {object} middleware.SuccessResponse "更新成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "角色不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles/{id} [put]
 func (h *AdminHandler) UpdateRole(c *gin.Context) {
 	roleID := c.Param("id")
 
@@ -202,6 +287,16 @@ func (h *AdminHandler) UpdateRole(c *gin.Context) {
 }
 
 // DeleteRole 删除角色
+// @Summary 删除角色
+// @Tags Admin/Roles
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "角色ID"
+// @Success 200 {object} middleware.SuccessResponse "删除成功"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "角色不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles/{id} [delete]
 func (h *AdminHandler) DeleteRole(c *gin.Context) {
 	roleID := c.Param("id")
 
@@ -214,6 +309,16 @@ func (h *AdminHandler) DeleteRole(c *gin.Context) {
 }
 
 // ToggleRoleStatus 切换角色状态
+// @Summary 切换角色启用/禁用状态
+// @Tags Admin/Roles
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "角色ID"
+// @Success 200 {object} middleware.SuccessResponse "状态已切换"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "角色不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles/{id}/status [patch]
 func (h *AdminHandler) ToggleRoleStatus(c *gin.Context) {
 	roleID := c.Param("id")
 
@@ -228,6 +333,16 @@ func (h *AdminHandler) ToggleRoleStatus(c *gin.Context) {
 // ---- 权限管理 ----
 
 // GetRolePermissions 获取角色权限
+// @Summary 获取指定角色的权限列表
+// @Tags Admin/Permissions
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "角色ID"
+// @Success 200 {object} middleware.SuccessResponse "权限列表"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "角色不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles/{id}/permissions [get]
 func (h *AdminHandler) GetRolePermissions(c *gin.Context) {
 	roleID := c.Param("id")
 
@@ -241,6 +356,19 @@ func (h *AdminHandler) GetRolePermissions(c *gin.Context) {
 }
 
 // UpdateRolePermissions 更新角色权限
+// @Summary 更新角色的权限分配
+// @Tags Admin/Permissions
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "角色ID"
+// @Param request body object{permissions=[]string} true "权限标识列表"
+// @Success 200 {object} middleware.SuccessResponse "权限已更新"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "角色不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/roles/{id}/permissions [put]
 func (h *AdminHandler) UpdateRolePermissions(c *gin.Context) {
 	roleID := c.Param("id")
 
@@ -262,6 +390,14 @@ func (h *AdminHandler) UpdateRolePermissions(c *gin.Context) {
 }
 
 // GetCurrentUserPermissions 获取当前用户权限
+// @Summary 获取当前登录用户的权限列表
+// @Tags Admin/Permissions
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} middleware.SuccessResponse "权限列表"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /auth/permissions [get]
 func (h *AdminHandler) GetCurrentUserPermissions(c *gin.Context) {
 	userID := c.GetString("user_id")
 
@@ -275,6 +411,14 @@ func (h *AdminHandler) GetCurrentUserPermissions(c *gin.Context) {
 }
 
 // GetUserMenuTree 获取当前用户可见的菜单树
+// @Summary 获取当前登录用户可见的菜单树
+// @Tags Admin/Menus
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} middleware.SuccessResponse "菜单树"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /auth/menus [get]
 func (h *AdminHandler) GetUserMenuTree(c *gin.Context) {
 	userID := c.GetString("user_id")
 
@@ -290,6 +434,14 @@ func (h *AdminHandler) GetUserMenuTree(c *gin.Context) {
 // ---- 菜单管理 ----
 
 // ListMenus 获取菜单树
+// @Summary 获取完整菜单树（管理端）
+// @Tags Admin/Menus
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} middleware.SuccessResponse "菜单树"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/menus [get]
 func (h *AdminHandler) ListMenus(c *gin.Context) {
 	tree, err := h.service.ListMenuTree(c.Request.Context())
 	if err != nil {
@@ -301,6 +453,18 @@ func (h *AdminHandler) ListMenus(c *gin.Context) {
 }
 
 // CreateMenu 创建菜单
+// @Summary 创建新菜单
+// @Tags Admin/Menus
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body object{key=string,label=string,icon=string,path=string,permission=string,parent_id=string,sort_order=int} true "菜单创建数据"
+// @Success 201 {object} middleware.SuccessResponse "创建成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 409 {object} middleware.ErrorResponse "菜单Key已存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/menus [post]
 func (h *AdminHandler) CreateMenu(c *gin.Context) {
 	var req struct {
 		Key        string `json:"key" binding:"required"`
@@ -337,6 +501,19 @@ func (h *AdminHandler) CreateMenu(c *gin.Context) {
 }
 
 // UpdateMenu 更新菜单
+// @Summary 更新菜单信息
+// @Tags Admin/Menus
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "菜单ID"
+// @Param request body object{label=string,icon=string,path=string,permission=string} true "菜单更新数据"
+// @Success 200 {object} middleware.SuccessResponse "更新成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "菜单不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/menus/{id} [put]
 func (h *AdminHandler) UpdateMenu(c *gin.Context) {
 	menuID := c.Param("id")
 
@@ -370,6 +547,16 @@ func (h *AdminHandler) UpdateMenu(c *gin.Context) {
 }
 
 // DeleteMenu 删除菜单
+// @Summary 删除菜单
+// @Tags Admin/Menus
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "菜单ID"
+// @Success 200 {object} middleware.SuccessResponse "删除成功"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "菜单不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/menus/{id} [delete]
 func (h *AdminHandler) DeleteMenu(c *gin.Context) {
 	menuID := c.Param("id")
 
@@ -382,6 +569,16 @@ func (h *AdminHandler) DeleteMenu(c *gin.Context) {
 }
 
 // ToggleMenuStatus 切换菜单状态
+// @Summary 切换菜单启用/禁用状态
+// @Tags Admin/Menus
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "菜单ID"
+// @Success 200 {object} middleware.SuccessResponse "状态已切换"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "菜单不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/menus/{id}/status [patch]
 func (h *AdminHandler) ToggleMenuStatus(c *gin.Context) {
 	menuID := c.Param("id")
 
@@ -394,6 +591,17 @@ func (h *AdminHandler) ToggleMenuStatus(c *gin.Context) {
 }
 
 // UpdateMenuSort 更新菜单排序
+// @Summary 批量更新菜单排序顺序
+// @Tags Admin/Menus
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body object{items=[]object{id=string,sort_order=int}} true "排序数据"
+// @Success 200 {object} middleware.SuccessResponse "排序已更新"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /admin/menus/sort [put]
 func (h *AdminHandler) UpdateMenuSort(c *gin.Context) {
 	var req struct {
 		Items []struct {

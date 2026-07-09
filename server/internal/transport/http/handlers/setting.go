@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shenfay/kiqi/internal/domain/setting"
+	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 )
 
@@ -27,6 +28,15 @@ func (h *SettingHandler) RegisterRoutes(rg *gin.RouterGroup) {
 
 // ListSettings 获取设置列表（支持 category 过滤）
 // GET /api/v1/settings?category=basic
+// @Summary 获取系统设置列表
+// @Tags Settings
+// @Produce json
+// @Security BearerAuth
+// @Param category query string false "设置分类"
+// @Success 200 {object} middleware.SuccessResponse "设置列表"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /settings [get]
 func (h *SettingHandler) ListSettings(c *gin.Context) {
 	category := c.Query("category")
 
@@ -48,6 +58,16 @@ func (h *SettingHandler) ListSettings(c *gin.Context) {
 
 // GetSetting 获取单个设置
 // GET /api/v1/settings/:key
+// @Summary 获取单个系统设置
+// @Tags Settings
+// @Produce json
+// @Security BearerAuth
+// @Param key path string true "设置项Key"
+// @Success 200 {object} middleware.SuccessResponse "设置详情"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 404 {object} middleware.ErrorResponse "设置项不存在"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /settings/{key} [get]
 func (h *SettingHandler) GetSetting(c *gin.Context) {
 	key := c.Param("key")
 
@@ -78,6 +98,17 @@ type settingItem struct {
 
 // BatchUpdateSettings 批量更新设置
 // PUT /api/v1/settings
+// @Summary 批量更新系统设置
+// @Tags Settings
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body batchUpdateRequest true "批量更新数据"
+// @Success 200 {object} middleware.SuccessResponse "更新成功"
+// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
+// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Router /settings [put]
 func (h *SettingHandler) BatchUpdateSettings(c *gin.Context) {
 	var req batchUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
