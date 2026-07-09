@@ -25,6 +25,8 @@
   "dependencies": {
     "@ant-design/charts": "^2.6.7",
     "@ant-design/pro-components": "^3.1.14-1",
+    "@codemirror/lang-json": "^6.0.2",
+    "@uiw/react-codemirror": "^4.25.11",
     "antd": "^6.5.0",
     "axios": "^1.16.1",
     "i18next": "^26.3.5",
