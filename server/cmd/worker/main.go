@@ -67,11 +67,13 @@ func main() {
 	}
 	logger.Info("Database connection established")
 
-	// 4. 初始化仓储（统一操作日志）
+	// 4. 初始化仓储（统一操作日志 + 消息通知）
 	operationLogRepo := repository.NewOperationLogRepository(db)
+	messageRepo := repository.NewMessageRepository(db)
 
-	// 5. 创建统一操作日志处理器
+	// 5. 创建处理器
 	operationLogHandler := workerhandlers.NewOperationLogHandler(operationLogRepo)
+	notificationHandler := workerhandlers.NewNotificationHandler(messageRepo)
 
 	// 6. 注册 Asynq 任务处理器
 	mux := asynq.NewServeMux()
@@ -85,6 +87,9 @@ func main() {
 	// AsynqTaskOperationLog 由 TaskPublisher 直接入队，不在 Bridge 路由表中，单独注册
 	mux.HandleFunc(string(constants.AsynqTaskOperationLog), operationLogHandler.ProcessTask)
 
+	// 消息通知任务
+	mux.HandleFunc(string(constants.AsynqTaskNotification), notificationHandler.ProcessTask)
+
 	// 7. 创建 Asynq 服务器
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{
@@ -95,10 +100,11 @@ func main() {
 		asynq.Config{
 			Concurrency: cfg.Asynq.Concurrency,
 			Queues: map[string]int{
-				"critical": 6,
-				"default":  3,
-				"logs":     4, // 操作日志专用队列
-				"low":      1,
+				"critical":     6,
+				"default":      3,
+				"logs":         4, // 操作日志专用队列
+				"notification": 4, // 消息通知专用队列
+				"low":          1,
 			},
 			StrictPriority: true,
 		},

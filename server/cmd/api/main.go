@@ -19,6 +19,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shenfay/kiqi/internal/app/admin"
 	"github.com/shenfay/kiqi/internal/app/authentication"
+	notificationapp "github.com/shenfay/kiqi/internal/app/notification"
+	"github.com/shenfay/kiqi/internal/domain/notification"
 	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/setting"
@@ -111,22 +113,25 @@ type repoDeps struct {
 	menuRepo    rbac.MenuRepository
 	operLogRepo operation.LogRepository
 	settingRepo setting.Repository
+	messageRepo notification.MessageRepository
 }
 
 // svcDeps 应用服务层依赖
 type svcDeps struct {
-	tokenService authentication.TokenService
-	authService  *authentication.Service
-	adminService *admin.Service
-	settingSvc   *setting.Service
+	tokenService    authentication.TokenService
+	authService     *authentication.Service
+	adminService    *admin.Service
+	settingSvc      *setting.Service
+	notificationSvc *notificationapp.AppService
 }
 
 // handlerDeps 传输层依赖
 type handlerDeps struct {
-	authHandler  *handlers.AuthHandler
-	adminHandler *handlers.AdminHandler
-	operLogHdlr  *handlers.OperationLogHandler
-	settingHdlr  *handlers.SettingHandler
+	authHandler      *handlers.AuthHandler
+	adminHandler     *handlers.AdminHandler
+	operLogHdlr      *handlers.OperationLogHandler
+	settingHdlr      *handlers.SettingHandler
+	notificationHdlr *handlers.NotificationHandler
 }
 
 // --- Provider 函数 ---
@@ -193,6 +198,7 @@ func initRepositories(db *gorm.DB) *repoDeps {
 		menuRepo:    repository.NewMenuRepository(db),
 		operLogRepo: repository.NewOperationLogRepository(db),
 		settingRepo: repository.NewSettingRepository(db),
+		messageRepo: repository.NewMessageRepository(db),
 	}
 }
 
@@ -212,21 +218,27 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer, infra.bus)
 	settingSvc := setting.NewService(repos.settingRepo, infra.bus)
 
+	// 消息模块
+	notificationDomainSvc := notification.NewService(repos.messageRepo)
+	notificationSvc := notificationapp.NewAppService(notificationDomainSvc)
+
 	return &svcDeps{
-		tokenService: tokenService,
-		authService:  authService,
-		adminService: adminService,
-		settingSvc:   settingSvc,
+		tokenService:    tokenService,
+		authService:     authService,
+		adminService:    adminService,
+		settingSvc:      settingSvc,
+		notificationSvc: notificationSvc,
 	}
 }
 
 // initHandlers 初始化 HTTP 处理器
 func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
 	return &handlerDeps{
-		authHandler:  handlers.NewAuthHandler(svcs.authService, svcs.tokenService),
-		adminHandler: handlers.NewAdminHandler(svcs.adminService),
-		operLogHdlr:  handlers.NewOperationLogHandler(repos.operLogRepo),
-		settingHdlr:  handlers.NewSettingHandler(svcs.settingSvc),
+		authHandler:      handlers.NewAuthHandler(svcs.authService, svcs.tokenService),
+		adminHandler:     handlers.NewAdminHandler(svcs.adminService),
+		operLogHdlr:      handlers.NewOperationLogHandler(repos.operLogRepo),
+		settingHdlr:      handlers.NewSettingHandler(svcs.settingSvc),
+		notificationHdlr: handlers.NewNotificationHandler(svcs.notificationSvc),
 	}
 }
 
@@ -239,7 +251,7 @@ func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, toke
 	engine := gin.New()
 	transhttp.Middlewares(engine, m, cfg.CORS)
 
-	apiRouter := transhttp.NewRouter(engine, hdls.authHandler, hdls.adminHandler, hdls.operLogHdlr, hdls.settingHdlr, tokenService, enforcer)
+	apiRouter := transhttp.NewRouter(engine, hdls.authHandler, hdls.adminHandler, hdls.operLogHdlr, hdls.settingHdlr, hdls.notificationHdlr, tokenService, enforcer)
 	apiRouter.Setup()
 
 	srv := &http.Server{

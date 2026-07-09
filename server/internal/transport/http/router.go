@@ -16,6 +16,7 @@ type Router struct {
 	adminHandler        *handlers.AdminHandler
 	operationLogHandler *handlers.OperationLogHandler
 	settingHandler      *handlers.SettingHandler
+	notificationHandler *handlers.NotificationHandler
 	tokenService        authentication.TokenService
 	enforcer            *authorize.Enforcer
 }
@@ -27,6 +28,7 @@ func NewRouter(
 	adminHandler *handlers.AdminHandler,
 	operationLogHandler *handlers.OperationLogHandler,
 	settingHandler *handlers.SettingHandler,
+	notificationHandler *handlers.NotificationHandler,
 	tokenService authentication.TokenService,
 	enforcer *authorize.Enforcer,
 ) *Router {
@@ -36,6 +38,7 @@ func NewRouter(
 		adminHandler:        adminHandler,
 		operationLogHandler: operationLogHandler,
 		settingHandler:      settingHandler,
+		notificationHandler: notificationHandler,
 		tokenService:        tokenService,
 		enforcer:            enforcer,
 	}
@@ -64,6 +67,7 @@ func (r *Router) Setup() {
 		r.setupAdminRoutes(v1)
 		r.setupOperationLogRoutes(v1)
 		r.setupSettingRoutes(v1)
+		r.setupNotificationRoutes(v1)
 	}
 
 	// 注册 Swagger UI 路由（开发环境）
@@ -172,5 +176,27 @@ func (r *Router) setupSettingRoutes(v1 *gin.RouterGroup) {
 	settings.Use(authMiddleware, permMiddleware)
 	{
 		r.settingHandler.RegisterRoutes(settings)
+	}
+}
+
+// setupNotificationRoutes 配置消息路由
+func (r *Router) setupNotificationRoutes(v1 *gin.RouterGroup) {
+	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
+		TokenService: r.tokenService,
+	})
+	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
+
+	// 用户消息接口（只需登录）
+	messages := v1.Group("/messages")
+	messages.Use(authMiddleware)
+	{
+		r.notificationHandler.RegisterRoutes(messages)
+	}
+
+	// 管理员消息管理（需要登录 + message:view 权限）
+	adminMessages := v1.Group("/admin/messages")
+	adminMessages.Use(authMiddleware, permMiddleware)
+	{
+		r.notificationHandler.RegisterAdminRoutes(adminMessages)
 	}
 }

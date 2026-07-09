@@ -59,13 +59,15 @@ const (
 	AsynqTaskLogUserRegistration    = "auth:log_user_registration"
 	AsynqTaskLogLoginAttempt        = "auth:log_login_attempt"
 	AsynqTaskCleanupExpiredTokens   = "auth:cleanup_expired_tokens"
-	AsynqTaskOperationLog           = "log:operation" // 统一操作日志任务类型
+	AsynqTaskOperationLog           = "log:operation"     // 统一操作日志任务类型
+	AsynqTaskNotification           = "notification:send" // 消息通知任务类型
 )
 
 // 队列名称
 const (
-	QueueCritical QueueName = "critical"
-	QueueDefault  QueueName = "default"
-	QueueLow      QueueName = "low"
-	QueueLogs     QueueName = "logs" // 操作日志专用队列
+	QueueCritical     QueueName = "critical"
+	QueueDefault      QueueName = "default"
+	QueueLow          QueueName = "low"
+	QueueLogs         QueueName = "logs"         // 操作日志专用队列
+	QueueNotification QueueName = "notification" // 消息通知专用队列
 )

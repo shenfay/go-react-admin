@@ -23,6 +23,7 @@ const PermissionManagement = lazy(() => import('@/pages/PermissionManagement'))
 const MenuManagement = lazy(() => import('@/pages/MenuManagement'))
 const Profile = lazy(() => import('@/pages/Profile'))
 const OperationLog = lazy(() => import('@/pages/OperationLog'))
+const MessageManagement = lazy(() => import('@/pages/MessageManagement'))
 const SystemSettings = lazy(() => import('@/pages/SystemSettings'))
 const DesignSystem = lazy(() => import('@/pages/DesignSystem'))
 
@@ -108,6 +109,10 @@ const router = createBrowserRouter([
       {
         path: 'operation-log',
         element: <PermissionGuard permission="operation:log"><OperationLog /></PermissionGuard>,
+      },
+      {
+        path: 'messages',
+        element: <PermissionGuard permission="message:view"><MessageManagement /></PermissionGuard>,
       },
       {
         path: 'design-system',
