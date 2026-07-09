@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { Breadcrumb, AutoComplete, Input, Select } from 'antd'
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { Breadcrumb, AutoComplete, Input, Dropdown } from 'antd'
+import { SearchOutlined, ReloadOutlined, GlobalOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/stores'
@@ -8,6 +8,40 @@ import type { MenuItem } from '@/types'
 
 interface TopBarProps {
   onRefresh: () => void
+}
+
+/** 菜单 key -> i18n key 映射 */
+const menuKeyMap: Record<string, string> = {
+  overview: 'menuOverview',
+  dashboard: 'menuDashboard',
+  growth: 'menuGrowth',
+  family: 'menuFamily',
+  goals: 'menuGoals',
+  'card-engine': 'menuCardEngine',
+  'card-templates': 'menuCardTemplates',
+  'card-instances': 'menuCardInstances',
+  companion: 'menuCompanion',
+  companions: 'menuCompanions',
+  acceptance: 'menuAcceptance',
+  'acceptance-pending': 'menuAcceptancePending',
+  'points-system': 'menuPointsSystem',
+  points: 'menuPoints',
+  'shop-items': 'menuShopItems',
+  'exchange-orders': 'menuExchangeOrders',
+  user: 'menuUser',
+  'user-management': 'menuUserManagement',
+  'permission-management': 'menuPermissionManagement',
+  'menu-management': 'menuMenuManagement',
+  profile: 'menuProfile',
+  system: 'menuSystem',
+  'operation-log': 'menuOperationLog',
+  'design-system': 'menuDesignSystem',
+  'system-settings': 'menuSystemSettings',
+}
+
+function getMenuLabel(node: MenuItem, t: (key: string) => string): string {
+  const i18nKey = menuKeyMap[node.key]
+  return i18nKey ? t(i18nKey) : node.label
 }
 
 export default function TopBar({ onRefresh }: TopBarProps) {
@@ -21,12 +55,13 @@ export default function TopBar({ onRefresh }: TopBarProps) {
     const result: { title: string }[] = [{ title: t('home') }]
     function search(nodes: MenuItem[], parentLabel?: string): boolean {
       for (const node of nodes) {
+        const nodeLabel = getMenuLabel(node, t)
         if (node.path === location.pathname) {
           if (parentLabel) result.push({ title: parentLabel })
-          result.push({ title: node.label })
+          result.push({ title: nodeLabel })
           return true
         }
-        if (node.children && search(node.children, node.label)) {
+        if (node.children && search(node.children, nodeLabel)) {
           return true
         }
       }
@@ -43,7 +78,8 @@ export default function TopBar({ onRefresh }: TopBarProps) {
     const items: { value: string; label: string; path: string }[] = []
     function flatten(nodes: MenuItem[], parentLabel?: string) {
       for (const node of nodes) {
-        const fullLabel = parentLabel ? `${parentLabel} / ${node.label}` : node.label
+        const nodeLabel = getMenuLabel(node, t)
+        const fullLabel = parentLabel ? `${parentLabel} / ${nodeLabel}` : nodeLabel
         if (node.path) {
           items.push({ value: node.path, label: fullLabel, path: node.path })
         }
@@ -52,7 +88,8 @@ export default function TopBar({ onRefresh }: TopBarProps) {
     }
     flatten(menuTree)
     return items
-  }, [menuTree])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuTree, i18n.language])
 
   const filteredOptions = useMemo(() => {
     if (!searchValue) return []
@@ -131,18 +168,6 @@ export default function TopBar({ onRefresh }: TopBarProps) {
           />
         </AutoComplete>
 
-        {/* Language Switcher */}
-        <Select
-          value={i18n.language}
-          onChange={val => i18n.changeLanguage(val)}
-          style={{ width: 90 }}
-          size="small"
-          options={[
-            { value: 'zh-CN', label: '中文' },
-            { value: 'en-US', label: 'English' },
-          ]}
-        />
-
         {/* Refresh Button */}
         <button
           type="button"
@@ -170,6 +195,46 @@ export default function TopBar({ onRefresh }: TopBarProps) {
         >
           <ReloadOutlined style={{ fontSize: 16, color: 'var(--text-secondary)' }} />
         </button>
+
+        {/* Language Switcher */}
+        <Dropdown
+          menu={{
+            items: [
+              { key: 'zh-CN', label: <span style={{ fontSize: 14 }}>{'\u{1F1E8}\u{1F1F3}'} 中文</span> },
+              { key: 'en-US', label: <span style={{ fontSize: 14 }}>{'\u{1F1FA}\u{1F1F8}'} English</span> },
+            ],
+            onClick: ({ key }) => i18n.changeLanguage(key),
+            selectedKeys: [i18n.language],
+          }}
+          trigger={['click']}
+        >
+          <button
+            type="button"
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-light)',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.15s',
+              fontSize: 18,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--hover-bg)'
+              e.currentTarget.style.borderColor = 'var(--border-hover)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'var(--bg-light)'
+              e.currentTarget.style.borderColor = 'var(--border-color)'
+            }}
+          >
+            {i18n.language === 'zh-CN' ? '\u{1F1E8}\u{1F1F3}' : '\u{1F1FA}\u{1F1F8}'}
+          </button>
+        </Dropdown>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Table, Tag, Select, Button } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import DataPanel from '@/components/DataPanel'
-import { DEFAULT_PAGINATION } from '@/config/pagination'
+import { DEFAULT_PAGINATION, getPaginationShowTotal } from '@/config/pagination'
 import { useCrudList } from '@/hooks/useCrudList'
 import { getOperationLogs, type OperationLogRecord } from '@/services/operationLog'
 
@@ -169,6 +169,7 @@ export default function OperationLog() {
             pageSize,
             total,
             ...DEFAULT_PAGINATION,
+            ...getPaginationShowTotal(t),
             onChange: handlePageChange,
           }}
         />

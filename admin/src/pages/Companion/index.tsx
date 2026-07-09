@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Table, Tag, Button, Select } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
-import { DEFAULT_PAGINATION } from '@/config/pagination'
+import { DEFAULT_PAGINATION, getPaginationShowTotal } from '@/config/pagination'
 
 export default function Companion() {
   const { t } = useTranslation()
@@ -59,7 +59,7 @@ export default function Companion() {
         dataSource={[]}
         rowKey="id"
         locale={{ emptyText: t('noData') }}
-        pagination={DEFAULT_PAGINATION}
+        pagination={{ ...DEFAULT_PAGINATION, ...getPaginationShowTotal(t) }}
       />
     </DataPanel>
   )

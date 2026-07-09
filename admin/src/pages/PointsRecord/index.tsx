@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Table, Tag, Statistic, Row, Col, Card, Button, Select } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
-import { DEFAULT_PAGINATION } from '@/config/pagination'
+import { DEFAULT_PAGINATION, getPaginationShowTotal } from '@/config/pagination'
 
 export default function PointsRecord() {
   const { t } = useTranslation()
@@ -82,7 +82,7 @@ export default function PointsRecord() {
           dataSource={[]}
           rowKey="id"
           locale={{ emptyText: t('noData') }}
-          pagination={DEFAULT_PAGINATION}
+          pagination={{ ...DEFAULT_PAGINATION, ...getPaginationShowTotal(t) }}
         />
       </DataPanel>
     </div>

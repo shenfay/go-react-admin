@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Menu } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getIcon } from '@/config/menu'
@@ -9,23 +10,54 @@ interface SidebarMenuProps {
   collapsed: boolean
 }
 
+/** 菜单 key -> i18n key 映射 */
+const menuKeyMap: Record<string, string> = {
+  overview: 'menuOverview',
+  dashboard: 'menuDashboard',
+  growth: 'menuGrowth',
+  family: 'menuFamily',
+  goals: 'menuGoals',
+  'card-engine': 'menuCardEngine',
+  'card-templates': 'menuCardTemplates',
+  'card-instances': 'menuCardInstances',
+  companion: 'menuCompanion',
+  companions: 'menuCompanions',
+  acceptance: 'menuAcceptance',
+  'acceptance-pending': 'menuAcceptancePending',
+  'points-system': 'menuPointsSystem',
+  points: 'menuPoints',
+  'shop-items': 'menuShopItems',
+  'exchange-orders': 'menuExchangeOrders',
+  user: 'menuUser',
+  'user-management': 'menuUserManagement',
+  'permission-management': 'menuPermissionManagement',
+  'menu-management': 'menuMenuManagement',
+  profile: 'menuProfile',
+  system: 'menuSystem',
+  'operation-log': 'menuOperationLog',
+  'design-system': 'menuDesignSystem',
+  'system-settings': 'menuSystemSettings',
+}
+
 /** 将后端菜单树转换为 Ant Design Menu 项 */
-function convertMenuTree(nodes: MenuItem[], showIcons: boolean, isParent: boolean): Array<{ key: string; label: string; icon?: React.ReactNode; children?: Array<{ key: string; label: string; icon?: React.ReactNode }> }> {
+function convertMenuTree(nodes: MenuItem[], showIcons: boolean, isParent: boolean, t: (key: string) => string): Array<{ key: string; label: string; icon?: React.ReactNode; children?: Array<{ key: string; label: string; icon?: React.ReactNode }> }> {
   return nodes
     .filter(node => node.status)
     .map(node => {
       const resolvedIcon = node.icon ? getIcon(node.icon) : undefined
       const hasChildren = node.children && node.children.length > 0
+      const i18nKey = menuKeyMap[node.key]
+      const label = i18nKey ? t(i18nKey) : node.label
       const renderItem = {
         key: node.key,
-        label: node.label,
+        label,
         icon: (isParent && !showIcons) ? undefined : resolvedIcon,
       }
 
       if (hasChildren) {
         return {
           ...renderItem,
-          children: convertMenuTree(node.children!, showIcons, true),
+          children: convertMenuTree(node.children!, showIcons, true, t),
         }
       }
 
@@ -90,6 +122,7 @@ function findAncestorKeys(nodes: MenuItem[], targetPath: string, parents: string
 }
 
 export default function SidebarMenu({ menuTree, collapsed }: SidebarMenuProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [openKeys, setOpenKeys] = useState<string[]>([])
@@ -108,7 +141,7 @@ export default function SidebarMenu({ menuTree, collapsed }: SidebarMenuProps) {
   }, [menuTree, location.pathname])
 
   const filteredMenu = menuTree.length > 0
-    ? convertMenuTree(menuTree, collapsed, false)
+    ? convertMenuTree(menuTree, collapsed, false, t)
     : []
 
   const handleMenuClick = ({ key }: { key: string }) => {

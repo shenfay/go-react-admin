@@ -4,7 +4,7 @@ import type { TableColumnsType } from 'antd'
 import { PlusOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
-import { DEFAULT_PAGINATION } from '@/config/pagination'
+import { DEFAULT_PAGINATION, getPaginationShowTotal } from '@/config/pagination'
 import { useCrudList } from '@/hooks/useCrudList'
 import { getUserList, createUser, updateUser, toggleUserStatus } from '@/services/user'
 import { getRoleList } from '@/services/role'
@@ -193,6 +193,7 @@ export default function UserManagement() {
             pageSize,
             total,
             ...DEFAULT_PAGINATION,
+            ...getPaginationShowTotal(t),
             onChange: handlePageChange,
           }}
         />
