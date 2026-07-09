@@ -26,18 +26,16 @@ export default function Profile() {
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
       {/* User Info Card */}
       <DataPanel title="" compact>
-        <div style={{ padding: '20px 28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            <Avatar size={80} icon={<UserOutlined />} style={{ background: 'var(--brand-dark)', flexShrink: 0 }} />
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-                {username || t('name')}
-              </div>
-              <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{email || ''}</div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {roles.map(r => <Tag key={r.code} style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{r.name}</Tag>)}
-                {roles.length === 0 && <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{t('noRole')}</Tag>}
-              </div>
+        <div style={{ padding: '20px 28px', display: 'flex', alignItems: 'center', gap: 24 }}>
+          <Avatar size={80} icon={<UserOutlined />} style={{ background: 'var(--brand-dark)', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
+              {username || t('name')}
+            </div>
+            <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{email || ''}</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {roles.map(r => <Tag key={r.code} style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{r.name}</Tag>)}
+              {roles.length === 0 && <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{t('noRole')}</Tag>}
             </div>
           </div>
         </div>
@@ -52,7 +50,7 @@ export default function Profile() {
             key: 'profile',
             label: (
               <span>
-                <UserOutlined style={{ marginRight: 4 }} />
+                <UserOutlined />
                 {t('basicInfo')}
               </span>
             ),
@@ -95,7 +93,7 @@ export default function Profile() {
             key: 'password',
             label: (
               <span>
-                <LockOutlined style={{ marginRight: 4 }} />
+                <LockOutlined />
                 {t('changePassword')}
               </span>
             ),
@@ -135,7 +133,7 @@ export default function Profile() {
             key: 'notifications',
             label: (
               <span>
-                <BellOutlined style={{ marginRight: 4 }} />
+                <BellOutlined />
                 {t('notificationSettings')}
               </span>
             ),

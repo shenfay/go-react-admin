@@ -7,18 +7,10 @@ import { DEFAULT_PAGINATION, getPaginationShowTotal } from '@/config/pagination'
 import { useCrudList } from '@/hooks/useCrudList'
 import { getOperationLogs, type OperationLogRecord } from '@/services/operationLog'
 
-// 分类标签颜色映射
-const categoryColorMap: Record<string, string> = {
-  AUTH: 'blue',
-  USER: 'green',
-  SYSTEM: 'purple',
-  BIZ: 'orange',
-}
-
-function formatTime(dateStr: string): string {
+function formatTime(dateStr: string, lang: string): string {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
-  return d.toLocaleString('zh-CN', {
+  return d.toLocaleString(lang, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -30,7 +22,7 @@ function formatTime(dateStr: string): string {
 }
 
 export default function OperationLog() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [categoryFilter, setCategoryFilter] = useState('')
 
   const categoryOptions = [
@@ -75,13 +67,21 @@ export default function OperationLog() {
     setCategoryFilter(v)
   }
 
+  // 分类标签颜色映射
+  const categoryColorMap: Record<string, { bg: string; color: string }> = {
+    AUTH: { bg: 'var(--blue-light)', color: 'var(--blue-text)' },
+    USER: { bg: 'var(--green-light)', color: 'var(--green-text)' },
+    SYSTEM: { bg: 'var(--gray-light)', color: 'var(--gray-text)' },
+    BIZ: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
+  }
+
   const columns = [
     {
       title: t('time'),
       dataIndex: 'created_at',
       key: 'created_at',
       width: 170,
-      render: (v: string) => formatTime(v),
+      render: (v: string) => formatTime(v, i18n.language),
     },
     {
       title: t('operator'),
@@ -94,9 +94,10 @@ export default function OperationLog() {
       dataIndex: 'category',
       key: 'category',
       width: 90,
-      render: (v: string) => (
-        <Tag color={categoryColorMap[v] || 'default'}>{v}</Tag>
-      ),
+      render: (v: string) => {
+        const c = categoryColorMap[v] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
+        return <Tag style={{ background: c.bg, color: c.color }}>{v}</Tag>
+      },
     },
     {
       title: t('actions'),

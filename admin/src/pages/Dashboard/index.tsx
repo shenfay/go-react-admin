@@ -9,7 +9,7 @@ import {
   ShopOutlined,
 } from '@ant-design/icons'
 
-const statCardStyle = { borderRadius: 12, borderColor: 'var(--border-light)' }
+const statCardStyle = { borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' } as React.CSSProperties
 
 export default function Dashboard() {
   const { t } = useTranslation()

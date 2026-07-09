@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Form, message } from 'antd'
+import { useTranslation } from 'react-i18next'
 import type { FormInstance } from 'antd'
 
 /**
@@ -29,6 +30,7 @@ export function useCrudList<T>(
   fetchFn: UseCrudListOptions<T>['fetchFn'],
   options?: Omit<UseCrudListOptions<T>, 'fetchFn'>,
 ) {
+  const { t } = useTranslation()
   const defaultPageSize = options?.defaultPageSize ?? 20
 
   // ---- 列表状态 ----
@@ -108,10 +110,10 @@ export function useCrudList<T>(
       const payload = getFormValues ? getFormValues(values) : values
       if (editingItem) {
         await updateFn(editingItem, payload)
-        message.success('已更新')
+        message.success(t('updateSuccess'))
       } else {
         await createFn(payload)
-        message.success('已创建')
+        message.success(t('createSuccess'))
       }
       setIsModalOpen(false)
       form.resetFields()

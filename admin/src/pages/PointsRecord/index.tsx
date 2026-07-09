@@ -72,7 +72,7 @@ export default function PointsRecord() {
         filters={
           <>
             <FilterSearch placeholder={t('searchUserOrSource')} />
-            <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={typeOptions} />
+            <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 140 }} options={typeOptions} />
             <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
           </>
         }
