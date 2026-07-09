@@ -15,6 +15,7 @@ type Router struct {
 	authHandler         *handlers.AuthHandler
 	adminHandler        *handlers.AdminHandler
 	operationLogHandler *handlers.OperationLogHandler
+	settingHandler      *handlers.SettingHandler
 	tokenService        authentication.TokenService
 	enforcer            *authorize.Enforcer
 }
@@ -25,6 +26,7 @@ func NewRouter(
 	authHandler *handlers.AuthHandler,
 	adminHandler *handlers.AdminHandler,
 	operationLogHandler *handlers.OperationLogHandler,
+	settingHandler *handlers.SettingHandler,
 	tokenService authentication.TokenService,
 	enforcer *authorize.Enforcer,
 ) *Router {
@@ -33,6 +35,7 @@ func NewRouter(
 		authHandler:         authHandler,
 		adminHandler:        adminHandler,
 		operationLogHandler: operationLogHandler,
+		settingHandler:      settingHandler,
 		tokenService:        tokenService,
 		enforcer:            enforcer,
 	}
@@ -59,6 +62,7 @@ func (r *Router) Setup() {
 		r.setupUserRoutes(v1)
 		r.setupAdminRoutes(v1)
 		r.setupOperationLogRoutes(v1)
+		r.setupSettingRoutes(v1)
 	}
 
 	// 注册 Swagger UI 路由（开发环境）
@@ -153,5 +157,19 @@ func (r *Router) setupOperationLogRoutes(v1 *gin.RouterGroup) {
 	operationLogs.Use(authMiddleware, permMiddleware)
 	{
 		r.operationLogHandler.RegisterRoutes(operationLogs)
+	}
+}
+
+// setupSettingRoutes 配置系统设置路由（需要认证 + setting:manage 权限）
+func (r *Router) setupSettingRoutes(v1 *gin.RouterGroup) {
+	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
+		TokenService: r.tokenService,
+	})
+	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
+
+	settings := v1.Group("/settings")
+	settings.Use(authMiddleware, permMiddleware)
+	{
+		r.settingHandler.RegisterRoutes(settings)
 	}
 }

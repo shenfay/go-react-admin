@@ -19,7 +19,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shenfay/kiqi/internal/app/admin"
 	"github.com/shenfay/kiqi/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/domain/operation"
+	"github.com/shenfay/kiqi/internal/domain/rbac"
+	"github.com/shenfay/kiqi/internal/domain/setting"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/user"
 	casbinenforcer "github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/internal/infra/config"
 	"github.com/shenfay/kiqi/internal/infra/messaging"
@@ -54,113 +58,190 @@ import (
 // @description 使用 JWT Token，格式：Bearer {token}
 
 func main() {
-	// 1. 加载配置
+	// 1. 加载配置 + 安全检查
+	env := loadEnv()
+	cfg := mustLoadConfig(env)
+	validateJWTSecret(cfg)
+
+	// 2. 初始化日志和指标
+	pkglogger.Init(cfg.Logger.Level)
+	defer pkglogger.Sync()
+	m := metrics.NewMetrics(prometheus.DefaultRegisterer)
+
+	// 3. 初始化基础设施
+	infra := initInfrastructure(cfg, m)
+	defer infra.close()
+
+	// 4. 初始化仓储
+	repos := initRepositories(infra.db)
+
+	// 5. 初始化应用服务
+	svcs := initServices(cfg, infra, repos, m)
+
+	// 6. 初始化传输层
+	hdls := initHandlers(svcs, repos)
+
+	// 7. 启动 HTTP 服务器
+	startServer(cfg, m, hdls, svcs.tokenService, infra.enforcer)
+}
+
+// --- Provider 结构体 ---
+
+type infraDeps struct {
+	db          *gorm.DB
+	redisClient *redis.Client
+	asynqClient *asynq.Client
+	bus         *events.InProcessBus
+	bridge      *messaging.DomainToIntegrationBridge
+	enforcer    *casbinenforcer.Enforcer
+}
+
+func (d *infraDeps) close() {
+	if sqlDB, _ := d.db.DB(); sqlDB != nil {
+		sqlDB.Close()
+	}
+	d.redisClient.Close()
+	d.asynqClient.Close()
+}
+
+// repoDeps 仓储层依赖
+type repoDeps struct {
+	userRepo    user.UserRepository
+	roleRepo    rbac.RoleRepository
+	menuRepo    rbac.MenuRepository
+	operLogRepo operation.LogRepository
+	settingRepo setting.Repository
+}
+
+// svcDeps 应用服务层依赖
+type svcDeps struct {
+	tokenService authentication.TokenService
+	authService  *authentication.Service
+	adminService *admin.Service
+	settingSvc   *setting.Service
+}
+
+// handlerDeps 传输层依赖
+type handlerDeps struct {
+	authHandler  *handlers.AuthHandler
+	adminHandler *handlers.AdminHandler
+	operLogHdlr  *handlers.OperationLogHandler
+	settingHdlr  *handlers.SettingHandler
+}
+
+// --- Provider 函数 ---
+
+// loadEnv 读取运行环境
+func loadEnv() string {
 	env := os.Getenv("APP_ENV")
 	if env == "" {
 		env = "development"
 	}
+	return env
+}
+
+// mustLoadConfig 加载配置，失败则终止
+func mustLoadConfig(env string) *config.Config {
 	cfg, err := config.Load(env)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
+	return cfg
+}
 
-	// 2. 安全检查：JWT Secret 不允许使用默认值
+// validateJWTSecret 生产环境 JWT Secret 安全检查
+func validateJWTSecret(cfg *config.Config) {
 	if cfg.JWT.Secret == "your-jwt-secret-key-change-in-production" {
 		log.Fatalf("FATAL: JWT secret is using the default value. Please set a secure JWT_SECRET in your configuration.")
 	}
+}
 
-	// 3. 初始化日志系统
-	if err := pkglogger.Init(cfg.Logger.Level); err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
-	}
-	defer pkglogger.Sync() // 优雅关闭，确保所有日志写入磁盘
-
-	pkglogger.Info("Starting application initialization...",
-		"env", env,
-	)
-
-	// 4. 初始化 Prometheus 指标
-	m := metrics.NewMetrics(prometheus.DefaultRegisterer)
-	pkglogger.Info("✓ Prometheus metrics initialized")
-
-	// 5. 初始化数据库
+// initInfrastructure 初始化基础设施依赖
+func initInfrastructure(cfg *config.Config, m *metrics.Metrics) *infraDeps {
 	db, err := initDatabase(cfg.Database, m)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	defer func() {
-		if sqlDB, _ := db.DB(); sqlDB != nil {
-			sqlDB.Close()
-		}
-	}()
-
-	// 6. 初始化 Redis
 	redisClient := initRedis(cfg.Redis)
-	defer redisClient.Close()
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: cfg.Asynq.Addr})
 
-	// 7. 初始化 Asynq Client
-	asynqClient := asynq.NewClient(asynq.RedisClientOpt{
-		Addr: cfg.Asynq.Addr,
-	})
-	defer asynqClient.Close()
-
-	pkglogger.Info("✓ Asynq client initialized")
-
-	// 8. 创建进程内事件总线 + 桥接器
-	inProcessBus := events.NewInProcessBus()
-
+	bus := events.NewInProcessBus()
 	bridge := messaging.NewBridge(asynqClient)
-	bridge.SubscribeTo(inProcessBus)
-	pkglogger.Info("✓ InProcessBus and Bridge initialized")
+	bridge.SubscribeTo(bus)
 
-	// 9. 初始化服务依赖
-	userRepo := repository.NewUserRepository(db)
-	roleRepo := repository.NewRoleRepository(db)
-	menuRepo := repository.NewMenuRepository(db)
-
-	// 初始化 Casbin 权限引擎
 	enforcer, err := casbinenforcer.NewEnforcer(db)
 	if err != nil {
 		log.Fatalf("Failed to initialize Casbin enforcer: %v", err)
 	}
-	pkglogger.Info("✓ Casbin enforcer initialized")
+	pkglogger.Info("\u2713 Casbin enforcer initialized")
 
+	return &infraDeps{
+		db:          db,
+		redisClient: redisClient,
+		asynqClient: asynqClient,
+		bus:         bus,
+		bridge:      bridge,
+		enforcer:    enforcer,
+	}
+}
+
+// initRepositories 初始化仓储
+func initRepositories(db *gorm.DB) *repoDeps {
+	return &repoDeps{
+		userRepo:    repository.NewUserRepository(db),
+		roleRepo:    repository.NewRoleRepository(db),
+		menuRepo:    repository.NewMenuRepository(db),
+		operLogRepo: repository.NewOperationLogRepository(db),
+		settingRepo: repository.NewSettingRepository(db),
+	}
+}
+
+// initServices 初始化应用服务
+func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metrics.Metrics) *svcDeps {
 	tokenService := authentication.NewTokenServiceImpl(
-		redisClient,
+		infra.redisClient,
 		cfg.JWT.Secret,
 		cfg.JWT.Issuer,
 		cfg.JWT.AccessExpire,
 		cfg.JWT.RefreshExpire,
 	)
-	authService := authentication.NewService(userRepo, roleRepo, menuRepo, tokenService, inProcessBus, m, enforcer)
+	authService := authentication.NewService(
+		repos.userRepo, repos.roleRepo, repos.menuRepo,
+		tokenService, infra.bus, m, infra.enforcer,
+	)
+	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer)
+	settingSvc := setting.NewService(repos.settingRepo)
 
-	// 创建认证 Handler
-	authHandler := handlers.NewAuthHandler(authService, tokenService)
+	return &svcDeps{
+		tokenService: tokenService,
+		authService:  authService,
+		adminService: adminService,
+		settingSvc:   settingSvc,
+	}
+}
 
-	// 创建管理员服务
-	adminService := admin.NewService(userRepo, roleRepo, menuRepo, enforcer)
-	adminHandler := handlers.NewAdminHandler(adminService)
+// initHandlers 初始化 HTTP 处理器
+func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
+	return &handlerDeps{
+		authHandler:  handlers.NewAuthHandler(svcs.authService, svcs.tokenService),
+		adminHandler: handlers.NewAdminHandler(svcs.adminService),
+		operLogHdlr:  handlers.NewOperationLogHandler(repos.operLogRepo),
+		settingHdlr:  handlers.NewSettingHandler(svcs.settingSvc),
+	}
+}
 
-	// 创建操作日志服务
-	operationLogRepo := repository.NewOperationLogRepository(db)
-	operationLogHandler := handlers.NewOperationLogHandler(operationLogRepo)
-
-	// 10. 设置 Gin 模式
+// startServer 创建并启动 HTTP 服务器（含优雅关闭）
+func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, tokenService authentication.TokenService, enforcer *casbinenforcer.Enforcer) {
 	if cfg.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// 11. 创建路由引擎
 	engine := gin.New()
-
-	// 12. 注册中间件
 	transhttp.Middlewares(engine, m, cfg.CORS)
 
-	// 13. 创建并配置路由器
-	apiRouter := transhttp.NewRouter(engine, authHandler, adminHandler, operationLogHandler, tokenService, enforcer)
+	apiRouter := transhttp.NewRouter(engine, hdls.authHandler, hdls.adminHandler, hdls.operLogHdlr, hdls.settingHdlr, tokenService, enforcer)
 	apiRouter.Setup()
 
-	// 14. 创建 HTTP 服务器
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler:      engine,
@@ -169,22 +250,19 @@ func main() {
 		IdleTimeout:  cfg.Server.IdleTimeout,
 	}
 
-	// 15. 在 goroutine 中启动服务器
 	go func() {
-		log.Printf("Starting server on port %s (env=%s)", srv.Addr, env)
+		pkglogger.Info("Starting HTTP server...", "port", cfg.Server.Port, "mode", cfg.Server.Mode)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
 
-	// 16. 等待中断信号
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	log.Println("Shutting down server...")
 
-	// 17. 优雅关闭
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
