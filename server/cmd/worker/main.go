@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/messaging"
 	"github.com/shenfay/kiqi/internal/infra/repository"
 	workerhandlers "github.com/shenfay/kiqi/internal/transport/worker/handlers"
 	"github.com/shenfay/kiqi/pkg/constants"
@@ -22,7 +23,12 @@ import (
 
 func main() {
 	// 1. 加载配置
-	cfg, err := config.Load("development")
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	cfg, err := config.Load(env)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
@@ -70,23 +76,14 @@ func main() {
 	// 6. 注册 Asynq 任务处理器
 	mux := asynq.NewServeMux()
 
-	// 注册统一操作日志处理器（处理 log:operation 任务）
-	mux.HandleFunc(string(constants.AsynqTaskOperationLog), operationLogHandler.ProcessTask)
-
-	// 兼容旧领域事件（user.registered, user.logged_in 等）
-	// 这些事件类型也会被 OperationLogHandler 处理
-	for _, eventName := range []constants.EventName{
-		constants.EventUserRegistered,
-		constants.EventUserLoggedIn,
-		constants.EventUserLoginFailed,
-		constants.EventUserAccountLocked,
-		constants.EventUserLoggedOut,
-		constants.EventUserTokenRefreshed,
-		constants.EventUserProfileUpdated,
-		constants.EventOperationLog, // 统一操作日志事件
-	} {
+	// 从 Bridge 获取所有路由到 logs 队列的事件类型（单一真相来源）
+	bridge := messaging.NewBridge(nil)
+	for _, eventName := range bridge.LogEventTypes() {
 		mux.HandleFunc(string(eventName), operationLogHandler.ProcessTask)
 	}
+
+	// AsynqTaskOperationLog 由 TaskPublisher 直接入队，不在 Bridge 路由表中，单独注册
+	mux.HandleFunc(string(constants.AsynqTaskOperationLog), operationLogHandler.ProcessTask)
 
 	// 7. 创建 Asynq 服务器
 	srv := asynq.NewServer(

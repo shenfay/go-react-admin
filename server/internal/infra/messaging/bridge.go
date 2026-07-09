@@ -36,6 +36,9 @@ func NewBridge(client *asynq.Client) *DomainToIntegrationBridge {
 
 // SubscribeTo 订阅 InProcessBus 中的所有领域事件
 func (b *DomainToIntegrationBridge) SubscribeTo(bus events.Bus) {
+	if b.client == nil {
+		return // nil client 模式仅用于事件类型发现，不执行订阅
+	}
 	for eventName := range b.queueMap {
 		name := eventName // capture for closure
 		bus.Subscribe(string(name), func(ctx context.Context, evt events.DomainEvent) error {
@@ -44,8 +47,23 @@ func (b *DomainToIntegrationBridge) SubscribeTo(bus events.Bus) {
 	}
 }
 
+// LogEventTypes 返回路由到 logs 队列的所有事件类型
+// 作为事件注册表的单一真相来源，供 Worker 进程统一注册
+func (b *DomainToIntegrationBridge) LogEventTypes() []constants.EventName {
+	types := make([]constants.EventName, 0, len(b.queueMap))
+	for eventName, queue := range b.queueMap {
+		if queue == constants.QueueLogs {
+			types = append(types, eventName)
+		}
+	}
+	return types
+}
+
 // enqueue 将领域事件入队到 Asynq
 func (b *DomainToIntegrationBridge) enqueue(ctx context.Context, eventName constants.EventName, evt events.DomainEvent) error {
+	if b.client == nil {
+		return nil
+	}
 	payload, err := json.Marshal(evt)
 	if err != nil {
 		return err
