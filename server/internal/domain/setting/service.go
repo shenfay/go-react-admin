@@ -61,13 +61,11 @@ func (s *Service) BatchUpdate(ctx context.Context, updates []SettingUpdate, upda
 	}
 
 	// 记录操作日志
-	operatorID := utils.GetOperatorUserID(ctx)
-	operatorEmail := utils.GetOperatorEmail(ctx)
 	keys := make([]string, len(updates))
 	for i, u := range updates {
 		keys[i] = u.Key
 	}
-	s.recordOperation(ctx, "SYSTEM.CONFIG.UPDATED", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+	s.recordOperation(ctx, "SYSTEM.CONFIG.UPDATED", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"updated_keys": keys},
 	)
 
@@ -112,10 +110,19 @@ func GetBoolValue(raw json.RawMessage) bool {
 }
 
 // recordOperation 统一操作日志记录方法
-func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email, ip, userAgent, device, browser, os string, metadata map[string]interface{}) {
+// 操作人信息和请求元数据均从 context 自动提取
+func (s *Service) recordOperation(ctx context.Context, action, category, status string, metadata map[string]interface{}) {
 	if s.eventBus == nil {
 		return
 	}
+	userID := utils.GetOperatorUserID(ctx)
+	email := utils.GetOperatorEmail(ctx)
+	ip := utils.GetRequestIP(ctx)
+	userAgent := utils.GetRequestUserAgent(ctx)
+	device := utils.GetRequestDevice(ctx)
+	browser := utils.GetRequestBrowser(ctx)
+	os := utils.GetRequestOS(ctx)
+
 	evt := events.NewOperationEvent(action, category, status).
 		WithUser(userID, email).
 		WithRequestInfo(ip, userAgent, device, browser, os).

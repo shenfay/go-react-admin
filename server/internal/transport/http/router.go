@@ -45,7 +45,8 @@ func NewRouter(
 func (r *Router) Setup() {
 	// 注册全局中间件（顺序很重要！）
 	r.engine.Use(middleware.TraceID())       // 1. 生成 trace_id
-	r.engine.Use(middleware.ErrorHandling()) // 2. 错误处理
+	r.engine.Use(middleware.RequestInfo())   // 2. 注入请求元数据（IP/UA/设备信息）
+	r.engine.Use(middleware.ErrorHandling()) // 3. 错误处理
 
 	// 健康检查
 	r.engine.GET("/health", func(c *gin.Context) {

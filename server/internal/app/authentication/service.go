@@ -13,6 +13,7 @@ import (
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/metrics"
+	"github.com/shenfay/kiqi/pkg/utils"
 	"go.uber.org/zap"
 )
 
@@ -122,7 +123,7 @@ func (s *Service) Register(ctx context.Context, cmd RegisterCommand) (*ServiceAu
 
 	// 4. 记录操作日志
 	s.recordOperation(ctx, "USER.REGISTER", "USER", "SUCCESS",
-		u.ID, u.Email, "", "", "", "", "",
+		u.ID, u.Email,
 		map[string]interface{}{"email": u.Email},
 	)
 
@@ -199,7 +200,7 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 
 	// 7. 记录操作日志
 	s.recordOperation(ctx, "AUTH.LOGIN.SUCCESS", "AUTH", "SUCCESS",
-		u.ID, u.Email, cmd.IP, cmd.UserAgent, cmd.DeviceType, "", "",
+		u.ID, u.Email,
 		nil,
 	)
 
@@ -254,7 +255,7 @@ func (s *Service) Logout(ctx context.Context, cmd LogoutCommand) error {
 	u, err := s.userRepo.FindByID(ctx, cmd.UserID)
 	if err == nil {
 		s.recordOperation(ctx, "AUTH.LOGOUT", "AUTH", "SUCCESS",
-			u.ID, u.Email, "", "", "", "", "",
+			u.ID, u.Email,
 			nil,
 		)
 	}
@@ -305,7 +306,7 @@ func (s *Service) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*S
 
 	// 7. 记录操作日志（已脱敏，不记录 token 明文）
 	s.recordOperation(ctx, "AUTH.TOKEN.REFRESHED", "AUTH", "SUCCESS",
-		u.ID, u.Email, "", "", "", "", "",
+		u.ID, u.Email,
 		nil,
 	)
 
@@ -324,11 +325,19 @@ func (s *Service) GetUserByID(ctx context.Context, userID string) (*user.User, e
 
 // recordOperation 统一操作日志记录方法
 // 发布 OperationEvent 到事件总线，通过 Bridge → Asynq → Worker 异步写入数据库
+// userID/email 由调用方显式传入（认证场景用户信息尚未在 context 中），
+// 请求元数据（IP/UA/设备）从 context 自动提取
 // 日志记录失败不影响主流程，仅输出 warn 级别日志
-func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email, ip, userAgent, device, browser, os string, metadata map[string]interface{}) {
+func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email string, metadata map[string]interface{}) {
 	if s.eventBus == nil {
 		return
 	}
+	ip := utils.GetRequestIP(ctx)
+	userAgent := utils.GetRequestUserAgent(ctx)
+	device := utils.GetRequestDevice(ctx)
+	browser := utils.GetRequestBrowser(ctx)
+	os := utils.GetRequestOS(ctx)
+
 	evt := events.NewOperationEvent(action, category, status).
 		WithUser(userID, email).
 		WithRequestInfo(ip, userAgent, device, browser, os).
