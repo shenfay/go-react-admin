@@ -209,8 +209,8 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 		repos.userRepo, repos.roleRepo, repos.menuRepo,
 		tokenService, infra.bus, m, infra.enforcer,
 	)
-	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer)
-	settingSvc := setting.NewService(repos.settingRepo)
+	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer, infra.bus)
+	settingSvc := setting.NewService(repos.settingRepo, infra.bus)
 
 	return &svcDeps{
 		tokenService: tokenService,

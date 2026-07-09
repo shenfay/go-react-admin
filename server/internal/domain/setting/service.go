@@ -5,17 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
+	"go.uber.org/zap"
 )
 
 // Service 系统设置业务逻辑
 type Service struct {
-	repo Repository
+	repo     Repository
+	eventBus events.Bus
 }
 
 // NewService 创建系统设置服务
-func NewService(repo Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo Repository, eventBus events.Bus) *Service {
+	return &Service{repo: repo, eventBus: eventBus}
 }
 
 // GetAllSettings 获取所有设置（可选按分类过滤）
@@ -52,7 +56,22 @@ func (s *Service) BatchUpdate(ctx context.Context, updates []SettingUpdate, upda
 		}
 	}
 
-	return s.repo.BatchUpsert(ctx, settings)
+	if err := s.repo.BatchUpsert(ctx, settings); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	keys := make([]string, len(updates))
+	for i, u := range updates {
+		keys[i] = u.Key
+	}
+	s.recordOperation(ctx, "SYSTEM.CONFIG.UPDATED", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"updated_keys": keys},
+	)
+
+	return nil
 }
 
 // GetSettingsMap 获取所有设置并返回 map 结构（方便业务代码读取配置）
@@ -90,4 +109,22 @@ func GetBoolValue(raw json.RawMessage) bool {
 		return false
 	}
 	return v
+}
+
+// recordOperation 统一操作日志记录方法
+func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email, ip, userAgent, device, browser, os string, metadata map[string]interface{}) {
+	if s.eventBus == nil {
+		return
+	}
+	evt := events.NewOperationEvent(action, category, status).
+		WithUser(userID, email).
+		WithRequestInfo(ip, userAgent, device, browser, os).
+		WithMetadata(metadata)
+	if err := s.eventBus.Publish(ctx, evt); err != nil {
+		logger.Warn("Failed to record operation log",
+			zap.String("action", action),
+			zap.String("user_id", userID),
+			zap.Error(err),
+		)
+	}
 }

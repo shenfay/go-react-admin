@@ -6,9 +6,12 @@ import (
 	"time"
 
 	"github.com/shenfay/kiqi/internal/domain/rbac"
+	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/infra/authorize"
+	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
+	"go.uber.org/zap"
 )
 
 // Service 管理员应用服务
@@ -17,15 +20,17 @@ type Service struct {
 	roleRepo rbac.RoleRepository
 	menuRepo rbac.MenuRepository
 	enforcer *authorize.Enforcer
+	eventBus events.Bus
 }
 
 // NewService 创建管理员应用服务
-func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menuRepo rbac.MenuRepository, enforcer *authorize.Enforcer) *Service {
+func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menuRepo rbac.MenuRepository, enforcer *authorize.Enforcer, eventBus events.Bus) *Service {
 	return &Service{
 		userRepo: userRepo,
 		roleRepo: roleRepo,
 		menuRepo: menuRepo,
 		enforcer: enforcer,
+		eventBus: eventBus,
 	}
 }
 
@@ -81,6 +86,14 @@ func (s *Service) CreateUser(ctx context.Context, cmd CreateUserCmd) (*UserDTO, 
 	if roles != nil {
 		dto.Roles = rolesToBriefs(roles)
 	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "USER.CREATE", "USER", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"target_user_id": u.ID, "email": u.Email},
+	)
+
 	return dto, nil
 }
 
@@ -117,6 +130,14 @@ func (s *Service) UpdateUser(ctx context.Context, cmd UpdateUserCmd) (*UserDTO, 
 	if roles != nil {
 		dto.Roles = rolesToBriefs(roles)
 	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "USER.UPDATE", "USER", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"target_user_id": u.ID, "name": cmd.Name, "email": cmd.Email},
+	)
+
 	return dto, nil
 }
 
@@ -135,7 +156,22 @@ func (s *Service) ToggleUserStatus(ctx context.Context, userID string, locked bo
 	}
 	u.UpdatedAt = utils.Now()
 
-	return s.userRepo.Update(ctx, u)
+	if err := s.userRepo.Update(ctx, u); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	action := "USER.ENABLE"
+	if locked {
+		action = "USER.DISABLE"
+	}
+	s.recordOperation(ctx, action, "USER", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"target_user_id": userID},
+	)
+
+	return nil
 }
 
 // ---- 角色管理 ----
@@ -160,6 +196,14 @@ func (s *Service) CreateRole(ctx context.Context, cmd CreateRoleCmd) (*RoleDTO, 
 	if err := s.roleRepo.Create(ctx, r); err != nil {
 		return nil, err
 	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "ROLE.CREATE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"role_id": r.ID, "role_name": cmd.Name, "role_code": cmd.Code},
+	)
+
 	return toRoleDTO(r), nil
 }
 
@@ -175,12 +219,30 @@ func (s *Service) UpdateRole(ctx context.Context, cmd UpdateRoleCmd) (*RoleDTO, 
 		return nil, err
 	}
 
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "ROLE.UPDATE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"role_id": cmd.RoleID, "role_name": cmd.Name},
+	)
+
 	return toRoleDTO(r), nil
 }
 
 // DeleteRole 删除角色
 func (s *Service) DeleteRole(ctx context.Context, roleID string) error {
-	return s.roleRepo.Delete(ctx, roleID)
+	if err := s.roleRepo.Delete(ctx, roleID); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "ROLE.DELETE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"role_id": roleID},
+	)
+
+	return nil
 }
 
 // ToggleRoleStatus 切换角色状态
@@ -190,7 +252,18 @@ func (s *Service) ToggleRoleStatus(ctx context.Context, roleID string) error {
 		return err
 	}
 	r.ToggleStatus()
-	return s.roleRepo.Update(ctx, r)
+	if err := s.roleRepo.Update(ctx, r); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "ROLE.TOGGLE_STATUS", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"role_id": roleID, "status": r.Status},
+	)
+
+	return nil
 }
 
 // ---- 权限管理（通过 Casbin）----
@@ -202,7 +275,18 @@ func (s *Service) GetRolePermissions(ctx context.Context, roleID string) ([]stri
 
 // UpdateRolePermissions 更新角色权限（通过 Casbin）
 func (s *Service) UpdateRolePermissions(ctx context.Context, roleID string, permissions []string) error {
-	return s.enforcer.SetRolePermissions(roleID, permissions)
+	if err := s.enforcer.SetRolePermissions(roleID, permissions); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "PERMISSION.UPDATE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"role_id": roleID, "permissions_count": len(permissions)},
+	)
+
+	return nil
 }
 
 // ---- 菜单管理 ----
@@ -228,6 +312,14 @@ func (s *Service) CreateMenu(ctx context.Context, cmd CreateMenuCmd) (*MenuDTO, 
 	if err := s.menuRepo.Create(ctx, m); err != nil {
 		return nil, err
 	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "MENU.CREATE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"menu_id": m.ID, "menu_key": cmd.Key, "label": cmd.Label},
+	)
+
 	return toMenuDTO(m), nil
 }
 
@@ -242,12 +334,31 @@ func (s *Service) UpdateMenu(ctx context.Context, cmd UpdateMenuCmd) (*MenuDTO, 
 	if err := s.menuRepo.Update(ctx, m); err != nil {
 		return nil, err
 	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "MENU.UPDATE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"menu_id": cmd.MenuID, "label": cmd.Label},
+	)
+
 	return toMenuDTO(m), nil
 }
 
 // DeleteMenu 删除菜单
 func (s *Service) DeleteMenu(ctx context.Context, menuID string) error {
-	return s.menuRepo.Delete(ctx, menuID)
+	if err := s.menuRepo.Delete(ctx, menuID); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "MENU.DELETE", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"menu_id": menuID},
+	)
+
+	return nil
 }
 
 // ToggleMenuStatus 切换菜单状态
@@ -257,7 +368,18 @@ func (s *Service) ToggleMenuStatus(ctx context.Context, menuID string) error {
 		return err
 	}
 	m.ToggleStatus()
-	return s.menuRepo.Update(ctx, m)
+	if err := s.menuRepo.Update(ctx, m); err != nil {
+		return err
+	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "MENU.TOGGLE_STATUS", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"menu_id": menuID, "status": m.Status},
+	)
+
+	return nil
 }
 
 // UpdateMenuSort 更新菜单排序
@@ -267,6 +389,14 @@ func (s *Service) UpdateMenuSort(ctx context.Context, cmd SortMenuCmd) error {
 			return err
 		}
 	}
+
+	// 记录操作日志
+	operatorID := utils.GetOperatorUserID(ctx)
+	operatorEmail := utils.GetOperatorEmail(ctx)
+	s.recordOperation(ctx, "MENU.SORT", "SYSTEM", "SUCCESS", operatorID, operatorEmail, "", "", "", "", "",
+		map[string]interface{}{"items_count": len(cmd.Items)},
+	)
+
 	return nil
 }
 
@@ -534,4 +664,24 @@ func (s *Service) GetUserMenuTree(ctx context.Context, userID string) ([]*rbac.M
 
 	// 5. 构建树
 	return buildMenuTree(visibleMenus, ""), nil
+}
+
+// recordOperation 统一操作日志记录方法
+// 发布 OperationEvent 到事件总线，通过 Bridge → Asynq → Worker 异步写入数据库
+// 日志记录失败不影响主流程，仅输出 warn 级别日志
+func (s *Service) recordOperation(ctx context.Context, action, category, status string, userID, email, ip, userAgent, device, browser, os string, metadata map[string]interface{}) {
+	if s.eventBus == nil {
+		return
+	}
+	evt := events.NewOperationEvent(action, category, status).
+		WithUser(userID, email).
+		WithRequestInfo(ip, userAgent, device, browser, os).
+		WithMetadata(metadata)
+	if err := s.eventBus.Publish(ctx, evt); err != nil {
+		logger.Warn("Failed to record operation log",
+			zap.String("action", action),
+			zap.String("user_id", userID),
+			zap.Error(err),
+		)
+	}
 }
