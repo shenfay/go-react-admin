@@ -131,6 +131,35 @@ function DesignTokens() {
       <Divider style={{ margin: 0 }} />
 
       <div>
+        <SectionTitle>{t('fontSpec')}</SectionTitle>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {[
+            { label: t('enFont'), family: 'var(--font-family-en)', sample: 'The Quick Brown Fox Jumps Over The Lazy Dog', stack: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif' },
+            { label: t('zhFont'), family: 'var(--font-family-zh)', sample: t('zhFontSample'), stack: 'PingFang SC, Microsoft YaHei, Noto Sans SC, sans-serif' },
+            { label: t('numFont'), family: 'var(--font-family-num)', sample: '0123456789 .,%', stack: 'Inter, JetBrains Mono, SF Mono, Roboto Mono, monospace' },
+            { label: t('monoFont'), family: 'var(--font-family-mono)', sample: 'const hello = "Qoder" // 2024-07-09', stack: 'JetBrains Mono, SF Mono, Menlo, Roboto Mono, monospace' },
+          ].map(f => (
+            <div key={f.label} style={{ background: 'var(--bg-light)', borderRadius: 12, padding: '16px 20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <Text style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{f.label}</Text>
+                <Text style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{f.stack}</Text>
+              </div>
+              <div style={{ fontSize: 24, fontFamily: f.family, color: 'var(--text-primary)', lineHeight: 1.6 }}>{f.sample}</div>
+            </div>
+          ))}
+          <div style={{ background: 'var(--bg-light)', borderRadius: 12, padding: '16px 20px' }}>
+            <Text style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>{t('mainFontStack')}</Text>
+            <Text style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>Inter, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji</Text>
+            <div style={{ marginTop: 10, fontSize: 15, fontFamily: 'var(--font-family)', color: 'var(--text-primary)', lineHeight: 1.8 }}>
+              {t('mixedSample')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Divider style={{ margin: 0 }} />
+
+      <div>
         <SectionTitle>{t('typography')}</SectionTitle>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Title style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{t('pageTitleDesc')}</Title>
