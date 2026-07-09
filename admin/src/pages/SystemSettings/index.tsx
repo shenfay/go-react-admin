@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Form, Input, InputNumber, Switch, Button, Select, Tabs, Table, Tag,
   Modal, message, Spin, Space,
 } from 'antd'
 import { EditOutlined, CheckOutlined, FormatPainterOutlined } from '@ant-design/icons'
-import type { TabsProps, TableColumnsType } from 'antd'
+import type { TabsProps } from 'antd'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import DataPanel from '@/components/DataPanel'
@@ -31,6 +32,7 @@ interface ChannelConfig {
 }
 
 export default function SystemSettings() {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -68,10 +70,10 @@ export default function SystemSettings() {
 
       // 初始化通知事件
       setNotifyEvents([
-        { key: 'notify_acceptance', label: '验收提醒', enabled: map['notify_acceptance'] as boolean ?? true },
-        { key: 'notify_goal_progress', label: '目标进度通知', enabled: map['notify_goal_progress'] as boolean ?? true },
-        { key: 'notify_companion_status', label: '伙伴状态通知', enabled: map['notify_companion_status'] as boolean ?? true },
-        { key: 'notify_streak_inactive', label: '连续未完成提醒', enabled: map['notify_streak_inactive'] as boolean ?? true },
+        { key: 'notify_acceptance', label: t('notifyAcceptance'), enabled: map['notify_acceptance'] as boolean ?? true },
+        { key: 'notify_goal_progress', label: t('notifyGoalProgress'), enabled: map['notify_goal_progress'] as boolean ?? true },
+        { key: 'notify_companion_status', label: t('notifyCompanionStatus'), enabled: map['notify_companion_status'] as boolean ?? true },
+        { key: 'notify_streak_inactive', label: t('notifyStreakInactive'), enabled: map['notify_streak_inactive'] as boolean ?? true },
       ])
 
       // 初始化连续加成规则 JSON
@@ -86,7 +88,7 @@ export default function SystemSettings() {
         }
       }
     } catch {
-      message.error('加载设置失败')
+      message.error(t('settingsLoadFailed'))
     } finally {
       setLoading(false)
     }
@@ -116,7 +118,7 @@ export default function SystemSettings() {
           const parsed = JSON.parse(streakJson)
           updates.push({ key: 'streak_bonus_rules', value: parsed })
         } catch {
-          message.error('连续加成规则 JSON 格式错误')
+          message.error(t('streakRuleJsonError'))
           setSaving(false)
           return
         }
@@ -128,7 +130,7 @@ export default function SystemSettings() {
       })
 
       await batchUpdateSettings(updates)
-      message.success('保存成功')
+      message.success(t('saveSuccess'))
       await fetchData()
     } catch {
       // validation failed
@@ -146,8 +148,8 @@ export default function SystemSettings() {
 
   // ---- 渠道配置 ----
   const channels: ChannelConfig[] = [
-    { name: '邮件渠道', key: 'channel_email', configured: hasChannelConfig('channel_email') },
-    { name: 'Webhook 渠道', key: 'channel_webhook', configured: hasChannelConfig('channel_webhook') },
+    { name: t('emailChannel'), key: 'channel_email', configured: hasChannelConfig('channel_email') },
+    { name: t('webhookChannel'), key: 'channel_webhook', configured: hasChannelConfig('channel_webhook') },
   ]
 
   function hasChannelConfig(key: string): boolean {
@@ -185,7 +187,7 @@ export default function SystemSettings() {
       if (obj.secret === '••••••') delete obj.secret
 
       await batchUpdateSettings([{ key: editingChannel.key, value: obj }])
-      message.success('渠道配置已保存')
+      message.success(t('channelConfigSaved'))
       setChannelModalOpen(false)
       fetchData()
     } catch {
@@ -201,7 +203,7 @@ export default function SystemSettings() {
       const parsed = JSON.parse(streakJson)
       setStreakJson(JSON.stringify(parsed, null, 2))
     } catch {
-      message.error('JSON 格式错误，请检查')
+      message.error(t('jsonFormatError'))
     }
   }
 
@@ -209,95 +211,95 @@ export default function SystemSettings() {
   const tabItems: TabsProps['items'] = [
     {
       key: 'basic',
-      label: '基础配置',
+      label: t('basicConfig'),
       children: (
         <>
           <div style={{ display: 'flex', gap: 24 }}>
-            <Form.Item label="站点名称" name="site_name" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入站点名称' }]}>
-              <Input placeholder="请输入站点名称" />
+            <Form.Item label={t('siteName')} name="site_name" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('siteNamePlaceholder') }]}>
+              <Input placeholder={t('siteNamePlaceholder')} />
             </Form.Item>
-            <Form.Item label="站点 Logo" name="logo_url" style={{ flex: 1 }}>
-              <Input placeholder="输入 Logo 图片 URL" />
+            <Form.Item label={t('siteLogo')} name="logo_url" style={{ flex: 1 }}>
+              <Input placeholder={t('logoPlaceholder')} />
             </Form.Item>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>
-            <Form.Item label="默认语言" name="default_language" style={{ flex: 1 }}>
+            <Form.Item label={t('defaultLanguage')} name="default_language" style={{ flex: 1 }}>
               <Select>
-                <Select.Option value="zh-CN">简体中文</Select.Option>
+                <Select.Option value="zh-CN">{t('zhCN')}</Select.Option>
                 <Select.Option value="en-US">English</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item label="时区" name="timezone" style={{ flex: 1 }}>
+            <Form.Item label={t('timezone')} name="timezone" style={{ flex: 1 }}>
               <Select>
                 <Select.Option value="Asia/Shanghai">Asia/Shanghai</Select.Option>
                 <Select.Option value="UTC">UTC</Select.Option>
               </Select>
             </Form.Item>
           </div>
-          <Form.Item label="会话超时" name="session_timeout" style={{ maxWidth: 400 }}
-            rules={[{ required: true, message: '请输入会话超时时间' }]}>
-            <InputNumber min={5} max={120} addonAfter="分钟" style={{ width: '100%' }} />
+          <Form.Item label={t('sessionTimeout')} name="session_timeout" style={{ maxWidth: 400 }}
+            rules={[{ required: true, message: t('sessionTimeoutPlaceholder') }]}>
+            <InputNumber min={5} max={120} addonAfter={t('minutes')} style={{ width: '100%' }} />
           </Form.Item>
         </>
       ),
     },
     {
       key: 'toggle',
-      label: '功能开关',
+      label: t('featureToggles'),
       children: (
         <>
-          <Form.Item label="开放注册" name="enable_register" valuePropName="checked">
-            <Switch checkedChildren="已开启" unCheckedChildren="已关闭" />
+          <Form.Item label={t('openRegistration')} name="enable_register" valuePropName="checked">
+            <Switch checkedChildren={t('turnedOn')} unCheckedChildren={t('turnedOff')} />
           </Form.Item>
-          <Form.Item label="审计日志" name="enable_audit_log" valuePropName="checked">
-            <Switch checkedChildren="已开启" unCheckedChildren="已关闭" />
+          <Form.Item label={t('auditLog')} name="enable_audit_log" valuePropName="checked">
+            <Switch checkedChildren={t('turnedOn')} unCheckedChildren={t('turnedOff')} />
           </Form.Item>
-          <Form.Item label="消息通知" name="enable_notification" valuePropName="checked">
-            <Switch checkedChildren="已开启" unCheckedChildren="已关闭" />
+          <Form.Item label={t('messageNotification')} name="enable_notification" valuePropName="checked">
+            <Switch checkedChildren={t('turnedOn')} unCheckedChildren={t('turnedOff')} />
           </Form.Item>
         </>
       ),
     },
     {
       key: 'business',
-      label: '业务规则',
+      label: t('businessRules'),
       children: (
         <>
           <div style={{ display: 'flex', gap: 24 }}>
-            <Form.Item label="家庭最大孩子数" name="max_children_per_family" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入' }]}>
+            <Form.Item label={t('maxChildrenPerFamily')} name="max_children_per_family" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
               <InputNumber min={1} max={10} style={{ width: '100%' }} />
             </Form.Item>
-            <Form.Item label="每日最大卡片数" name="max_daily_cards" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入' }]}>
+            <Form.Item label={t('maxDailyCards')} name="max_daily_cards" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
               <InputNumber min={1} max={10} style={{ width: '100%' }} />
             </Form.Item>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>
-            <Form.Item label="目标最大关联卡片数" name="max_goal_cards" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入' }]}>
+            <Form.Item label={t('maxGoalCards')} name="max_goal_cards" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
               <InputNumber min={1} max={10} style={{ width: '100%' }} />
             </Form.Item>
-            <Form.Item label="XP等级公式除数" name="xp_level_divisor" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入' }]}>
+            <Form.Item label={t('xpLevelDivisor')} name="xp_level_divisor" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
               <InputNumber min={1} style={{ width: '100%' }} />
             </Form.Item>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>
-            <Form.Item label="伙伴初始名称" name="default_companion_name" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入' }]}>
-              <Input placeholder="如：波奇" />
+            <Form.Item label={t('defaultCompanionName')} name="default_companion_name" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <Input placeholder={t('companionExample')} />
             </Form.Item>
-            <Form.Item label="积分达成默认奖金" name="default_goal_reward" style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入' }]}>
-              <InputNumber min={1} addonAfter="分" style={{ width: '100%' }} />
+            <Form.Item label={t('defaultGoalReward')} name="default_goal_reward" style={{ flex: 1 }}
+              rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <InputNumber min={1} addonAfter={t('pointsUnit2')} style={{ width: '100%' }} />
             </Form.Item>
           </div>
 
           {/* 连续加成规则 - CodeMirror 编辑器 */}
-          <Form.Item label="积分连续加成规则">
-            <div style={{ border: '1px solid #d9d9d9', borderRadius: 6, overflow: 'hidden' }}>
+          <Form.Item label={t('streakBonusRules')}>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
               <CodeMirror
                 value={streakJson}
                 height="150px"
@@ -308,13 +310,13 @@ export default function SystemSettings() {
             </div>
             <Space style={{ marginTop: 8 }}>
               <Button size="small" icon={<FormatPainterOutlined />} onClick={handleFormatJson}>
-                格式化 JSON
+                {t('formatJson')}
               </Button>
               <Button size="small" icon={<CheckOutlined />} onClick={() => {
-                try { JSON.parse(streakJson); message.success('JSON 格式正确') }
-                catch { message.error('JSON 格式错误') }
+                try { JSON.parse(streakJson); message.success(t('jsonFormatCorrect')) }
+                catch { message.error(t('jsonFormatErrorShort')) }
               }}>
-                校验
+                {t('validate')}
               </Button>
             </Space>
           </Form.Item>
@@ -323,126 +325,123 @@ export default function SystemSettings() {
     },
     {
       key: 'notification',
-      label: '通知设置',
-      children: <NotificationTab />,
+      label: t('notificationSettings'),
+      children: (
+        <>
+          <div style={{ marginBottom: 16, fontWeight: 500 }}>{t('eventSwitches')}</div>
+          <Table<NotifyEvent>
+            columns={[
+              { title: t('notifyEvent'), dataIndex: 'label', key: 'label' },
+              {
+                title: t('status'), dataIndex: 'enabled', key: 'enabled',
+                render: (enabled: boolean) => (
+                  <Tag style={{
+                    background: enabled ? 'var(--green-light)' : 'var(--gray-light)',
+                    color: enabled ? 'var(--green-text)' : 'var(--gray-text)',
+                    border: 'none', borderRadius: 'var(--radius-sm)',
+                  }}>{enabled ? t('turnedOn') : t('turnedOff')}</Tag>
+                ),
+              },
+              {
+                title: t('actions'), key: 'action', width: 100,
+                render: (_: unknown, record: NotifyEvent) => (
+                  <Switch
+                    size="small"
+                    checked={record.enabled}
+                    onChange={(checked) => handleNotifyToggle(record.key, checked)}
+                  />
+                ),
+              },
+            ]}
+            dataSource={notifyEvents}
+            rowKey="key"
+            pagination={false}
+            size="small"
+            style={{ marginBottom: 24 }}
+          />
+
+          <div style={{ marginBottom: 16, fontWeight: 500 }}>{t('channelConfig')}</div>
+          <Table<ChannelConfig>
+            columns={[
+              { title: t('channelName'), dataIndex: 'name', key: 'name' },
+              {
+                title: t('configStatus'), dataIndex: 'configured', key: 'configured',
+                render: (configured: boolean) => (
+                  <Tag style={{
+                    background: configured ? 'var(--green-light)' : 'var(--gray-light)',
+                    color: configured ? 'var(--green-text)' : 'var(--gray-text)',
+                    border: 'none', borderRadius: 'var(--radius-sm)',
+                  }}>{configured ? t('configured') : t('notConfigured')}</Tag>
+                ),
+              },
+              {
+                title: t('actions'), key: 'action', width: 100,
+                render: (_: unknown, record: ChannelConfig) => (
+                  <Button type="link" size="small" icon={<EditOutlined />}
+                    onClick={() => handleEditChannel(record)}>
+                    {t('edit')}
+                  </Button>
+                ),
+              },
+            ]}
+            dataSource={channels}
+            rowKey="key"
+            pagination={false}
+            size="small"
+          />
+        </>
+      ),
     },
   ]
 
-  // ---- 通知设置 Tab 内容 ----
-  function NotificationTab() {
-    const eventColumns: TableColumnsType<NotifyEvent> = [
-      { title: '通知事件', dataIndex: 'label', key: 'label' },
-      {
-        title: '状态', dataIndex: 'enabled', key: 'enabled',
-        render: (enabled: boolean) => (
-          <Tag color={enabled ? 'green' : 'default'}>{enabled ? '已开启' : '已关闭'}</Tag>
-        ),
-      },
-      {
-        title: '操作', key: 'action', width: 100,
-        render: (_: unknown, record: NotifyEvent) => (
-          <Switch
-            size="small"
-            checked={record.enabled}
-            onChange={(checked) => handleNotifyToggle(record.key, checked)}
-          />
-        ),
-      },
-    ]
-
-    const channelColumns: TableColumnsType<ChannelConfig> = [
-      { title: '渠道名称', dataIndex: 'name', key: 'name' },
-      {
-        title: '配置状态', dataIndex: 'configured', key: 'configured',
-        render: (configured: boolean) => (
-          <Tag color={configured ? 'green' : 'default'}>{configured ? '已配置' : '未配置'}</Tag>
-        ),
-      },
-      {
-        title: '操作', key: 'action', width: 100,
-        render: (_: unknown, record: ChannelConfig) => (
-          <Button type="link" size="small" icon={<EditOutlined />}
-            onClick={() => handleEditChannel(record)}>
-            编辑
-          </Button>
-        ),
-      },
-    ]
-
-    return (
-      <>
-        <div style={{ marginBottom: 16, fontWeight: 500 }}>事件开关</div>
-        <Table<NotifyEvent>
-          columns={eventColumns}
-          dataSource={notifyEvents}
-          rowKey="key"
-          pagination={false}
-          size="small"
-          style={{ marginBottom: 24 }}
-        />
-
-        <div style={{ marginBottom: 16, fontWeight: 500 }}>渠道配置</div>
-        <Table<ChannelConfig>
-          columns={channelColumns}
-          dataSource={channels}
-          rowKey="key"
-          pagination={false}
-          size="small"
-        />
-      </>
-    )
-  }
-
   // ---- 渠道编辑 Modal ----
-  function ChannelModal() {
-    const isEmail = editingChannel?.key === 'channel_email'
+  const isEmail = editingChannel?.key === 'channel_email'
 
-    return (
-      <Modal
-        title={`编辑${editingChannel?.name ?? ''}`}
-        open={channelModalOpen}
-        onOk={handleChannelSave}
-        onCancel={() => setChannelModalOpen(false)}
-        confirmLoading={saving}
-        destroyOnClose
-      >
-        <Form form={channelForm} layout="vertical" preserve={false}>
-          {isEmail ? (
-            <>
-              <Form.Item label="SMTP Host" name="host" rules={[{ required: true, message: '请输入' }]}>
-                <Input placeholder="如：smtp.gmail.com" />
-              </Form.Item>
-              <Form.Item label="Port" name="port" rules={[{ required: true, message: '请输入' }]}>
-                <InputNumber min={1} max={65535} style={{ width: '100%' }} placeholder="如：587" />
-              </Form.Item>
-              <Form.Item label="用户名" name="user" rules={[{ required: true, message: '请输入' }]}>
-                <Input placeholder="SMTP 用户名" />
-              </Form.Item>
-              <Form.Item label="密码" name="password">
-                <Input.Password placeholder="••••••" />
-              </Form.Item>
-              <Form.Item label="发件人" name="from" rules={[{ required: true, message: '请输入' }]}>
-                <Input placeholder="如：noreply@kiqi.com" />
-              </Form.Item>
-            </>
-          ) : (
-            <>
-              <Form.Item label="Webhook URL" name="url" rules={[{ required: true, message: '请输入' }]}>
-                <Input placeholder="https://..." />
-              </Form.Item>
-              <Form.Item label="签名密钥" name="secret">
-                <Input.Password placeholder="••••••" />
-              </Form.Item>
-            </>
-          )}
-        </Form>
-      </Modal>
-    )
-  }
+  const channelModalNode = (
+    <Modal
+      title={t('editChannel', { name: editingChannel?.name ?? '' })}
+      open={channelModalOpen}
+      onOk={handleChannelSave}
+      onCancel={() => setChannelModalOpen(false)}
+      confirmLoading={saving}
+      destroyOnClose
+    >
+      <Form form={channelForm} layout="vertical" preserve={false}>
+        {isEmail ? (
+          <>
+            <Form.Item label={t('smtpHost')} name="host" rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <Input placeholder={t('smtpHostExample')} />
+            </Form.Item>
+            <Form.Item label={t('port')} name="port" rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <InputNumber min={1} max={65535} style={{ width: '100%' }} placeholder={t('portExample')} />
+            </Form.Item>
+            <Form.Item label={t('username')} name="user" rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <Input placeholder={t('smtpUser')} />
+            </Form.Item>
+            <Form.Item label={t('password')} name="password">
+              <Input.Password placeholder="••••••" />
+            </Form.Item>
+            <Form.Item label={t('sender')} name="from" rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <Input placeholder={t('senderExample')} />
+            </Form.Item>
+          </>
+        ) : (
+          <>
+            <Form.Item label="Webhook URL" name="url" rules={[{ required: true, message: t('inputPlaceholderShort') }]}>
+              <Input placeholder="https://..." />
+            </Form.Item>
+            <Form.Item label={t('signingKey')} name="secret">
+              <Input.Password placeholder="••••••" />
+            </Form.Item>
+          </>
+        )}
+      </Form>
+    </Modal>
+  )
 
   if (loading) {
     return (
-      <DataPanel title="系统设置">
+      <DataPanel title={t('systemSettings')}>
         <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
           <Spin size="large" />
         </div>
@@ -451,22 +450,22 @@ export default function SystemSettings() {
   }
 
   return (
-    <DataPanel title="系统设置">
+    <DataPanel title={t('systemSettings')}>
       <div style={{ padding: '0 28px 20px' }}>
         <Form form={form} layout="vertical">
           <Tabs items={tabItems} />
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
             <Button type="primary" loading={saving} onClick={handleSave}>
-              保存设置
+              {t('saveSettingsBtn')}
             </Button>
             <Button onClick={() => fetchData()}>
-              重置
+              {t('reset')}
             </Button>
           </div>
         </Form>
 
-        <ChannelModal />
+        {channelModalNode}
       </div>
     </DataPanel>
   )
