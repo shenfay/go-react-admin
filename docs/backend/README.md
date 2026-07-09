@@ -9,11 +9,10 @@
 
 ### 🏗️ 架构设计
 - [DDD 架构设计](architecture/DDD_ARCHITECTURE.md) - 架构理念与分层设计
-- [领域模型](architecture/DOMAIN_MODEL.md) - 聚合根、实体、值对象
-- [架构重构规范](architecture/ARCHITECTURE_REFACTORING_SPEC_V2.md) - 重构历史与规范
+- [领域模型](architecture/DOMAIN_MODEL.md) - 聚合根、实体、值对象、RBAC 权限领域、操作日志聚合
 
 ### 🗄️ 数据库
-- [数据库设计](database/SCHEMA_DESIGN.md) - 表结构与 ER 图
+- [数据库设计](database/SCHEMA_DESIGN.md) - 表结构、ER 图、迁移管理
 
 ### 📡 API 文档
 - 启动服务后访问：http://localhost:8080/swagger/index.html
@@ -24,6 +23,19 @@
 ### 📊 监控运维
 - [监控配置指南](operations/MONITORING_SETUP.md) - Prometheus + Grafana 配置
 - [故障排查指南](operations/TROUBLESHOOTING.md) - 常见问题诊断与解决
+
+### 🖥️ 管理后台前端
+- [前端架构文档](../admin/ARCHITECTURE.md) - 路由、状态管理、i18n、组件体系
+
+### 📝 产品文档
+- [产品需求文档](../product/PRD.md)
+- [MVP 功能清单与验收标准](../product/MVP功能清单与验收标准.md)
+- [用户故事文档](../product/用户故事文档.md)
+- [文案内容体系](../product/文案内容体系.md)
+- [核心交互流程图](../product/核心交互流程图.md)
+
+### 🎨 UI 设计
+- [UI 设计规范](../UI_DESIGN_SPEC.md) - 布局、色彩、字体、按钮、表格等设计规范
 
 ## 📖 文档规范
 
@@ -54,12 +66,13 @@
 - [x] 代码注释规范
 
 ### P1 - 重要文档（已完成）
-- [x] 领域模型
-- [x] 数据库设计
+- [x] 领域模型（含 RBAC 权限领域、操作日志聚合）
+- [x] 数据库设计（含 RBAC 表、菜单表、统一操作日志表）
 - [x] 开发指南
 - [x] Docker 部署
 - [x] 监控配置
 - [x] 故障排查
+- [x] 管理后台前端架构文档
 
 ### P2 - 辅助文档（按需补充）
 - [ ] 事件风暴
@@ -89,5 +102,5 @@
 
 ---
 
-**最后更新**：2026-04-08  
+**最后更新**：2026-07-09  
 **文档状态**：✅ 核心文档已完成，持续优化中

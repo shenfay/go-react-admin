@@ -302,33 +302,45 @@ func TestService_Register(t *testing.T) {
 
 ### 迁移文件命名
 
+迁移文件按表归组，命名规范为 `{序号}_{操作}_{表名}.{up|down}.sql`：
+
 ```
 migrations/
 ├── 001_create_users_table.up.sql
 ├── 001_create_users_table.down.sql
-├── 003_create_email_verification_tokens_table.up.sql
-├── 003_create_email_verification_tokens_table.down.sql
-├── 004_create_password_reset_tokens_table.up.sql
-├── 004_create_password_reset_tokens_table.down.sql
-├── 005_create_audit_logs_table.up.sql
-├── 005_create_audit_logs_table.down.sql
-├── 006_create_activity_logs_table.up.sql
-└── 006_create_activity_logs_table.down.sql
+├── 002_create_email_verification_tokens_table.up.sql
+├── 002_create_email_verification_tokens_table.down.sql
+├── 003_create_password_reset_tokens_table.up.sql
+├── 003_create_password_reset_tokens_table.down.sql
+├── 004_create_rbac_tables.up.sql              -- 角色 + 用户角色 + Casbin 策略
+├── 004_create_rbac_tables.down.sql
+├── 005_create_menus_table.up.sql              -- 菜单管理
+├── 005_create_menus_table.down.sql
+├── 006_create_operation_logs_table.up.sql     -- 统一操作日志
+├── 006_create_operation_logs_table.down.sql
+├── 007_seed_roles_and_permissions.up.sql      -- 角色与权限种子数据
+├── 007_seed_roles_and_permissions.down.sql
+├── 008_seed_menus.up.sql                      -- 菜单种子数据
+├── 008_seed_menus.down.sql
+├── 009_seed_founder.up.sql                    -- 创始人账号种子数据
+└── 009_seed_founder.down.sql
 ```
 
 **规则**：
-- 三位数字前缀统一（001, 003, 004, 005, 006…）
-- 描述性名称（`create_users_table`）
+- 三位数字前缀统一（001-009…）
+- 同一张表/同一组功能的迁移文件共享同一序号
+- 描述性名称（`create_users_table`、`create_rbac_tables`）
+- Seed 数据使用 `seed_` 前缀（`seed_roles_and_permissions`）
 - `.up.sql` - 正向迁移
 - `.down.sql` - 回滚迁移
 
 ### 编写迁移脚本
 
-**正向迁移**（`003_create_email_verification_tokens_table.up.sql`）：
+**正向迁移**（`002_create_email_verification_tokens_table.up.sql`）：
 ```sql
 CREATE TABLE IF NOT EXISTS email_verification_tokens (
-    id VARCHAR(26) PRIMARY KEY,
-    user_id VARCHAR(26) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token VARCHAR(255) NOT NULL UNIQUE,
     expires_at TIMESTAMP NOT NULL,
     used BOOLEAN DEFAULT FALSE,
@@ -339,7 +351,7 @@ CREATE INDEX idx_email_verification_tokens_user_id ON email_verification_tokens(
 CREATE INDEX idx_email_verification_tokens_token ON email_verification_tokens(token);
 ```
 
-**回滚迁移**（`003_create_email_verification_tokens_table.down.sql`）：
+**回滚迁移**（`002_create_email_verification_tokens_table.down.sql`）：
 ```sql
 DROP TABLE IF EXISTS email_verification_tokens;
 ```
@@ -548,6 +560,76 @@ GET user:session:01JQMXYZ...
 # 清空数据库（开发环境）
 FLUSHDB
 ```
+
+## 权限系统开发指南
+
+### Casbin 权限引擎配置
+
+项目使用 **Casbin v3** + **gorm-adapter/v3** 作为权限决策引擎。
+
+**核心依赖**（`go.mod`）：
+```go
+github.com/casbin/casbin/v3          // 权限引擎
+github.com/casbin/gorm-adapter/v3    // PostgreSQL 持久化适配器
+```
+
+**配置文件**（`configs/rbac_model.conf`）：
+```
+[request_definition]
+r = sub, obj, act
+
+[policy_definition]
+p = sub, obj, act
+
+[role_definition]
+g = _, _
+
+[policy_effect]
+e = some(where (p.eft == allow))
+
+[matchers]
+m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
+```
+
+### 新增权限策略
+
+**步骤 1：在 seed 迁移中添加角色和策略**
+
+```sql
+-- 添加角色
+INSERT INTO roles (id, name, code) VALUES ('role-id', '管理员', 'ADMIN');
+
+-- 添加 Casbin 策略（角色对资源的访问权限）
+INSERT INTO casbin_rule (ptype, v0, v1, v2) VALUES ('p', 'ADMIN', '/api/v1/users', 'GET');
+
+-- 分配用户角色
+INSERT INTO casbin_rule (ptype, v0, v1) VALUES ('g', 'user-id', 'ADMIN');
+```
+
+**步骤 2：在路由中配置中间件**
+
+```go
+// router.go
+api.Use(middleware.RBAC(enforcer))
+```
+
+**步骤 3：前端配置权限标识**
+
+前端通过 `PermissionGuard` 组件和路由的 `permission` 属性进行权限控制，权限标识与后端 Casbin 策略中的 `v1`（资源路径）对应。
+
+### 操作日志开发
+
+操作日志通过领域事件驱动自动记录，无需在业务代码中手动调用。
+
+**事件发布 → 监听器 → 持久化**：
+1. 聚合根发布领域事件（如 `UserLoggedIn`）
+2. `OperationLogListener` 监听事件并转换为 `OperationLog` 实体
+3. 通过异步队列持久化到数据库
+
+**新增操作日志类型**：
+1. 在聚合根中发布新的领域事件
+2. 在 `OperationLogListener` 中添加事件到 OperationLog 的转换逻辑
+3. 定义 `action` 命名格式：`{Category}.{Resource}.{Action}.{Result}`
 
 ## 📚 延伸阅读
 

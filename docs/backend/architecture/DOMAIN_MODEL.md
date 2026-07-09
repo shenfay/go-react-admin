@@ -6,6 +6,8 @@
 
 - [领域模型概览](#领域模型概览)
 - [用户聚合（User Aggregate）](#用户聚合user-aggregate)
+- [RBAC 权限领域](#rbac-权限领域)
+- [操作日志聚合（OperationLog Aggregate）](#操作日志聚合operationlog-aggregate)
 - [值对象设计](#值对象设计)
 - [领域事件](#领域事件)
 - [仓储接口](#仓储接口)
@@ -33,18 +35,29 @@ graph TB
         User -.发布.-> PasswordChanged
     end
     
-    subgraph LogContext["日志上下文 (Log Bounded Context)"]
-        AuditLog[AuditLog 聚合根]
-        ActivityLog[ActivityLog 聚合根]
+    subgraph RBACContext["权限上下文 (RBAC Bounded Context)"]
+        Role[Role 聚合根]
+        Menu[Menu 实体]
+        CasbinPolicy[Casbin 策略引擎]
+        
+        Role --> CasbinPolicy
+        Role --> Menu
     end
     
-    UserContext --> LogContext
+    subgraph OperationContext["操作上下文 (Operation Bounded Context)"]
+        OperationLog[OperationLog 聚合根]
+    end
+    
+    UserContext --> RBACContext
+    UserContext --> OperationContext
+    RBACContext --> OperationContext
 ```
 
 **核心聚合**：
 - **User** - 用户聚合根（认证、权限、资料）
-- **AuditLog** - 审计日志聚合根（操作审计）
-- **ActivityLog** - 活动日志聚合根（用户行为）
+- **Role** - 角色聚合根（RBAC 角色管理，通过 Casbin 引擎授权）
+- **Menu** - 菜单实体（树形菜单结构，驱动前端侧边栏）
+- **OperationLog** - 统一操作日志聚合根（合并安全审计与业务活动）
 
 ## 用户聚合（User Aggregate）
 
@@ -221,6 +234,165 @@ func (u *User) VerifyEmail() {
 
 **使用场景**：
 - 用户点击邮箱验证链接后调用
+
+## RBAC 权限领域
+
+### 权限模型概述
+
+项目采用 **RBAC（基于角色的访问控制）** 模型，结合 **Casbin v3** 策略引擎实现灵活的权限管理。
+
+**代码位置**：`internal/domain/rbac/`
+
+```mermaid
+graph TB
+    Role[Role 聚合根] --> UserRole[用户角色关联]
+    Role --> CasbinRule[Casbin 策略规则]
+    Menu[Menu 实体] --> Role
+```
+
+### 聚合根：Role
+
+**职责**：
+- 管理角色定义（名称、编码、描述）
+- 控制角色启用/禁用状态
+- 通过 Casbin 策略关联资源权限
+
+**代码位置**：`internal/domain/rbac/role.go`
+
+#### 属性
+
+| 属性 | 类型 | 说明 | 不变量 |
+|------|------|------|--------|
+| `ID` | string | 角色唯一标识（ULID） | 不可变 |
+| `Name` | string | 角色名称 | 非空 |
+| `Code` | string | 角色编码（唯一） | 不可变，如 `FOUNDER`、`ADMIN` |
+| `Description` | string | 角色描述 | - |
+| `Status` | bool | 是否启用 | - |
+
+### Menu 实体
+
+**职责**：
+- 管理后台菜单树形结构
+- 驱动前端侧边栏动态渲染
+- 关联权限标识
+
+**代码位置**：`internal/domain/rbac/menu.go`
+
+#### 属性
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `ID` | string | 菜单 ID（ULID） |
+| `Key` | string | 菜单唯一标识 |
+| `Label` | string | 菜单显示名称 |
+| `Icon` | string | Ant Design 图标名称 |
+| `Path` | string | 前端路由路径 |
+| `Permission` | string | 权限标识（如 `user:manage`） |
+| `ParentID` | string | 父菜单 ID，空表示顶级 |
+| `SortOrder` | int | 排序序号 |
+| `Status` | bool | 是否启用 |
+
+### Casbin 权限引擎集成
+
+**代码位置**：`internal/infra/authorize/enforcer.go`
+
+项目使用 Casbin v3 作为权限决策引擎，通过 `gorm-adapter/v3` 将策略规则持久化到 `casbin_rule` 表。
+
+**策略模型**：
+```
+[request_definition]
+r = sub, obj, act
+
+[policy_definition]
+p = sub, obj, act
+
+[role_definition]
+g = _, _
+
+[policy_effect]
+e = some(where (p.eft == allow))
+
+[matchers]
+m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
+```
+
+**权限检查流程**：
+1. HTTP 请求到达 RBAC 中间件（`middleware/rbac.go`）
+2. 中间件提取用户角色和请求路径/方法
+3. 调用 Casbin Enforcer 进行权限判断
+4. 匹配策略规则则放行，否则返回 403
+
+**仓储接口**：
+
+**代码位置**：`internal/domain/rbac/repository.go`
+
+```go
+type RoleRepository interface {
+    Create(ctx context.Context, role *Role) error
+    FindByID(ctx context.Context, id string) (*Role, error)
+    FindByCode(ctx context.Context, code string) (*Role, error)
+    FindAll(ctx context.Context) ([]*Role, error)
+    Update(ctx context.Context, role *Role) error
+    Delete(ctx context.Context, id string) error
+}
+
+type MenuRepository interface {
+    Create(ctx context.Context, menu *Menu) error
+    FindByID(ctx context.Context, id string) (*Menu, error)
+    FindAll(ctx context.Context) ([]*Menu, error)
+    FindByParentID(ctx context.Context, parentID string) ([]*Menu, error)
+    Update(ctx context.Context, menu *Menu) error
+    Delete(ctx context.Context, id string) error
+}
+```
+
+## 操作日志聚合（OperationLog Aggregate）
+
+### 聚合根：OperationLog
+
+**职责**：
+- 统一记录安全审计事件与业务操作事件
+- 合并原 AuditLog（安全审计）与 ActivityLog（业务活动）为单一聚合
+
+**代码位置**：`internal/domain/operation/entity.go`
+
+#### 属性
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `ID` | string | 日志 ID（ULID） |
+| `UserID` | string | 操作用户 ID |
+| `Email` | string | 用户邮箱（冗余，便于查询） |
+| `Action` | string | 操作类型（如 `AUTH.LOGIN.SUCCESS`） |
+| `Category` | string | 分类：`AUTH` / `USER` / `SYSTEM` / `BIZ` |
+| `Status` | string | 状态：`SUCCESS` / `FAILED` |
+| `IP` | string | IP 地址（支持 IPv6） |
+| `UserAgent` | string | 浏览器 UA |
+| `Device` | string | 设备类型 |
+| `Browser` | string | 浏览器名称 |
+| `OS` | string | 操作系统 |
+| `Metadata` | map[string]interface{} | 事件元数据（JSONB） |
+
+**分类体系**：
+| Category | 说明 | 示例 |
+|----------|------|------|
+| `AUTH` | 认证相关 | 登录、登出、密码重置 |
+| `USER` | 用户操作 | 资料更新、权限变更 |
+| `SYSTEM` | 系统操作 | 菜单管理、角色配置 |
+| `BIZ` | 业务操作 | 目标创建、卡片验收 |
+
+**仓储接口**：
+
+**代码位置**：`internal/domain/operation/repository.go`
+
+```go
+type OperationLogRepository interface {
+    Create(ctx context.Context, log *OperationLog) error
+    FindByUserID(ctx context.Context, userID string, limit int) ([]*OperationLog, error)
+    FindByCategory(ctx context.Context, category string, limit int) ([]*OperationLog, error)
+    FindByAction(ctx context.Context, action string, limit int) ([]*OperationLog, error)
+}
+```
 
 ## 值对象设计
 
@@ -402,8 +574,7 @@ func (e *UserRegistered) OccurredAt() time.Time { return e.Timestamp }
 - 用户成功注册账户
 
 **监听器**：
-- `AuditLogListener` - 记录审计日志
-- `ActivityLogListener` - 记录活动日志
+- `OperationLogListener` - 记录统一操作日志
 - `EmailListener` - 发送验证邮件（待实现）
 
 #### 2. UserLoggedIn（用户登录）
@@ -437,8 +608,7 @@ func (e *UserLoggedIn) OccurredAt() time.Time { return e.Timestamp }
 - 用户成功登录
 
 **监听器**：
-- `AuditLogListener` - 记录审计日志（状态 SUCCESS）
-- `ActivityLogListener` - 记录登录活动
+- `OperationLogListener` - 记录登录操作日志（状态 SUCCESS）
 - `SecurityListener` - 检测异常登录（待实现）
 
 #### 3. UserLoggedOut（用户登出）
@@ -525,7 +695,7 @@ func (e *AccountLocked) OccurredAt() time.Time { return e.Timestamp }
 - 连续 5 次登录失败自动锁定
 
 **监听器**：
-- `AuditLogListener` - 记录安全审计
+- `OperationLogListener` - 记录安全操作日志
 - `EmailListener` - 发送锁定通知（待实现）
 
 #### 6. TokenRefreshed（Token 刷新）
@@ -603,13 +773,13 @@ const (
 
 | 事件常量 | 事件结构体 | 触发时机 | 监听器 |
 |---------|-----------|---------|--------|
-| `user.registered` | UserRegistered | 用户注册 | AuditLog, ActivityLog, Email |
-| `user.logged_in` | UserLoggedIn | 用户登录 | AuditLog, ActivityLog, Security |
-| `user.logged_out` | UserLoggedOut | 用户登出 | ActivityLog |
-| `user.login_failed` | LoginFailed | 登录失败 | AuditLog |
-| `user.account_locked` | AccountLocked | 账户锁定 | AuditLog, Email |
-| `user.token_refreshed` | TokenRefreshed | Token 刷新 | ActivityLog |
-| `user.profile_updated` | UserProfileUpdated | 资料更新 | AuditLog
+| `user.registered` | UserRegistered | 用户注册 | OperationLog, Email |
+| `user.logged_in` | UserLoggedIn | 用户登录 | OperationLog, Security |
+| `user.logged_out` | UserLoggedOut | 用户登出 | OperationLog |
+| `user.login_failed` | LoginFailed | 登录失败 | OperationLog |
+| `user.account_locked` | AccountLocked | 账户锁定 | OperationLog, Email |
+| `user.token_refreshed` | TokenRefreshed | Token 刷新 | OperationLog |
+| `user.profile_updated` | UserProfileUpdated | 资料更新 | OperationLog |
 
 ## 仓储接口
 
@@ -832,5 +1002,4 @@ type User struct {
 ## 📚 延伸阅读
 
 - [DDD 架构设计](DDD_ARCHITECTURE.md) - 架构分层和依赖规则
-- [事件风暴文档](EVENT_STORMING.md) - 领域事件设计过程
 - [数据库设计](../database/SCHEMA_DESIGN.md) - 聚合到表的映射
