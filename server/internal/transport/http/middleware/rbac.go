@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -67,13 +66,4 @@ func PermissionMiddleware(enforcer *authorize.Enforcer) gin.HandlerFunc {
 
 		c.Next()
 	}
-}
-
-// getRouteKey 从 Gin 上下文构建路由 key（备用方法）
-func getRouteKey(c *gin.Context) string {
-	var sb strings.Builder
-	sb.WriteString(c.Request.Method)
-	sb.WriteString(":")
-	sb.WriteString(c.FullPath())
-	return sb.String()
 }

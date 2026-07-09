@@ -11,10 +11,11 @@ import (
 
 // RateLimiter 速率限制器
 type RateLimiter struct {
-	visitors map[string]*visitor
-	mu       sync.Mutex
-	rate     rate.Limit
-	burst    int
+	visitors    map[string]*visitor
+	mu          sync.Mutex
+	rate        rate.Limit
+	burst       int
+	lastCleanup time.Time
 }
 
 // visitor 访问者信息
@@ -26,9 +27,10 @@ type visitor struct {
 // NewRateLimiter 创建速率限制器
 func NewRateLimiter(rate rate.Limit, burst int) *RateLimiter {
 	return &RateLimiter{
-		visitors: make(map[string]*visitor),
-		rate:     rate,
-		burst:    burst,
+		visitors:    make(map[string]*visitor),
+		rate:        rate,
+		burst:       burst,
+		lastCleanup: time.Now(),
 	}
 }
 
@@ -46,8 +48,11 @@ func (rl *RateLimiter) allow(ip string) bool {
 		v.lastSeen = time.Now()
 	}
 
-	// 清理长时间未访问的用户（可选）
-	go rl.cleanup()
+	// 每分钟清理一次过期用户
+	if time.Since(rl.lastCleanup) > time.Minute {
+		rl.cleanup()
+		rl.lastCleanup = time.Now()
+	}
 
 	return v.limiter.Allow()
 }

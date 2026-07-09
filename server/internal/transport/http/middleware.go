@@ -21,11 +21,6 @@ func Middlewares(engine *gin.Engine, m *metrics.Metrics, corsCfg config.CORSConf
 	// Prometheus 监控中间件
 	engine.Use(middleware.PrometheusMiddleware(m))
 
-	// 请求日志中间件(Gin默认)
-	engine.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		SkipPaths: []string{"/health"},
-	}))
-
 	// Recovery 中间件(必须)
 	engine.Use(gin.Recovery())
 }

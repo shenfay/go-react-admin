@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/gin-gonic/gin"
-	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // CORSConfig CORS 配置
@@ -55,10 +57,10 @@ func CORSMiddleware(config CORSConfig) gin.HandlerFunc {
 
 		// 设置 CORS 响应头
 		c.Header("Access-Control-Allow-Origin", origin)
-		c.Header("Access-Control-Allow-Methods", joinStrings(config.AllowedMethods))
-		c.Header("Access-Control-Allow-Headers", joinStrings(config.AllowedHeaders))
-		c.Header("Access-Control-Allow-Credentials", boolToString(config.AllowCredentials))
-		c.Header("Access-Control-Max-Age", intToString(config.MaxAge))
+		c.Header("Access-Control-Allow-Methods", strings.Join(config.AllowedMethods, ", "))
+		c.Header("Access-Control-Allow-Headers", strings.Join(config.AllowedHeaders, ", "))
+		c.Header("Access-Control-Allow-Credentials", strconv.FormatBool(config.AllowCredentials))
+		c.Header("Access-Control-Max-Age", strconv.Itoa(config.MaxAge))
 
 		// 处理预检请求
 		if c.Request.Method == "OPTIONS" {
@@ -68,29 +70,4 @@ func CORSMiddleware(config CORSConfig) gin.HandlerFunc {
 
 		c.Next()
 	}
-}
-
-// joinStrings 连接字符串数组
-func joinStrings(strs []string) string {
-	result := ""
-	for i, s := range strs {
-		if i > 0 {
-			result += ", "
-		}
-		result += s
-	}
-	return result
-}
-
-// boolToString 布尔转字符串
-func boolToString(b bool) string {
-	if b {
-		return "true"
-	}
-	return "false"
-}
-
-// intToString 整数转字符串
-func intToString(i int) string {
-	return utils.ToString(i)
 }
