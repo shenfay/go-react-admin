@@ -1,4 +1,4 @@
-import axios, { AxiosError, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios'
+import axios, { AxiosError, type InternalAxiosRequestConfig, type AxiosResponse, type CancelTokenSource } from 'axios'
 import { message } from 'antd'
 import type { ApiResponse } from '@/types'
 
@@ -11,6 +11,21 @@ const request = axios.create({
   },
 })
 
+// ---- 请求取消：路由切换时取消所有进行中的请求 ----
+let cancelTokenSource: CancelTokenSource | null = null
+
+function cancelPendingRequests() {
+  if (cancelTokenSource) {
+    cancelTokenSource.cancel('路由切换，取消请求')
+    cancelTokenSource = null
+  }
+}
+
+/** 在路由切换时调用，取消所有进行中的请求 */
+export function cancelAllRequests() {
+  cancelPendingRequests()
+}
+
 // 请求拦截器
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -19,9 +34,14 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    // 为每个请求附加取消令牌
+    cancelTokenSource = axios.CancelToken.source()
+    config.cancelToken = cancelTokenSource.token
     return config
   },
   (error: AxiosError) => {
+    // 忽略取消请求的错误
+    if (axios.isCancel(error)) return Promise.reject(error)
     return Promise.reject(error)
   }
 )

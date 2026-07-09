@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Layout } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageContainer from './PageContainer'
 import { useUserStore } from '@/stores'
 import { getUserMenuTree } from '@/services/auth'
+import { cancelAllRequests } from '@/utils/request'
 import type { ReactNode } from 'react'
 
 const { Content } = Layout
@@ -16,8 +17,14 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { isLogin, setMenuTree } = useUserStore()
   const [contentKey, setContentKey] = useState(0)
+
+  // 路由切换时取消进行中的 API 请求
+  useEffect(() => {
+    return () => { cancelAllRequests() }
+  }, [location.pathname])
 
   const handleRefresh = useCallback(() => {
     setContentKey(k => k + 1)

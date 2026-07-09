@@ -4,6 +4,7 @@ import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/stores'
 import { login as loginApi, getUserMenuTree } from '@/services/auth'
+import { emailRules, passwordRules } from '@/utils/formRules'
 import type { LoginRequest } from '@/types'
 
 export default function Login() {
@@ -195,10 +196,7 @@ export default function Login() {
           >
             <Form.Item
               name="email"
-              rules={[
-                { required: true, message: '请输入邮箱' },
-                { type: 'email', message: '请输入有效的邮箱地址' },
-              ]}
+              rules={emailRules}
             >
               <Input
                 prefix={<MailOutlined style={{ color: 'var(--text-icon)' }} />}
@@ -209,7 +207,7 @@ export default function Login() {
 
             <Form.Item
               name="password"
-              rules={[{ required: true, message: '请输入密码' }]}
+              rules={passwordRules}
             >
               <Input.Password
                 prefix={<LockOutlined style={{ color: 'var(--text-icon)' }} />}

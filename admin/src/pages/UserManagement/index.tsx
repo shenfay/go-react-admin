@@ -7,6 +7,7 @@ import { DEFAULT_PAGINATION } from '@/config/pagination'
 import { useCrudList } from '@/hooks/useCrudList'
 import { getUserList, createUser, updateUser, toggleUserStatus } from '@/services/user'
 import { getRoleList } from '@/services/role'
+import { emailRules, passwordRules } from '@/utils/formRules'
 import type { User, Role } from '@/types'
 
 export default function UserManagement() {
@@ -206,11 +207,11 @@ export default function UserManagement() {
           <Form.Item label="姓名" name="name" rules={[{ required: true, message: '请输入姓名' }]}>
             <Input placeholder="请输入姓名" />
           </Form.Item>
-          <Form.Item label="邮箱" name="email" rules={[{ required: true }, { type: 'email' }]}>
+          <Form.Item label="邮箱" name="email" rules={emailRules}>
             <Input placeholder="example@domain.com" />
           </Form.Item>
           {!editingUser && (
-            <Form.Item label="密码" name="password" rules={[{ required: true, message: '请输入密码' }, { min: 8, message: '密码至少 8 位' }]}>
+            <Form.Item label="密码" name="password" rules={passwordRules}>
               <Input.Password placeholder="请输入密码" />
             </Form.Item>
           )}

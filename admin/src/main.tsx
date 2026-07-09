@@ -5,11 +5,14 @@ import { ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import './styles/theme.css'
 import './styles/global.css'
+import ErrorBoundary from '@/components/ErrorBoundary'
+
 import router from './router'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider
+    <ErrorBoundary>
+      <ConfigProvider
       locale={zhCN}
       theme={{
         token: {
@@ -135,5 +138,6 @@ createRoot(document.getElementById('root')!).render(
     >
       <RouterProvider router={router} />
     </ConfigProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
