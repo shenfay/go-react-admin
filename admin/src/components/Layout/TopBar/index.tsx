@@ -177,27 +177,9 @@ export default function TopBar({ onRefresh }: TopBarProps) {
         {/* Refresh Button */}
         <button
           type="button"
+          className="icon-btn"
           onClick={onRefresh}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 8,
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-light)',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'var(--hover-bg)'
-            e.currentTarget.style.borderColor = 'var(--border-hover)'
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'var(--bg-light)'
-            e.currentTarget.style.borderColor = 'var(--border-color)'
-          }}
+          title={t('refresh')}
         >
           <ReloadOutlined style={{ fontSize: 16, color: 'var(--text-secondary)' }} />
         </button>
@@ -216,27 +198,8 @@ export default function TopBar({ onRefresh }: TopBarProps) {
         >
           <button
             type="button"
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-light)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.15s',
-              fontSize: 18,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'var(--hover-bg)'
-              e.currentTarget.style.borderColor = 'var(--border-hover)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'var(--bg-light)'
-              e.currentTarget.style.borderColor = 'var(--border-color)'
-            }}
+            className="icon-btn"
+            style={{ fontSize: 18 }}
           >
             <span className={`fi fi-${countryCodeMap[i18n.language] || 'us'}`} style={{ fontSize: 16 }} />
           </button>
