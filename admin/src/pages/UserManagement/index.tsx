@@ -8,7 +8,7 @@ import { DEFAULT_PAGINATION, getPaginationShowTotal } from '@/config/pagination'
 import { useCrudList } from '@/hooks/useCrudList'
 import { getUserList, createUser, updateUser, toggleUserStatus } from '@/services/user'
 import { getRoleList } from '@/services/role'
-import { emailRules, passwordRules } from '@/utils/formRules'
+import { getEmailRules, getPasswordRules } from '@/utils/formRules'
 import type { User, Role } from '@/types'
 
 export default function UserManagement() {
@@ -210,11 +210,11 @@ export default function UserManagement() {
           <Form.Item label={t('name')} name="name" rules={[{ required: true, message: t('namePlaceholder') }]}>
             <Input placeholder={t('namePlaceholder')} />
           </Form.Item>
-          <Form.Item label={t('email')} name="email" rules={emailRules}>
+          <Form.Item label={t('email')} name="email" rules={getEmailRules()}>
             <Input placeholder="example@domain.com" />
           </Form.Item>
           {!editingUser && (
-            <Form.Item label={t('password')} name="password" rules={passwordRules}>
+            <Form.Item label={t('password')} name="password" rules={getPasswordRules()}>
               <Input.Password placeholder={t('passwordPlaceholder')} />
             </Form.Item>
           )}

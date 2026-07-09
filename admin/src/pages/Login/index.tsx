@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useUserStore } from '@/stores'
 import { login as loginApi, getUserMenuTree } from '@/services/auth'
-import { emailRules, passwordRules } from '@/utils/formRules'
+import { getEmailRules, getPasswordRules } from '@/utils/formRules'
 import type { LoginRequest } from '@/types'
 
 export default function Login() {
@@ -198,7 +198,7 @@ export default function Login() {
           >
             <Form.Item
               name="email"
-              rules={emailRules}
+              rules={getEmailRules()}
             >
               <Input
                 prefix={<MailOutlined style={{ color: 'var(--text-icon)' }} />}
@@ -209,7 +209,7 @@ export default function Login() {
 
             <Form.Item
               name="password"
-              rules={passwordRules}
+              rules={getPasswordRules()}
             >
               <Input.Password
                 prefix={<LockOutlined style={{ color: 'var(--text-icon)' }} />}
