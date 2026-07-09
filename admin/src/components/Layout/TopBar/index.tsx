@@ -1,10 +1,16 @@
 import { useState, useMemo } from 'react'
 import { Breadcrumb, AutoComplete, Input, Dropdown } from 'antd'
-import { SearchOutlined, ReloadOutlined, GlobalOutlined } from '@ant-design/icons'
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import 'flag-icons/css/flag-icons.min.css'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/stores'
 import type { MenuItem } from '@/types'
+
+const countryCodeMap: Record<string, string> = {
+  'zh-CN': 'cn',
+  'en-US': 'us',
+}
 
 interface TopBarProps {
   onRefresh: () => void
@@ -200,8 +206,8 @@ export default function TopBar({ onRefresh }: TopBarProps) {
         <Dropdown
           menu={{
             items: [
-              { key: 'zh-CN', label: <span style={{ fontSize: 14 }}>{'\u{1F1E8}\u{1F1F3}'} 中文</span> },
-              { key: 'en-US', label: <span style={{ fontSize: 14 }}>{'\u{1F1FA}\u{1F1F8}'} English</span> },
+              { key: 'zh-CN', label: <span style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}><span className="fi fi-cn" style={{ fontSize: 16 }} /> 中文</span> },
+              { key: 'en-US', label: <span style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}><span className="fi fi-us" style={{ fontSize: 16 }} /> English</span> },
             ],
             onClick: ({ key }) => i18n.changeLanguage(key),
             selectedKeys: [i18n.language],
@@ -232,7 +238,7 @@ export default function TopBar({ onRefresh }: TopBarProps) {
               e.currentTarget.style.borderColor = 'var(--border-color)'
             }}
           >
-            {i18n.language === 'zh-CN' ? '\u{1F1E8}\u{1F1F3}' : '\u{1F1FA}\u{1F1F8}'}
+            <span className={`fi fi-${countryCodeMap[i18n.language] || 'us'}`} style={{ fontSize: 16 }} />
           </button>
         </Dropdown>
       </div>
