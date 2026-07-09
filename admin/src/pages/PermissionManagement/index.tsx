@@ -291,7 +291,7 @@ export default function PermissionManagement() {
         title={t('permissionManagement')}
         filters={
           <>
-            <FilterSearch placeholder={t('searchRoleName')} />
+            <FilterSearch value={keyword} onChange={setKeyword} placeholder={t('searchRoleName')} />
             <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
           </>
         }

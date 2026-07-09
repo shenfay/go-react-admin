@@ -239,7 +239,7 @@ export default function MenuManagement() {
         title={t('menuManagement')}
         filters={
           <>
-            <FilterSearch placeholder={t('searchMenuName')} />
+            <FilterSearch value={keyword} onChange={setKeyword} placeholder={t('searchMenuName')} />
             <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
           </>
         }
