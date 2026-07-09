@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
-import { Breadcrumb, AutoComplete, Input } from 'antd'
+import { Breadcrumb, AutoComplete, Input, Select } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/stores'
 import type { MenuItem } from '@/types'
@@ -10,13 +11,14 @@ interface TopBarProps {
 }
 
 export default function TopBar({ onRefresh }: TopBarProps) {
+  const { t, i18n } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const menuTree = useUserStore(state => state.menuTree)
   const [searchValue, setSearchValue] = useState('')
 
   const findBreadcrumb = () => {
-    const result: { title: string }[] = [{ title: '首页' }]
+    const result: { title: string }[] = [{ title: t('home') }]
     function search(nodes: MenuItem[], parentLabel?: string): boolean {
       for (const node of nodes) {
         if (node.path === location.pathname) {
@@ -109,7 +111,7 @@ export default function TopBar({ onRefresh }: TopBarProps) {
         >
           <Input
             prefix={<SearchOutlined style={{ color: 'var(--text-icon)' }} />}
-            placeholder="搜索菜单..."
+            placeholder={t('searchMenu')}
             allowClear
             style={{
               height: 34,
@@ -128,6 +130,18 @@ export default function TopBar({ onRefresh }: TopBarProps) {
             }}
           />
         </AutoComplete>
+
+        {/* Language Switcher */}
+        <Select
+          value={i18n.language}
+          onChange={val => i18n.changeLanguage(val)}
+          style={{ width: 90 }}
+          size="small"
+          options={[
+            { value: 'zh-CN', label: '中文' },
+            { value: 'en-US', label: 'English' },
+          ]}
+        />
 
         {/* Refresh Button */}
         <button

@@ -1,54 +1,56 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Tag, Button, Select } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { DEFAULT_PAGINATION } from '@/config/pagination'
 
-const personalityOptions = [
-  { label: '全部性格', value: '' },
-  { label: '探索型', value: 'explorer' },
-  { label: '守护型', value: 'guardian' },
-  { label: '创造型', value: 'creator' },
-  { label: '思考型', value: 'thinker' },
-]
-
-const columns = [
-  { title: '伙伴名称', dataIndex: 'name', key: 'name' },
-  {
-    title: '性格类型',
-    dataIndex: 'personality',
-    key: 'personality',
-    render: (personality: string) => {
-      const labelMap: Record<string, string> = {
-        explorer: '探索型',
-        guardian: '守护型',
-        creator: '创造型',
-        thinker: '思考型',
-      }
-      return <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{labelMap[personality] || personality}</Tag>
-    },
-  },
-  { title: '解锁等级', dataIndex: 'unlockLevel', key: 'unlockLevel' },
-  { title: '描述', dataIndex: 'description', key: 'description', ellipsis: true },
-  { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt' },
-]
-
 export default function Companion() {
+  const { t } = useTranslation()
   const [personalityFilter, setPersonalityFilter] = useState('')
+
+  const personalityOptions = [
+    { label: t('allPersonality'), value: '' },
+    { label: t('explorer'), value: 'explorer' },
+    { label: t('guardian'), value: 'guardian' },
+    { label: t('creator'), value: 'creator' },
+    { label: t('thinker'), value: 'thinker' },
+  ]
+
+  const columns = [
+    { title: t('companionName'), dataIndex: 'name', key: 'name' },
+    {
+      title: t('personalityType'),
+      dataIndex: 'personality',
+      key: 'personality',
+      render: (personality: string) => {
+        const labelMap: Record<string, string> = {
+          explorer: t('explorer'),
+          guardian: t('guardian'),
+          creator: t('creator'),
+          thinker: t('thinker'),
+        }
+        return <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{labelMap[personality] || personality}</Tag>
+      },
+    },
+    { title: t('unlockLevel'), dataIndex: 'unlockLevel', key: 'unlockLevel' },
+    { title: t('description'), dataIndex: 'description', key: 'description', ellipsis: true },
+    { title: t('updatedAt'), dataIndex: 'updatedAt', key: 'updatedAt' },
+  ]
 
   return (
     <DataPanel
-      title="伙伴模板管理"
+      title={t('companionManagement')}
       filters={
         <>
-          <FilterSearch placeholder="搜索伙伴名称..." />
+          <FilterSearch placeholder={t('searchCompanionName')} />
           <Select value={personalityFilter} onChange={setPersonalityFilter} style={{ width: 140 }} options={personalityOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
         </>
       }
       toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
-          新增伙伴
+          {t('addCompanion')}
         </Button>
       }
     >
@@ -56,7 +58,7 @@ export default function Companion() {
         columns={columns}
         dataSource={[]}
         rowKey="id"
-        locale={{ emptyText: '暂无数据' }}
+        locale={{ emptyText: t('noData') }}
         pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>

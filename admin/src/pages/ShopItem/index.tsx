@@ -1,64 +1,66 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Tag, Button, Select } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { DEFAULT_PAGINATION } from '@/config/pagination'
 
-const approvalOptions = [
-  { label: '全部审批', value: '' },
-  { label: '自动通过', value: 'auto' },
-  { label: '通知家长', value: 'notify' },
-  { label: '需审批', value: 'approve' },
-]
-
-const columns = [
-  { title: '商品名称', dataIndex: 'name', key: 'name' },
-  { title: '商品描述', dataIndex: 'description', key: 'description', ellipsis: true },
-  {
-    title: '积分价格',
-    dataIndex: 'price',
-    key: 'price',
-    render: (price: number) => <Tag style={{ background: 'var(--yellow-light)', color: 'var(--yellow-text)' }}>{price} 积分</Tag>,
-  },
-  {
-    title: '审批级别',
-    dataIndex: 'approvalLevel',
-    key: 'approvalLevel',
-    render: (level: string) => {
-      const labelMap: Record<string, string> = {
-        auto: '自动通过',
-        notify: '通知家长',
-        approve: '需审批',
-      }
-      const colorMap: Record<string, { bg: string; color: string }> = {
-        auto: { bg: 'var(--green-light)', color: 'var(--green-text)' },
-        notify: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
-        approve: { bg: 'var(--red-light)', color: 'var(--red-text)' },
-      }
-      const c = colorMap[level] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
-      return <Tag style={{ background: c.bg, color: c.color }}>{labelMap[level] || level}</Tag>
-    },
-  },
-  { title: '库存', dataIndex: 'stock', key: 'stock' },
-  { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt' },
-]
-
 export default function ShopItem() {
+  const { t } = useTranslation()
   const [approvalFilter, setApprovalFilter] = useState('')
+
+  const approvalOptions = [
+    { label: t('allApproval'), value: '' },
+    { label: t('autoPassed'), value: 'auto' },
+    { label: t('notifyParent'), value: 'notify' },
+    { label: t('needApproval'), value: 'approve' },
+  ]
+
+  const columns = [
+    { title: t('itemName'), dataIndex: 'name', key: 'name' },
+    { title: t('itemDescription'), dataIndex: 'description', key: 'description', ellipsis: true },
+    {
+      title: t('pointsPrice'),
+      dataIndex: 'price',
+      key: 'price',
+      render: (price: number) => <Tag style={{ background: 'var(--yellow-light)', color: 'var(--yellow-text)' }}>{price} {t('pointsUnit')}</Tag>,
+    },
+    {
+      title: t('approvalLevel'),
+      dataIndex: 'approvalLevel',
+      key: 'approvalLevel',
+      render: (level: string) => {
+        const labelMap: Record<string, string> = {
+          auto: t('autoPassed'),
+          notify: t('notifyParent'),
+          approve: t('needApproval'),
+        }
+        const colorMap: Record<string, { bg: string; color: string }> = {
+          auto: { bg: 'var(--green-light)', color: 'var(--green-text)' },
+          notify: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
+          approve: { bg: 'var(--red-light)', color: 'var(--red-text)' },
+        }
+        const c = colorMap[level] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
+        return <Tag style={{ background: c.bg, color: c.color }}>{labelMap[level] || level}</Tag>
+      },
+    },
+    { title: t('stock'), dataIndex: 'stock', key: 'stock' },
+    { title: t('updatedAt'), dataIndex: 'updatedAt', key: 'updatedAt' },
+  ]
 
   return (
     <DataPanel
-      title="商品管理"
+      title={t('shopItemManagement')}
       filters={
         <>
-          <FilterSearch placeholder="搜索商品名称..." />
+          <FilterSearch placeholder={t('searchItemName')} />
           <Select value={approvalFilter} onChange={setApprovalFilter} style={{ width: 140 }} options={approvalOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
         </>
       }
       toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
-          新增商品
+          {t('addItem')}
         </Button>
       }
     >
@@ -66,7 +68,7 @@ export default function ShopItem() {
         columns={columns}
         dataSource={[]}
         rowKey="id"
-        locale={{ emptyText: '暂无数据' }}
+        locale={{ emptyText: t('noData') }}
         pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>

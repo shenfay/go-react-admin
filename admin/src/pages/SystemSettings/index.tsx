@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Form, Input, Switch, Button, Select, InputNumber, message, Tabs } from 'antd'
 import type { TabsProps } from 'antd'
 import DataPanel from '@/components/DataPanel'
 
 export default function SystemSettings() {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
 
@@ -11,37 +13,37 @@ export default function SystemSettings() {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      message.success('保存成功')
+      message.success(t('saveSuccess'))
     }, 800)
   }
 
   const tabItems: TabsProps['items'] = [
     {
       key: 'basic',
-      label: '基础配置',
+      label: t('basicConfig'),
       children: (
         <>
           <div style={{ display: 'flex', gap: 24 }}>
             <Form.Item
-              label="站点名称"
+              label={t('siteName')}
               name="siteName"
               style={{ flex: 1 }}
-              rules={[{ required: true, message: '请输入站点名称' }]}
+              rules={[{ required: true, message: t('siteNamePlaceholder') }]}
             >
-              <Input placeholder="请输入站点名称" />
+              <Input placeholder={t('siteNamePlaceholder')} />
             </Form.Item>
-            <Form.Item label="站点 Logo" name="logo" style={{ flex: 1 }}>
-              <Input placeholder="输入 Logo 文字或图片 URL" />
+            <Form.Item label={t('siteLogo')} name="logo" style={{ flex: 1 }}>
+              <Input placeholder={t('logoPlaceholder')} />
             </Form.Item>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>
-            <Form.Item label="默认语言" name="language" style={{ flex: 1 }}>
+            <Form.Item label={t('defaultLanguage')} name="language" style={{ flex: 1 }}>
               <Select>
-                <Select.Option value="zh-CN">简体中文</Select.Option>
+                <Select.Option value="zh-CN">{t('zhCN')}</Select.Option>
                 <Select.Option value="en-US">English</Select.Option>
               </Select>
             </Form.Item>
-            <Form.Item label="时区" name="timezone" style={{ flex: 1 }}>
+            <Form.Item label={t('timezone')} name="timezone" style={{ flex: 1 }}>
               <Select>
                 <Select.Option value="Asia/Shanghai">Asia/Shanghai</Select.Option>
                 <Select.Option value="UTC">UTC</Select.Option>
@@ -49,41 +51,41 @@ export default function SystemSettings() {
             </Form.Item>
           </div>
           <Form.Item
-            label="会话超时"
+            label={t('sessionTimeout')}
             name="sessionTimeout"
             style={{ maxWidth: 400 }}
-            rules={[{ required: true, message: '请输入会话超时时间' }]}
+            rules={[{ required: true, message: t('sessionTimeoutPlaceholder') }]}
           >
-            <InputNumber min={5} max={120} addonAfter="分钟" style={{ width: '100%' }} />
+            <InputNumber min={5} max={120} addonAfter={t('minutes')} style={{ width: '100%' }} />
           </Form.Item>
         </>
       ),
     },
     {
       key: 'toggles',
-      label: '功能开关',
+      label: t('featureToggles'),
       children: (
         <>
           <Form.Item
-            label="开放注册"
+            label={t('openRegistration')}
             name="enableRegister"
             valuePropName="checked"
           >
-            <Switch checkedChildren="已开启" unCheckedChildren="已关闭" />
+            <Switch checkedChildren={t('turnedOn')} unCheckedChildren={t('turnedOff')} />
           </Form.Item>
           <Form.Item
-            label="审计日志"
+            label={t('auditLog')}
             name="enableAudit"
             valuePropName="checked"
           >
-            <Switch checkedChildren="已开启" unCheckedChildren="已关闭" />
+            <Switch checkedChildren={t('turnedOn')} unCheckedChildren={t('turnedOff')} />
           </Form.Item>
           <Form.Item
-            label="消息通知"
+            label={t('messageNotification')}
             name="enableNotify"
             valuePropName="checked"
           >
-            <Switch checkedChildren="已开启" unCheckedChildren="已关闭" />
+            <Switch checkedChildren={t('turnedOn')} unCheckedChildren={t('turnedOff')} />
           </Form.Item>
         </>
       ),
@@ -91,7 +93,7 @@ export default function SystemSettings() {
   ]
 
   return (
-    <DataPanel title="系统设置">
+    <DataPanel title={t('systemSettings')}>
       <div style={{ padding: '0 28px 20px' }}>
         <Form
           form={form}
@@ -111,10 +113,10 @@ export default function SystemSettings() {
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
             <Button type="primary" loading={loading} onClick={handleSave}>
-              保存设置
+              {t('saveSettings')}
             </Button>
             <Button onClick={() => form.resetFields()}>
-              重置
+              {t('reset')}
             </Button>
           </div>
         </Form>

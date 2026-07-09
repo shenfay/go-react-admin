@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { message } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 interface SidebarUserProps {
   collapsed: boolean
@@ -15,6 +16,7 @@ interface SidebarUserProps {
 }
 
 export default function SidebarUser({ collapsed, username, onLogout }: SidebarUserProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const handleUserMenuClick = ({ key }: { key: string }) => {
@@ -27,17 +29,17 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
         break
       case 'logout':
         onLogout()
-        message.success('已退出登录')
+        message.success(t('logoutSuccess'))
         navigate('/login', { replace: true })
         break
     }
   }
 
   const userMenuItems = [
-    { key: 'profile', icon: <UserOutlined />, label: '个人中心' },
-    { key: 'settings', icon: <SettingOutlined />, label: '系统设置' },
+    { key: 'profile', icon: <UserOutlined />, label: t('personalCenter') },
+    { key: 'settings', icon: <SettingOutlined />, label: t('systemSettings') },
     { type: 'divider' as const },
-    { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true },
+    { key: 'logout', icon: <LogoutOutlined />, label: t('logout'), danger: true },
   ]
 
   return (
@@ -62,7 +64,7 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
               cursor: 'pointer',
             }}
           >
-            {username?.charAt(0) || '管'}
+            {username?.charAt(0) || t('user').charAt(0)}
           </Avatar>
         </Dropdown>
       ) : (
@@ -97,7 +99,7 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
                   minWidth: 28,
                 }}
               >
-                {username?.charAt(0) || '管'}
+                {username?.charAt(0) || t('user').charAt(0)}
               </Avatar>
               <span
                 style={{
@@ -108,7 +110,7 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
                   overflow: 'hidden',
                 }}
               >
-                {username || '管理员'}
+                {username || t('user')}
               </span>
             </div>
           </Dropdown>

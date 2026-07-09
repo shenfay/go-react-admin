@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig, type AxiosResponse, type CancelTokenSource } from 'axios'
 import { message } from 'antd'
+import i18n from '@/locales'
 import type { ApiResponse } from '@/types'
 
 // 创建 axios 实例
@@ -67,7 +68,7 @@ request.interceptors.response.use(
         if (window.location.pathname === '/login') {
           return Promise.reject(error)
         }
-        message.error(msg || '登录已过期，请重新登录')
+        message.error(msg || i18n.t('sessionExpired'))
         // 统一清理：localStorage + Zustand store
         localStorage.removeItem('admin-token')
         localStorage.removeItem('admin-refresh-token')
@@ -78,10 +79,10 @@ request.interceptors.response.use(
         window.location.href = '/login'
       } else {
         // 直接使用后端返回的中文消息
-        message.error(msg || `请求错误 (${status})`)
+        message.error(msg || `${i18n.t('error')} (${status})`)
       }
     } else {
-      message.error('网络连接失败，请检查网络')
+      message.error(i18n.t('networkError'))
     }
     return Promise.reject(error)
   }

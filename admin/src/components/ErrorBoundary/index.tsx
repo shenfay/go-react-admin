@@ -1,7 +1,8 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
 import { Button, Result } from 'antd'
+import { withTranslation, type WithTranslation } from 'react-i18next'
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode
   fallback?: ReactNode
 }
@@ -16,7 +17,7 @@ interface State {
  * 捕获子组件树中的渲染错误，防止整个应用白屏。
  * 生产环境展示友好提示，开发环境保留控制台错误信息。
  */
-export default class ErrorBoundary extends Component<Props, State> {
+export default withTranslation()(class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, error: null }
 
   static getDerivedStateFromError(error: Error): State {
@@ -39,11 +40,11 @@ export default class ErrorBoundary extends Component<Props, State> {
       return (
         <Result
           status="error"
-          title="页面出错了"
-          subTitle={import.meta.env.DEV ? this.state.error?.message : '抱歉，页面渲染时发生了意外错误'}
+          title={this.props.t('pageError')}
+          subTitle={import.meta.env.DEV ? this.state.error?.message : this.props.t('pageErrorSubtitle')}
           extra={
             <Button type="primary" onClick={this.handleReset}>
-              重新加载
+              {this.props.t('reload')}
             </Button>
           }
         />
@@ -52,4 +53,4 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     return this.props.children
   }
-}
+})

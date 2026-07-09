@@ -1,53 +1,55 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Button, Select } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { DEFAULT_PAGINATION } from '@/config/pagination'
 
-const statusOptions = [
-  { label: '全部状态', value: '' },
-  { label: '活跃', value: 'active' },
-  { label: '未激活', value: 'inactive' },
-]
-
-const columns = [
-  { title: '家庭名称', dataIndex: 'name', key: 'name' },
-  { title: '家长', dataIndex: 'parentName', key: 'parentName' },
-  { title: '孩子数', dataIndex: 'childrenCount', key: 'childrenCount' },
-  {
-    title: '状态',
-    dataIndex: 'status',
-    key: 'status',
-    render: (status: string) => (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{
-          width: 7, height: 7, borderRadius: '50%',
-          background: status === 'active' ? 'var(--green)' : 'var(--border-hover)',
-          display: 'inline-block',
-        }} />
-        <span style={{ color: 'var(--text-primary)' }}>{status === 'active' ? '活跃' : '未激活'}</span>
-      </div>
-    ),
-  },
-  { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt' },
-]
-
 export default function Family() {
+  const { t } = useTranslation()
   const [statusFilter, setStatusFilter] = useState('')
+
+  const statusOptions = [
+    { label: t('allStatus'), value: '' },
+    { label: t('active'), value: 'active' },
+    { label: t('inactive'), value: 'inactive' },
+  ]
+
+  const columns = [
+    { title: t('name'), dataIndex: 'name', key: 'name' },
+    { title: t('parent'), dataIndex: 'parentName', key: 'parentName' },
+    { title: t('childrenCount'), dataIndex: 'childrenCount', key: 'childrenCount' },
+    {
+      title: t('status'),
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: status === 'active' ? 'var(--green)' : 'var(--border-hover)',
+            display: 'inline-block',
+          }} />
+          <span style={{ color: 'var(--text-primary)' }}>{status === 'active' ? t('active') : t('inactive')}</span>
+        </div>
+      ),
+    },
+    { title: t('createdAt'), dataIndex: 'createdAt', key: 'createdAt' },
+  ]
 
   return (
     <DataPanel
-      title="家庭管理"
+      title={t('familyManagement')}
       filters={
         <>
-          <FilterSearch placeholder="搜索家庭名称..." />
+          <FilterSearch placeholder={t('searchFamilyName')} />
           <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
         </>
       }
       toolbarActions={
         <Button type="primary" icon={<PlusOutlined />}>
-          新增家庭
+          {t('addFamily')}
         </Button>
       }
     >
@@ -55,7 +57,7 @@ export default function Family() {
         columns={columns}
         dataSource={[]}
         rowKey="id"
-        locale={{ emptyText: '暂无数据' }}
+        locale={{ emptyText: t('noData') }}
         pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>

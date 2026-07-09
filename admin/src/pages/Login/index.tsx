@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Form, Input, Button, message } from 'antd'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useUserStore } from '@/stores'
 import { login as loginApi, getUserMenuTree } from '@/services/auth'
 import { emailRules, passwordRules } from '@/utils/formRules'
 import type { LoginRequest } from '@/types'
 
 export default function Login() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { login } = useUserStore()
   const [loading, setLoading] = useState(false)
@@ -34,12 +36,12 @@ export default function Login() {
         // 菜单获取失败不影响登录
       }
 
-      message.success('登录成功')
+      message.success(t('loginSuccess'))
       navigate('/', { replace: true })
     } catch (err: unknown) {
       // 从 axios 响应中提取后端返回的错误消息
       const axiosErr = err as { response?: { data?: { message?: string } } }
-      const msg = axiosErr?.response?.data?.message || '登录失败，请检查邮箱和密码'
+      const msg = axiosErr?.response?.data?.message || t('loginFailed')
       message.error(msg)
     } finally {
       setLoading(false)
@@ -115,7 +117,7 @@ export default function Login() {
             letterSpacing: 2,
           }}
         >
-          巧记成长
+          {t('appName')}
         </h1>
 
         <p
@@ -128,9 +130,9 @@ export default function Login() {
             maxWidth: 360,
           }}
         >
-          记录家庭成长点滴
+          {t('tagline')}
           <br />
-          让每一刻都值得珍藏
+          {t('taglineSub')}
         </p>
 
         {/* 底部特性列表 */}
@@ -144,9 +146,9 @@ export default function Login() {
           }}
         >
           {[
-            { label: '家庭协作', value: '多角色协同' },
-            { label: '成长记录', value: '卡片式管理' },
-            { label: '目标激励', value: '积分与验收' },
+            { label: t('familyCollaboration'), value: t('multiRoleCollaboration') },
+            { label: t('growthRecord'), value: t('cardManagement') },
+            { label: t('goalIncentive'), value: t('pointsAndAcceptance') },
           ].map(item => (
             <div key={item.label} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
@@ -181,10 +183,10 @@ export default function Login() {
                 margin: '0 0 8px',
               }}
             >
-              欢迎回来
+              {t('welcomeBack')}
             </h2>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
-              请登录您的管理后台账号
+              {t('loginSubtitle')}
             </p>
           </div>
 
@@ -200,7 +202,7 @@ export default function Login() {
             >
               <Input
                 prefix={<MailOutlined style={{ color: 'var(--text-icon)' }} />}
-                placeholder="邮箱"
+                placeholder={t('email')}
                 style={{ height: 44 }}
               />
             </Form.Item>
@@ -211,7 +213,7 @@ export default function Login() {
             >
               <Input.Password
                 prefix={<LockOutlined style={{ color: 'var(--text-icon)' }} />}
-                placeholder="密码"
+                placeholder={t('password')}
                 style={{ height: 44 }}
               />
             </Form.Item>
@@ -223,13 +225,13 @@ export default function Login() {
                 loading={loading}
                 block
               >
-                登 录
+                {t('login')}
               </Button>
             </Form.Item>
           </Form>
 
           <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-icon)' }}>
-            请联系管理员获取登录凭据
+            {t('contactAdmin')}
           </div>
         </div>
       </div>

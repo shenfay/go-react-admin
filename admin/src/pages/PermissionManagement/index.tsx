@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Tag, Tree, Switch, Button, Modal, Form, Input, message, Popconfirm, Space } from 'antd'
 import { PlusOutlined, SearchOutlined, SettingOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
@@ -43,7 +44,6 @@ function buildPermissionTree(menus: MenuItem[]): PermTreeNode[] {
     if (children.length > 0) {
       tree.push({ title: menu.label, key: menu.key, children })
     } else {
-      // 无子菜单 → 作为叶子节点，可勾选
       tree.push({ title: menu.label, key: menu.key, permission: menu.permission || `${menu.key}:view` })
     }
   }
@@ -57,7 +57,6 @@ function getAllLeafKeys(treeData: PermTreeNode[]): string[] {
     if (node.children) {
       node.children.forEach(item => keys.push(item.key))
     } else {
-      // 无子节点的顶层菜单也是叶子
       keys.push(node.key)
     }
   }
@@ -80,6 +79,7 @@ function buildKeyPermMap(treeData: PermTreeNode[]): Record<string, string> {
 }
 
 export default function PermissionManagement() {
+  const { t } = useTranslation()
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [checkedKeys, setCheckedKeys] = useState<string[]>([])
@@ -126,7 +126,6 @@ export default function PermissionManagement() {
     setPermLoading(true)
     try {
       const perms = await getRolePermissions(role.id)
-      // 反向映射：permission string -> menu key
       const permToKey: Record<string, string> = {}
       Object.entries(keyPermMap).forEach(([key, perm]) => {
         permToKey[perm] = key
@@ -161,9 +160,9 @@ export default function PermissionManagement() {
         }
       })
       await updateRolePermissions(selectedRole.id, permissions)
-      message.success('权限配置已保存')
+      message.success(t('permSaved'))
     } catch {
-      message.error('保存失败')
+      message.error(t('permSaveFailed'))
     } finally {
       setPermLoading(false)
     }
@@ -196,14 +195,14 @@ export default function PermissionManagement() {
           name: values.name,
           description: values.description,
         })
-        message.success('角色已更新')
+        message.success(t('roleUpdated'))
       } else {
         await createRole({
           name: values.name,
           code: values.code,
           description: values.description,
         })
-        message.success('角色已创建')
+        message.success(t('roleCreated'))
       }
       setIsRoleModalOpen(false)
       form.resetFields()
@@ -217,14 +216,14 @@ export default function PermissionManagement() {
   const handleDeleteRole = async (role: Role) => {
     try {
       await deleteRole(role.id)
-      message.success('角色已删除')
+      message.success(t('roleDeleted'))
       if (selectedRole?.id === role.id) {
         setSelectedRole(null)
         setCheckedKeys([])
       }
       fetchRoles()
     } catch {
-      message.error('删除失败')
+      message.error(t('deleteFailed'))
     }
   }
 
@@ -232,25 +231,25 @@ export default function PermissionManagement() {
   const handleToggleStatus = async (role: Role) => {
     try {
       await toggleRoleStatus(role.id)
-      message.success('状态已更新')
+      message.success(t('statusUpdated'))
       fetchRoles()
     } catch {
-      message.error('操作失败')
+      message.error(t('operationFailed'))
     }
   }
 
   const columns = [
-    { title: '角色名称', dataIndex: 'name', key: 'name', width: 120 },
+    { title: t('roleName'), dataIndex: 'name', key: 'name', width: 120 },
     {
-      title: '角色编码',
+      title: t('roleCode'),
       dataIndex: 'code',
       key: 'code',
       width: 120,
       render: (v: string) => <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{v}</Tag>,
     },
-    { title: '描述', dataIndex: 'description', key: 'description' },
+    { title: t('description'), dataIndex: 'description', key: 'description' },
     {
-      title: '状态',
+      title: t('status'),
       dataIndex: 'status',
       key: 'status',
       width: 100,
@@ -263,23 +262,23 @@ export default function PermissionManagement() {
       ),
     },
     {
-      title: '操作',
+      title: t('actions'),
       key: 'action',
       width: 200,
       render: (_: unknown, record: Role) => (
         <Space size={4}>
           <Button type="link" size="small" icon={<SettingOutlined />} onClick={() => handleSelectRole(record)}>
-            配置权限
+            {t('configPermission')}
           </Button>
           <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEditRole(record)}>
-            编辑
+            {t('edit')}
           </Button>
           <Popconfirm
-            title="确定删除该角色？"
-            description="删除后不可恢复"
+            title={t('confirmDeleteRole')}
+            description={t('roleCannotUndo')}
             onConfirm={() => handleDeleteRole(record)}
           >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
+            <Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button>
           </Popconfirm>
         </Space>
       ),
@@ -289,16 +288,16 @@ export default function PermissionManagement() {
   return (
     <div>
       <DataPanel
-        title="角色管理"
+        title={t('permissionManagement')}
         filters={
           <>
-            <FilterSearch placeholder="搜索角色名称..." />
-            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+            <FilterSearch placeholder={t('searchRoleName')} />
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
           </>
         }
         toolbarActions={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRole}>
-            新增角色
+            {t('addRole')}
           </Button>
         }
         >
@@ -313,7 +312,7 @@ export default function PermissionManagement() {
 
       {selectedRole && (
         <DataPanel
-          title={`${selectedRole.name} - 菜单权限配置`}
+          title={t('menuPermConfigTitle', { name: selectedRole.name })}
           style={{ marginTop: 0 }}
           extra={
             <Space>
@@ -323,10 +322,10 @@ export default function PermissionManagement() {
                 loading={permLoading}
                 onClick={handleSavePermissions}
               >
-                保存权限
+                {t('savePermission')}
               </Button>
               <Button size="small" onClick={() => setSelectedRole(null)}>
-                收起
+                {t('collapse')}
               </Button>
             </Space>
           }
@@ -346,22 +345,22 @@ export default function PermissionManagement() {
       )}
 
       <Modal
-        title={editingRole ? '编辑角色' : '新增角色'}
+        title={editingRole ? t('editRole') : t('addRole')}
         open={isRoleModalOpen}
         onOk={handleSubmitRole}
         onCancel={() => { setIsRoleModalOpen(false); form.resetFields() }}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item label="角色名称" name="name" rules={[{ required: true, message: '请输入角色名称' }]}>
-            <Input placeholder="如：管理员、运营、观察员" />
+          <Form.Item label={t('roleName')} name="name" rules={[{ required: true, message: t('roleNameRequired') }]}>
+            <Input placeholder={t('roleNamePlaceholder')} />
           </Form.Item>
           {!editingRole && (
-            <Form.Item label="角色编码" name="code" rules={[{ required: true, message: '请输入角色编码' }]}>
-              <Input placeholder="如：admin、operator、viewer" />
+            <Form.Item label={t('roleCode')} name="code" rules={[{ required: true, message: t('roleCodeRequired') }]}>
+              <Input placeholder={t('roleCodePlaceholder')} />
             </Form.Item>
           )}
-          <Form.Item label="描述" name="description">
-            <TextArea rows={3} placeholder="角色描述..." />
+          <Form.Item label={t('description')} name="description">
+            <TextArea rows={3} placeholder={t('roleDescPlaceholder')} />
           </Form.Item>
         </Form>
       </Modal>

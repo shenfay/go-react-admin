@@ -1,47 +1,49 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Tag, Statistic, Row, Col, Card, Button, Select } from 'antd'
 import { ArrowUpOutlined, ArrowDownOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { DEFAULT_PAGINATION } from '@/config/pagination'
 
-const typeOptions = [
-  { label: '全部类型', value: '' },
-  { label: '获得', value: 'earn' },
-  { label: '消费', value: 'spend' },
-]
-
-const columns = [
-  { title: '用户', dataIndex: 'userName', key: 'userName' },
-  {
-    title: '类型',
-    dataIndex: 'type',
-    key: 'type',
-    render: (type: string) => (
-      <Tag style={{
-        background: type === 'earn' ? 'var(--green-light)' : 'var(--red-light)',
-        color: type === 'earn' ? 'var(--green-text)' : 'var(--red-text)',
-      }}>
-        {type === 'earn' ? '获得' : '消费'}
-      </Tag>
-    ),
-  },
-  {
-    title: '积分',
-    dataIndex: 'points',
-    key: 'points',
-    render: (points: number, record: { type: string }) => (
-      <span style={{ color: record.type === 'earn' ? 'var(--green)' : 'var(--red)', fontSize: 13 }}>
-        {record.type === 'earn' ? '+' : '-'}{points}
-      </span>
-    ),
-  },
-  { title: '来源', dataIndex: 'source', key: 'source' },
-  { title: '说明', dataIndex: 'description', key: 'description', ellipsis: true },
-  { title: '时间', dataIndex: 'createdAt', key: 'createdAt' },
-]
-
 export default function PointsRecord() {
+  const { t } = useTranslation()
   const [typeFilter, setTypeFilter] = useState('')
+
+  const typeOptions = [
+    { label: t('allTypes'), value: '' },
+    { label: t('earn'), value: 'earn' },
+    { label: t('spend'), value: 'spend' },
+  ]
+
+  const columns = [
+    { title: t('user'), dataIndex: 'userName', key: 'userName' },
+    {
+      title: t('type'),
+      dataIndex: 'type',
+      key: 'type',
+      render: (type: string) => (
+        <Tag style={{
+          background: type === 'earn' ? 'var(--green-light)' : 'var(--red-light)',
+          color: type === 'earn' ? 'var(--green-text)' : 'var(--red-text)',
+        }}>
+          {type === 'earn' ? t('earn') : t('spend')}
+        </Tag>
+      ),
+    },
+    {
+      title: t('points'),
+      dataIndex: 'points',
+      key: 'points',
+      render: (points: number, record: { type: string }) => (
+        <span style={{ color: record.type === 'earn' ? 'var(--green)' : 'var(--red)', fontSize: 13 }}>
+          {record.type === 'earn' ? '+' : '-'}{points}
+        </span>
+      ),
+    },
+    { title: t('source'), dataIndex: 'source', key: 'source' },
+    { title: t('description'), dataIndex: 'description', key: 'description', ellipsis: true },
+    { title: t('time'), dataIndex: 'createdAt', key: 'createdAt' },
+  ]
 
   return (
     <div>
@@ -49,29 +51,29 @@ export default function PointsRecord() {
         <Row gutter={16}>
           <Col span={8}>
             <Card style={{ borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' }}>
-              <Statistic title="今日发放积分" value={0} prefix={<ArrowUpOutlined />} valueStyle={{ color: 'var(--green)' }} />
+              <Statistic title={t('todayPointsIssued')} value={0} prefix={<ArrowUpOutlined />} valueStyle={{ color: 'var(--green)' }} />
             </Card>
           </Col>
           <Col span={8}>
             <Card style={{ borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' }}>
-              <Statistic title="今日消费积分" value={0} prefix={<ArrowDownOutlined />} valueStyle={{ color: 'var(--red)' }} />
+              <Statistic title={t('todayPointsSpent')} value={0} prefix={<ArrowDownOutlined />} valueStyle={{ color: 'var(--red)' }} />
             </Card>
           </Col>
           <Col span={8}>
             <Card style={{ borderRadius: 'var(--radius-md)', borderColor: 'var(--border-light)' }}>
-              <Statistic title="积分总余额" value={0} />
+              <Statistic title={t('totalPointsBalance')} value={0} />
             </Card>
           </Col>
         </Row>
       </div>
       <DataPanel
-        title="积分流水"
+        title={t('pointsRecord')}
         style={{ marginTop: 16 }}
         filters={
           <>
-            <FilterSearch placeholder="搜索用户/来源..." />
+            <FilterSearch placeholder={t('searchUserOrSource')} />
             <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={typeOptions} />
-            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
           </>
         }
       >
@@ -79,7 +81,7 @@ export default function PointsRecord() {
           columns={columns}
           dataSource={[]}
           rowKey="id"
-          locale={{ emptyText: '暂无数据' }}
+          locale={{ emptyText: t('noData') }}
           pagination={DEFAULT_PAGINATION}
         />
       </DataPanel>

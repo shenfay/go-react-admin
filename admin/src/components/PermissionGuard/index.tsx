@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useUserStore } from '@/stores'
 import { hasPermission } from '@/config/permission'
 
@@ -14,6 +15,7 @@ export default function PermissionGuard({
   children,
   fallback,
 }: PermissionGuardProps) {
+  const { t } = useTranslation()
   const { isLogin, permissions } = useUserStore()
 
   // 未登录，跳转到登录页
@@ -37,7 +39,7 @@ export default function PermissionGuard({
           fontSize: 16,
         }}
       >
-        暂无权限访问该页面
+        {t('noPermission')}
       </div>
     )
   }

@@ -1,23 +1,25 @@
 import { useState } from 'react'
 import { Form, Input, Button, Avatar, Descriptions, Divider, message, Tabs, Tag } from 'antd'
 import { UserOutlined, LockOutlined, BellOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { useUserStore } from '@/stores'
 import DataPanel from '@/components/DataPanel'
 
 export default function Profile() {
+  const { t } = useTranslation()
   const [profileForm] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [activeTab, setActiveTab] = useState('profile')
   const { username, email, roles } = useUserStore()
 
-  const roleLabels = roles.map(r => r.name).join('、') || '未分配角色'
+  const roleLabels = roles.map(r => r.name).join('、') || t('noRole')
 
   const handleSaveProfile = () => {
-    message.success('个人信息已保存')
+    message.success(t('updateSuccess'))
   }
 
   const handleChangePassword = () => {
-    message.success('密码修改成功')
+    message.success(t('updateSuccess'))
   }
 
   return (
@@ -29,12 +31,12 @@ export default function Profile() {
             <Avatar size={80} icon={<UserOutlined />} style={{ background: 'var(--brand-dark)', flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-                {username || '用户'}
+                {username || t('name')}
               </div>
               <div style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>{email || ''}</div>
               <div style={{ display: 'flex', gap: 8 }}>
                 {roles.map(r => <Tag key={r.code} style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{r.name}</Tag>)}
-                {roles.length === 0 && <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>未分配角色</Tag>}
+                {roles.length === 0 && <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{t('noRole')}</Tag>}
               </div>
             </div>
           </div>
@@ -51,18 +53,18 @@ export default function Profile() {
             label: (
               <span>
                 <UserOutlined style={{ marginRight: 4 }} />
-                基本信息
+                {t('basicInfo')}
               </span>
             ),
             children: (
               <div style={{ padding: '16px 0' }}>
                 <Descriptions bordered column={2}>
-                  <Descriptions.Item label="姓名" span={1}>{username || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="邮箱" span={1}>{email || '-'}</Descriptions.Item>
-                  <Descriptions.Item label="角色" span={1}>{roleLabels}</Descriptions.Item>
-                  <Descriptions.Item label="部门" span={1}>-</Descriptions.Item>
-                  <Descriptions.Item label="手机号" span={1}>-</Descriptions.Item>
-                  <Descriptions.Item label="注册日期" span={1}>-</Descriptions.Item>
+                  <Descriptions.Item label={t('name')} span={1}>{username || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('email')} span={1}>{email || '-'}</Descriptions.Item>
+                  <Descriptions.Item label={t('roles')} span={1}>{roleLabels}</Descriptions.Item>
+                  <Descriptions.Item label={t('department')} span={1}>-</Descriptions.Item>
+                  <Descriptions.Item label={t('phone')} span={1}>-</Descriptions.Item>
+                  <Descriptions.Item label={t('registerDate')} span={1}>-</Descriptions.Item>
                 </Descriptions>
 
                 <Divider />
@@ -72,19 +74,19 @@ export default function Profile() {
                   layout="vertical"
                   style={{ maxWidth: 500 }}
                 >
-                  <Form.Item label="昵称" name="nickname" initialValue={username || ''}>
+                  <Form.Item label={t('nickname')} name="nickname" initialValue={username || ''}>
                     <Input />
                   </Form.Item>
-                  <Form.Item label="邮箱" name="email" initialValue={email || ''} rules={[{ type: 'email', message: '请输入正确的邮箱格式' }]}>
+                  <Form.Item label={t('email')} name="email" initialValue={email || ''} rules={[{ type: 'email', message: t('emailInvalid') }]}>
                     <Input />
                   </Form.Item>
-                  <Form.Item label="手机号" name="phone" initialValue="">
+                  <Form.Item label={t('phone')} name="phone" initialValue="">
                     <Input />
                   </Form.Item>
-                  <Form.Item label="个人简介" name="bio">
-                    <Input.TextArea rows={3} placeholder="介绍一下自己..." />
+                  <Form.Item label={t('bio')} name="bio">
+                    <Input.TextArea rows={3} placeholder={t('bioPlaceholder')} />
                   </Form.Item>
-                  <Button type="primary" onClick={handleSaveProfile}>保存修改</Button>
+                  <Button type="primary" onClick={handleSaveProfile}>{t('saveChanges')}</Button>
                 </Form>
               </div>
             ),
@@ -94,7 +96,7 @@ export default function Profile() {
             label: (
               <span>
                 <LockOutlined style={{ marginRight: 4 }} />
-                修改密码
+                {t('changePassword')}
               </span>
             ),
             children: (
@@ -104,27 +106,27 @@ export default function Profile() {
                   layout="vertical"
                   style={{ maxWidth: 400 }}
                 >
-                  <Form.Item label="当前密码" name="oldPassword" rules={[{ required: true, message: '请输入当前密码' }]}>
+                  <Form.Item label={t('currentPassword')} name="oldPassword" rules={[{ required: true, message: t('pleaseEnter', { field: t('currentPassword') }) }]}>
                     <Input.Password />
                   </Form.Item>
-                  <Form.Item label="新密码" name="newPassword" rules={[
-                    { required: true, message: '请输入新密码' },
-                    { min: 8, message: '密码长度不能少于 8 位' },
+                  <Form.Item label={t('newPassword')} name="newPassword" rules={[
+                    { required: true, message: t('pleaseEnter', { field: t('newPassword') }) },
+                    { min: 8, message: t('passwordMinLength') },
                   ]}>
                     <Input.Password />
                   </Form.Item>
-                  <Form.Item label="确认新密码" name="confirmPassword" rules={[
-                    { required: true, message: '请确认新密码' },
+                  <Form.Item label={t('confirmPassword')} name="confirmPassword" rules={[
+                    { required: true, message: t('pleaseEnter', { field: t('confirmPassword') }) },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
                         if (!value || getFieldValue('newPassword') === value) return Promise.resolve()
-                        return Promise.reject(new Error('两次输入的密码不一致'))
+                        return Promise.reject(new Error(t('passwordMismatch')))
                       },
                     }),
                   ]}>
                     <Input.Password />
                   </Form.Item>
-                  <Button type="primary" onClick={handleChangePassword}>修改密码</Button>
+                  <Button type="primary" onClick={handleChangePassword}>{t('changePassword')}</Button>
                 </Form>
               </div>
             ),
@@ -134,26 +136,26 @@ export default function Profile() {
             label: (
               <span>
                 <BellOutlined style={{ marginRight: 4 }} />
-                通知设置
+                {t('notificationSettings')}
               </span>
             ),
             children: (
               <div style={{ padding: '16px 0' }}>
                 <div style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
-                  配置您需要接收的系统通知类型
+                  {t('notificationDesc')}
                 </div>
                 <Form layout="vertical" style={{ maxWidth: 500 }}>
-                  <Form.Item label="邮件通知" name="emailNotify">
+                  <Form.Item label={t('emailNotify')} name="emailNotify">
                     <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
-                      接收系统告警和任务状态更新的邮件通知
+                      {t('emailNotifyDesc')}
                     </div>
                   </Form.Item>
-                  <Form.Item label="短信通知" name="smsNotify">
+                  <Form.Item label={t('smsNotify')} name="smsNotify">
                     <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
-                      接收紧急告警的短信通知
+                      {t('smsNotifyDesc')}
                     </div>
                   </Form.Item>
-                  <Button type="primary">保存设置</Button>
+                  <Button type="primary">{t('saveSettings')}</Button>
                 </Form>
               </div>
             ),

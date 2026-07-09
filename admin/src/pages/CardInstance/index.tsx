@@ -1,64 +1,66 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table, Tag, Button, Select } from 'antd'
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons'
 import DataPanel, { FilterSearch } from '@/components/DataPanel'
 import { DEFAULT_PAGINATION } from '@/config/pagination'
 
-const statusOptions = [
-  { label: '全部状态', value: '' },
-  { label: '待验收', value: 'pending' },
-  { label: '已通过', value: 'approved' },
-  { label: '已退回', value: 'rejected' },
-  { label: '自动通过', value: 'auto_passed' },
-]
-
-const columns = [
-  { title: '卡片内容', dataIndex: 'content', key: 'content', ellipsis: true },
-  { title: '提交者', dataIndex: 'childName', key: 'childName' },
-  { title: '所属目标', dataIndex: 'goalName', key: 'goalName' },
-  { title: '卡片模板', dataIndex: 'templateName', key: 'templateName' },
-  {
-    title: '验收状态',
-    dataIndex: 'status',
-    key: 'status',
-    render: (status: string) => {
-      const colorMap: Record<string, { bg: string; color: string }> = {
-        pending: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
-        approved: { bg: 'var(--green-light)', color: 'var(--green-text)' },
-        rejected: { bg: 'var(--red-light)', color: 'var(--red-text)' },
-        auto_passed: { bg: 'var(--blue-light)', color: 'var(--blue-text)' },
-      }
-      const labelMap: Record<string, string> = {
-        pending: '待验收',
-        approved: '已通过',
-        rejected: '已退回',
-        auto_passed: '自动通过',
-      }
-      const c = colorMap[status] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
-      return <Tag style={{ background: c.bg, color: c.color }}>{labelMap[status] || status}</Tag>
-    },
-  },
-  { title: '提交时间', dataIndex: 'createdAt', key: 'createdAt' },
-  {
-    title: '操作',
-    key: 'action',
-    render: () => (
-      <Button type="link" size="small" icon={<EyeOutlined />}>查看</Button>
-    ),
-  },
-]
-
 export default function CardInstance() {
+  const { t } = useTranslation()
   const [statusFilter, setStatusFilter] = useState('')
+
+  const statusOptions = [
+    { label: t('allStatus'), value: '' },
+    { label: t('pendingReview'), value: 'pending' },
+    { label: t('approved'), value: 'approved' },
+    { label: t('rejected'), value: 'rejected' },
+    { label: t('autoPassed'), value: 'auto_passed' },
+  ]
+
+  const columns = [
+    { title: t('cardContent'), dataIndex: 'content', key: 'content', ellipsis: true },
+    { title: t('submitter'), dataIndex: 'childName', key: 'childName' },
+    { title: t('belongingGoal'), dataIndex: 'goalName', key: 'goalName' },
+    { title: t('cardTemplate'), dataIndex: 'templateName', key: 'templateName' },
+    {
+      title: t('acceptanceStatus'),
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
+        const colorMap: Record<string, { bg: string; color: string }> = {
+          pending: { bg: 'var(--yellow-light)', color: 'var(--yellow-text)' },
+          approved: { bg: 'var(--green-light)', color: 'var(--green-text)' },
+          rejected: { bg: 'var(--red-light)', color: 'var(--red-text)' },
+          auto_passed: { bg: 'var(--blue-light)', color: 'var(--blue-text)' },
+        }
+        const labelMap: Record<string, string> = {
+          pending: t('pendingReview'),
+          approved: t('approved'),
+          rejected: t('rejected'),
+          auto_passed: t('autoPassed'),
+        }
+        const c = colorMap[status] || { bg: 'var(--gray-light)', color: 'var(--gray-text)' }
+        return <Tag style={{ background: c.bg, color: c.color }}>{labelMap[status] || status}</Tag>
+      },
+    },
+    { title: t('submissionTime'), dataIndex: 'createdAt', key: 'createdAt' },
+    {
+      title: t('actions'),
+      key: 'action',
+      render: () => (
+        <Button type="link" size="small" icon={<EyeOutlined />}>{t('view')}</Button>
+      ),
+    },
+  ]
 
   return (
     <DataPanel
-      title="卡片提交记录"
+      title={t('cardInstanceManagement')}
       filters={
         <>
-          <FilterSearch placeholder="搜索卡片内容..." />
+          <FilterSearch placeholder={t('searchCardContent')} />
           <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 140 }} options={statusOptions} />
-          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+          <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
         </>
       }
     >
@@ -66,7 +68,7 @@ export default function CardInstance() {
         columns={columns}
         dataSource={[]}
         rowKey="id"
-        locale={{ emptyText: '暂无数据' }}
+        locale={{ emptyText: t('noData') }}
         pagination={DEFAULT_PAGINATION}
       />
     </DataPanel>

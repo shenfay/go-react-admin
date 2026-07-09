@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Table,
   Button,
@@ -30,6 +31,7 @@ import type { MenuItem } from '@/types'
 
 
 export default function MenuManagement() {
+  const { t } = useTranslation()
   const [menuTree, setMenuTree] = useState<MenuItem[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
@@ -103,10 +105,10 @@ export default function MenuManagement() {
   const handleDelete = async (record: MenuItem) => {
     try {
       await deleteMenu(record.id)
-      message.success('已删除')
+      message.success(t('menuDeleted'))
       fetchMenus()
     } catch {
-      message.error('删除失败')
+      message.error(t('deleteFailed'))
     }
   }
 
@@ -114,10 +116,10 @@ export default function MenuManagement() {
   const handleToggleStatus = async (record: MenuItem) => {
     try {
       await toggleMenuStatus(record.id)
-      message.success('状态已更新')
+      message.success(t('statusUpdated'))
       fetchMenus()
     } catch {
-      message.error('操作失败')
+      message.error(t('operationFailed'))
     }
   }
 
@@ -132,7 +134,7 @@ export default function MenuManagement() {
           path: values.path || '',
           permission: values.permission || '',
         })
-        message.success('菜单已更新')
+        message.success(t('menuUpdated'))
       } else {
         const parent = flatMenus.find(m => m.id === values.parent_id)
         await createMenu({
@@ -144,7 +146,7 @@ export default function MenuManagement() {
           parent_id: values.parent_id || '',
           sort_order: 0,
         })
-        message.success('菜单已添加')
+        message.success(t('menuAdded'))
         if (parent && !expandedKeys.includes(parent.key)) {
           setExpandedKeys(prev => [...prev, parent.key])
         }
@@ -159,41 +161,41 @@ export default function MenuManagement() {
 
   const columns = [
     {
-      title: '菜单名称',
+      title: t('menuName'),
       dataIndex: 'label',
       key: 'label',
       width: 200,
     },
     {
-      title: '标识 Key',
+      title: t('menuKey'),
       dataIndex: 'key',
       key: 'key',
       width: 160,
       render: (v: string) => <Tag style={{ background: 'var(--blue-light)', color: 'var(--blue-text)' }}>{v}</Tag>,
     },
     {
-      title: '图标',
+      title: t('icon'),
       dataIndex: 'icon',
       key: 'icon',
       width: 160,
       render: (v: string) => v ? <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)' }}>{v}</Tag> : <span style={{ color: 'var(--text-muted)' }}>-</span>,
     },
     {
-      title: '路由路径',
+      title: t('routePath'),
       dataIndex: 'path',
       key: 'path',
       width: 160,
       render: (v: string) => v || <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
-      title: '权限标识',
+      title: t('permission'),
       dataIndex: 'permission',
       key: 'permission',
       width: 180,
       render: (v: string) => v ? <Tag style={{ background: 'var(--green-light)', color: 'var(--green-text)' }}>{v}</Tag> : <span style={{ color: 'var(--text-muted)' }}>-</span>,
     },
     {
-      title: '状态',
+      title: t('status'),
       dataIndex: 'status',
       key: 'status',
       width: 80,
@@ -206,24 +208,24 @@ export default function MenuManagement() {
       ),
     },
     {
-      title: '操作',
+      title: t('actions'),
       key: 'action',
       width: 140,
       render: (_: unknown, record: MenuItem) => (
         <Space size={4}>
           <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAddChild(record.key)}>
-            新增子菜单
+            {t('addSubMenu')}
           </Button>
           <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            编辑
+            {t('edit')}
           </Button>
           <Popconfirm
-            title="确定删除该菜单？"
-            description="子菜单将一并删除"
+            title={t('confirmDeleteMenu')}
+            description={t('subMenuWillBeDeleted')}
             onConfirm={() => handleDelete(record)}
           >
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
+              {t('delete')}
             </Button>
           </Popconfirm>
         </Space>
@@ -234,16 +236,16 @@ export default function MenuManagement() {
   return (
     <div>
       <DataPanel
-        title="菜单管理"
+        title={t('menuManagement')}
         filters={
           <>
-            <FilterSearch placeholder="搜索菜单名称..." />
-            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>查询</Button>
+            <FilterSearch placeholder={t('searchMenuName')} />
+            <Button icon={<SearchOutlined />} style={{ color: 'var(--text-primary)' }}>{t('query')}</Button>
           </>
         }
         toolbarActions={
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAddRoot}>
-            新增菜单
+            {t('addMenu')}
           </Button>
         }
         >
@@ -262,19 +264,19 @@ export default function MenuManagement() {
       </DataPanel>
 
       <Modal
-        title={editingItem ? '编辑菜单' : '新增菜单'}
+        title={editingItem ? t('editMenu') : t('addMenu')}
         open={isModalOpen}
         onOk={handleSubmit}
         onCancel={() => { setIsModalOpen(false); form.resetFields() }}
         width={520}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item label="父级菜单" name="parent_id">
+          <Form.Item label={t('parentMenu')} name="parent_id">
             <Select
-              placeholder="无（顶级菜单）"
+              placeholder={t('noParentMenu')}
               allowClear
               options={[
-                { value: '', label: '无（顶级菜单）' },
+                { value: '', label: t('noParentMenu') },
                 ...flatMenus
                   .filter(f => !editingItem || f.id !== editingItem.id)
                   .map(f => ({ value: f.id, label: f.label })),
@@ -283,35 +285,35 @@ export default function MenuManagement() {
           </Form.Item>
           <div style={{ display: 'flex', gap: 16 }}>
             <Form.Item
-              label="菜单名称"
+              label={t('menuName')}
               name="label"
-              rules={[{ required: true, message: '请输入菜单名称' }]}
+              rules={[{ required: true, message: t('pleaseEnter', { field: t('menuName') }) }]}
               style={{ flex: 1 }}
             >
-              <Input placeholder="如：工作台" />
+              <Input placeholder={t('menuNamePlaceholder')} />
             </Form.Item>
             <Form.Item
-              label="标识 Key"
+              label={t('menuKey')}
               name="key"
               rules={[
-                { required: true, message: '请输入标识 Key' },
-                { pattern: /^[a-z0-9-]+$/, message: '仅支持小写字母、数字和短横线' },
+                { required: true, message: t('pleaseEnter', { field: t('menuKey') }) },
+                { pattern: /^[a-z0-9-]+$/, message: t('menuKeyRule') },
               ]}
               style={{ flex: 1 }}
             >
-              <Input placeholder="如：dashboard" disabled={!!editingItem} />
+              <Input placeholder={t('menuKeyPlaceholder')} disabled={!!editingItem} />
             </Form.Item>
           </div>
           <div style={{ display: 'flex', gap: 16 }}>
-            <Form.Item label="图标" name="icon" style={{ flex: 1 }}>
-              <Input placeholder="如：BuildOutlined" />
+            <Form.Item label={t('icon')} name="icon" style={{ flex: 1 }}>
+              <Input placeholder={t('iconPlaceholder')} />
             </Form.Item>
-            <Form.Item label="路由路径" name="path" style={{ flex: 1 }}>
-              <Input placeholder="如：/dashboard" />
+            <Form.Item label={t('routePath')} name="path" style={{ flex: 1 }}>
+              <Input placeholder={t('routePathPlaceholder')} />
             </Form.Item>
           </div>
-          <Form.Item label="权限标识" name="permission">
-            <Input placeholder="如：dashboard:view" />
+          <Form.Item label={t('permission')} name="permission">
+            <Input placeholder={t('permissionPlaceholder')} />
           </Form.Item>
         </Form>
       </Modal>
