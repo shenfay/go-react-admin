@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { Form, Input, Button, Avatar, Descriptions, Divider, message, Tabs, Tag } from 'antd'
 import { UserOutlined, LockOutlined, BellOutlined } from '@ant-design/icons'
-import { useAppStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import DataPanel from '@/components/DataPanel'
 
 export default function Profile() {
   const [profileForm] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [activeTab, setActiveTab] = useState('profile')
-  const { username, email, roles } = useAppStore()
+  const { username, email, roles } = useUserStore()
 
   const roleLabels = roles.map(r => r.name).join('、') || '未分配角色'
 

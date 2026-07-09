@@ -1,119 +1,39 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import type { UserPermission, RoleBrief, MenuItem } from '@/types'
+/**
+ * Store 入口
+ *
+ * 用户状态 → useUserStore（认证、权限、菜单树）
+ * 布局状态 → useLayoutStore（侧边栏折叠等 UI 状态）
+ *
+ * useAppStore 为兼容选择器，内部代理到对应子 store。
+ * 新代码建议直接使用 useUserStore / useLayoutStore。
+ */
 
-interface UserState {
-  userId: string | null
-  username: string | null
-  email: string | null
-  avatar: string | null
-  roles: RoleBrief[]
-  permissions: string[]
-  menus: string[]
-  menuTree: MenuItem[]
-  isLogin: boolean
+export { useUserStore } from './useUserStore'
+export { useLayoutStore } from './useLayoutStore'
+
+import { useUserStore } from './useUserStore'
+import { useLayoutStore } from './useLayoutStore'
+
+/**
+ * 兼容层：将旧 useAppStore 调用代理到拆分后的子 store。
+ * 支持 selector 模式，如 useAppStore(state => state.menuTree)
+ */
+export function useAppStore<T>(selector?: (state: Record<string, unknown>) => T): T {
+  const user = useUserStore()
+  const layout = useLayoutStore()
+
+  const combined = { ...user, ...layout } as Record<string, unknown>
+
+  if (selector) {
+    return selector(combined)
+  }
+  return combined as unknown as T
 }
 
-interface LayoutState {
-  sidebarCollapsed: boolean
-  setSidebarCollapsed: (collapsed: boolean) => void
-  toggleSidebar: () => void
+// 保留 getState 以支持 useAppStore.getState().xxx() 调用
+useAppStore.getState = () => {
+  return {
+    ...useUserStore.getState(),
+    ...useLayoutStore.getState(),
+  } as Record<string, unknown>
 }
-
-interface AppState extends UserState, LayoutState {
-  // User actions
-  login: (userData: {
-    userId: string
-    username: string
-    email: string
-    roles: RoleBrief[]
-    permissions: UserPermission
-    token: string
-    refreshToken: string
-  }) => void
-  logout: () => void
-  setUserInfo: (info: Partial<UserState>) => void
-  updatePermissions: (perms: UserPermission) => void
-  setMenuTree: (tree: MenuItem[]) => void
-}
-
-const initialUserState: UserState = {
-  userId: null,
-  username: null,
-  email: null,
-  avatar: null,
-  roles: [],
-  permissions: [],
-  menus: [],
-  menuTree: [],
-  isLogin: false,
-}
-
-export const useAppStore = create<AppState>()(
-  persist(
-    (set, get) => ({
-      ...initialUserState,
-
-      // Layout
-      sidebarCollapsed: true,
-      setSidebarCollapsed: collapsed => set({ sidebarCollapsed: collapsed }),
-      toggleSidebar: () => set(state => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-
-      // User
-      login: userData => {
-        // 存储 token
-        localStorage.setItem('admin-token', userData.token)
-        if (userData.refreshToken) {
-          localStorage.setItem('admin-refresh-token', userData.refreshToken)
-        }
-
-        set({
-          ...initialUserState,
-          userId: userData.userId,
-          username: userData.username,
-          email: userData.email,
-          roles: userData.roles,
-          permissions: userData.permissions?.permissions || [],
-          menus: userData.permissions?.menus || [],
-          isLogin: true,
-        })
-      },
-      logout: () => {
-        localStorage.removeItem('admin-token')
-        localStorage.removeItem('admin-refresh-token')
-        set(initialUserState)
-      },
-      setUserInfo: info => set(state => ({ ...state, ...info })),
-      updatePermissions: perms => {
-        set({
-          permissions: perms?.permissions || [],
-          menus: perms?.menus || [],
-          roles: perms?.roles || get().roles,
-        })
-      },
-      setMenuTree: tree => set({ menuTree: tree }),
-    }),
-    {
-      name: 'kiqi-admin-storage',
-      version: 6,
-      migrate: (_persistedState: unknown, version: number) => {
-        if (version < 6) {
-          return { ...(_persistedState as object), sidebarCollapsed: true, menuTree: [] } as AppState & { sidebarCollapsed: boolean }
-        }
-        return _persistedState as AppState & { sidebarCollapsed: boolean }
-      },
-      partialize: state => ({
-        sidebarCollapsed: state.sidebarCollapsed,
-        userId: state.userId,
-        username: state.username,
-        email: state.email,
-        avatar: state.avatar,
-        roles: state.roles,
-        permissions: state.permissions,
-        menus: state.menus,
-        menuTree: state.menuTree,
-        isLogin: state.isLogin,
-      }),
-    }
-  )
-)

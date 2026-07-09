@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageContainer from './PageContainer'
-import { useAppStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import { getUserMenuTree } from '@/services/auth'
 import type { ReactNode } from 'react'
 
@@ -16,7 +16,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate()
-  const { isLogin, setMenuTree } = useAppStore()
+  const { isLogin, setMenuTree } = useUserStore()
   const [contentKey, setContentKey] = useState(0)
 
   const handleRefresh = useCallback(() => {

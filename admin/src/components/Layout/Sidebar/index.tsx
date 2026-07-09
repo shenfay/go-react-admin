@@ -1,5 +1,5 @@
 import { Layout } from 'antd'
-import { useAppStore } from '@/stores'
+import { useUserStore, useLayoutStore } from '@/stores'
 import SidebarLogo from './SidebarLogo'
 import SidebarMenu from './SidebarMenu'
 import SidebarUser from './SidebarUser'
@@ -7,7 +7,8 @@ import SidebarUser from './SidebarUser'
 const { Sider } = Layout
 
 export default function Sidebar() {
-  const { sidebarCollapsed, toggleSidebar, username, menuTree, logout } = useAppStore()
+  const { username, menuTree, logout } = useUserStore()
+  const { sidebarCollapsed, toggleSidebar } = useLayoutStore()
 
   return (
     <Sider

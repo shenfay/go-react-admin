@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAppStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import { hasPermission } from '@/config/permission'
 
 interface PermissionGuardProps {
@@ -14,7 +14,7 @@ export default function PermissionGuard({
   children,
   fallback,
 }: PermissionGuardProps) {
-  const { isLogin, permissions } = useAppStore()
+  const { isLogin, permissions } = useUserStore()
 
   // 未登录，跳转到登录页
   if (!isLogin) {

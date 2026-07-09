@@ -50,6 +50,7 @@ createRoot(document.getElementById('root')!).render(
             defaultHoverBg: '#f5f2ed',
             defaultHoverBorderColor: '#d4cdc0',
             defaultHoverColor: '#6b6258',
+            primaryShadow: 'none',
           },
           Input: {
             borderRadius: 8,
@@ -78,6 +79,7 @@ createRoot(document.getElementById('root')!).render(
             cellPaddingBlock: 13,
             cellPaddingInline: 14,
             headerBorderRadius: 8,
+            fontWeightStrong: 600,
           },
           Menu: {
             itemBorderRadius: 8,
@@ -94,6 +96,7 @@ createRoot(document.getElementById('root')!).render(
           Card: {
             borderRadius: 12,
             colorBorderSecondary: '#efeae2',
+            headerFontSize: 14,
           },
           Modal: {
             borderRadius: 12,
@@ -101,6 +104,7 @@ createRoot(document.getElementById('root')!).render(
           Tag: {
             borderRadiusSM: 6,
             defaultBg: 'transparent',
+            colorBorder: 'transparent',
           },
           Pagination: {
             borderRadius: 6,

@@ -52,8 +52,8 @@ request.interceptors.response.use(
         localStorage.removeItem('admin-token')
         localStorage.removeItem('admin-refresh-token')
         // 延迟导入避免循环依赖
-        import('@/stores').then(({ useAppStore }) => {
-          useAppStore.getState().logout()
+        import('@/stores').then(({ useUserStore }) => {
+          useUserStore.getState().logout()
         })
         window.location.href = '/login'
       } else {

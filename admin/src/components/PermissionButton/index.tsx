@@ -1,6 +1,6 @@
 import { Button } from 'antd'
 import type { ButtonProps } from 'antd'
-import { useAppStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import { hasPermission } from '@/config/permission'
 
 interface PermissionButtonProps extends ButtonProps {
@@ -14,7 +14,7 @@ export default function PermissionButton({
   children,
   ...props
 }: PermissionButtonProps) {
-  const { permissions } = useAppStore()
+  const { permissions } = useUserStore()
 
   if (permission && !hasPermission(permissions, permission)) {
     return <>{fallback}</>

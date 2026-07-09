@@ -1,7 +1,8 @@
-import { Breadcrumb, Input } from 'antd'
+import { useState, useMemo } from 'react'
+import { Breadcrumb, AutoComplete, Input } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
-import { useLocation } from 'react-router-dom'
-import { useAppStore } from '@/stores'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useUserStore } from '@/stores'
 import type { MenuItem } from '@/types'
 
 interface TopBarProps {
@@ -10,7 +11,9 @@ interface TopBarProps {
 
 export default function TopBar({ onRefresh }: TopBarProps) {
   const location = useLocation()
-  const menuTree = useAppStore(state => state.menuTree)
+  const navigate = useNavigate()
+  const menuTree = useUserStore(state => state.menuTree)
+  const [searchValue, setSearchValue] = useState('')
 
   const findBreadcrumb = () => {
     const result: { title: string }[] = [{ title: '首页' }]
@@ -32,6 +35,30 @@ export default function TopBar({ onRefresh }: TopBarProps) {
   }
 
   const breadcrumbItems = findBreadcrumb()
+
+  // 将菜单树扁平化为搜索选项
+  const searchOptions = useMemo(() => {
+    const items: { value: string; label: string; path: string }[] = []
+    function flatten(nodes: MenuItem[], parentLabel?: string) {
+      for (const node of nodes) {
+        const fullLabel = parentLabel ? `${parentLabel} / ${node.label}` : node.label
+        if (node.path) {
+          items.push({ value: node.path, label: fullLabel, path: node.path })
+        }
+        if (node.children) flatten(node.children, fullLabel)
+      }
+    }
+    flatten(menuTree)
+    return items
+  }, [menuTree])
+
+  const filteredOptions = useMemo(() => {
+    if (!searchValue) return []
+    const keyword = searchValue.toLowerCase()
+    return searchOptions
+      .filter(item => item.label.toLowerCase().includes(keyword) || item.path.toLowerCase().includes(keyword))
+      .map(item => ({ value: item.path, label: item.label }))
+  }, [searchValue, searchOptions])
 
   return (
     <div
@@ -70,25 +97,22 @@ export default function TopBar({ onRefresh }: TopBarProps) {
       {/* Right: Global Search + Refresh */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {/* Global Search */}
-        <div style={{ position: 'relative' }}>
-          <SearchOutlined
-            style={{
-              position: 'absolute',
-              left: 10,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              fontSize: 14,
-              color: 'var(--text-icon)',
-              pointerEvents: 'none',
-            }}
-          />
+        <AutoComplete
+          value={searchValue}
+          options={filteredOptions}
+          onSelect={(path: string) => {
+            setSearchValue('')
+            navigate(path)
+          }}
+          onChange={setSearchValue}
+          style={{ width: 220 }}
+        >
           <Input
-            placeholder="搜索..."
+            prefix={<SearchOutlined style={{ color: 'var(--text-icon)' }} />}
+            placeholder="搜索菜单..."
+            allowClear
             style={{
-              width: 220,
               height: 34,
-              paddingLeft: 32,
-              paddingRight: 12,
               borderRadius: 8,
               border: '1px solid var(--border-color)',
               background: 'var(--bg-light)',
@@ -103,7 +127,7 @@ export default function TopBar({ onRefresh }: TopBarProps) {
               e.target.style.background = 'var(--bg-light)'
             }}
           />
-        </div>
+        </AutoComplete>
 
         {/* Refresh Button */}
         <button

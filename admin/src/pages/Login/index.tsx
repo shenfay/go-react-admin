@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Form, Input, Button, message } from 'antd'
 import { MailOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { useAppStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import { login as loginApi, getUserMenuTree } from '@/services/auth'
 import type { LoginRequest } from '@/types'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { login } = useAppStore()
+  const { login } = useUserStore()
   const [loading, setLoading] = useState(false)
 
   const onFinish = async (values: LoginRequest) => {
@@ -28,7 +28,7 @@ export default function Login() {
       // 登录后获取用户菜单树
       try {
         const menuTree = await getUserMenuTree()
-        useAppStore.getState().setMenuTree(menuTree || [])
+        useUserStore.getState().setMenuTree(menuTree || [])
       } catch {
         // 菜单获取失败不影响登录
       }
