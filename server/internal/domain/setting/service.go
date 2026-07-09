@@ -3,9 +3,10 @@ package setting
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"net/http"
 
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/pkg/errors"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
 	"go.uber.org/zap"
@@ -44,7 +45,11 @@ type SettingUpdate struct {
 // BatchUpdate 批量更新设置
 func (s *Service) BatchUpdate(ctx context.Context, updates []SettingUpdate, updatedBy *string) error {
 	if len(updates) == 0 {
-		return fmt.Errorf("no settings to update")
+		return errors.NewAppError(
+			errors.ErrCodeSystemInvalidRequest,
+			"没有要更新的设置项",
+			http.StatusBadRequest,
+		)
 	}
 
 	settings := make([]*Setting, len(updates))

@@ -2,13 +2,14 @@ package admin
 
 import (
 	"context"
-	"errors"
+	"net/http"
 	"time"
 
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/infra/authorize"
+	"github.com/shenfay/kiqi/pkg/errors"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
 	"go.uber.org/zap"
@@ -289,7 +290,11 @@ func (s *Service) CreateMenu(ctx context.Context, cmd CreateMenuCmd) (*MenuDTO, 
 	// 检查 key 是否已存在
 	existing, _ := s.menuRepo.FindByKey(ctx, cmd.Key)
 	if existing != nil {
-		return nil, errors.New("菜单标识已存在")
+		return nil, errors.NewAppError(
+			errors.ErrCodeMenuKeyAlreadyExists,
+			"菜单标识已存在",
+			http.StatusConflict,
+		)
 	}
 
 	m := rbac.NewMenu(cmd.Key, cmd.Label, cmd.Icon, cmd.Path, cmd.Permission, cmd.ParentID, cmd.SortOrder)

@@ -7,8 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shenfay/kiqi/internal/app/authentication"
-	"github.com/shenfay/kiqi/internal/transport/http/middleware"
+	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
+	"github.com/shenfay/kiqi/pkg/errors"
+	userErr "github.com/shenfay/kiqi/pkg/errors/user"
 	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
 )
 
@@ -112,7 +114,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	resp, err := h.service.Login(c.Request.Context(), cmd)
 	if err != nil {
-		h.handleServiceError(c, err)
+		response.Error(c, err)
 		return
 	}
 
@@ -136,7 +138,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	if err := h.service.Logout(c.Request.Context(), cmd); err != nil {
-		h.handleServiceError(c, err)
+		response.Error(c, err)
 		return
 	}
 
@@ -173,11 +175,6 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	response.Success(c, authentication.ToAuthResponse(resp))
 }
 
-// handleServiceError 处理服务层错误（走统一错误处理链路，含 trace_id/timestamp）
-func (h *AuthHandler) handleServiceError(c *gin.Context, err error) {
-	response.Error(c, err)
-}
-
 // GetUserByID 根据 ID 获取用户信息
 // @Summary Get user by ID
 // @Tags Users
@@ -191,13 +188,17 @@ func (h *AuthHandler) handleServiceError(c *gin.Context, err error) {
 func (h *AuthHandler) GetUserByID(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {
-		middleware.RespondError(c, http.StatusBadRequest, "SYSTEM.INVALID_REQUEST", "用户 ID 不能为空")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemInvalidRequest,
+			"用户 ID 不能为空",
+			http.StatusBadRequest,
+		))
 		return
 	}
 
 	u, err := h.service.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
-		middleware.RespondError(c, http.StatusNotFound, "USER.NOT_FOUND", "用户不存在")
+		response.Error(c, userErr.ErrNotFound)
 		return
 	}
 
@@ -213,29 +214,19 @@ func (h *AuthHandler) GetUserByID(c *gin.Context) {
 // @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
 // @Router /auth/me [get]
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		middleware.RespondError(c, http.StatusUnauthorized, "SYSTEM.UNAUTHORIZED", "缺少认证信息")
+	userID := c.GetString("user_id")
+	if userID == "" {
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemUnauthorized,
+			"缺少用户身份信息",
+			http.StatusUnauthorized,
+		))
 		return
 	}
 
-	parts := strings.SplitN(authHeader, " ", 2)
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		middleware.RespondError(c, http.StatusUnauthorized, "SYSTEM.UNAUTHORIZED", "认证格式不正确")
-		return
-	}
-
-	tokenString := parts[1]
-
-	claims, err := h.tokenService.ValidateAccessToken(tokenString)
+	u, err := h.service.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
-		middleware.RespondError(c, http.StatusUnauthorized, "AUTH.INVALID_TOKEN", "无效的认证令牌")
-		return
-	}
-
-	u, err := h.service.GetUserByID(c.Request.Context(), claims.UserID)
-	if err != nil {
-		middleware.RespondError(c, http.StatusNotFound, "USER.NOT_FOUND", "用户不存在")
+		response.Error(c, userErr.ErrNotFound)
 		return
 	}
 
@@ -281,14 +272,18 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 
 	devices, err := h.tokenService.GetUserDevices(c.Request.Context(), userID)
 	if err != nil {
-		middleware.RespondError(c, http.StatusInternalServerError, "SYSTEM.INTERNAL_ERROR", "获取设备列表失败")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemInternal,
+			"获取设备列表失败",
+			http.StatusInternalServerError,
+		))
 		return
 	}
 
 	var deviceResponses []DeviceResponse
 	for _, device := range devices {
 		deviceResponses = append(deviceResponses, DeviceResponse{
-			TokenID:    device.UserID,
+			TokenID:    device.TokenID,
 			DeviceType: device.DeviceType,
 			IP:         maskIP(device.IP),
 			UserAgent:  device.UserAgent,
@@ -297,7 +292,7 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, DevicesResponse{
+	response.Success(c, DevicesResponse{
 		Devices: deviceResponses,
 	})
 }
@@ -317,23 +312,39 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 	token := c.Param("token")
 
 	if token == "" {
-		middleware.RespondError(c, http.StatusBadRequest, "SYSTEM.INVALID_REQUEST", "设备令牌不能为空")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemInvalidRequest,
+			"设备令牌不能为空",
+			http.StatusBadRequest,
+		))
 		return
 	}
 
 	deviceInfo, err := h.tokenService.ValidateRefreshTokenWithDevice(c.Request.Context(), token)
 	if err != nil {
-		middleware.RespondError(c, http.StatusUnauthorized, "AUTH.INVALID_TOKEN", "无效或已过期的设备令牌")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeAuthInvalidToken,
+			"无效或已过期的设备令牌",
+			http.StatusUnauthorized,
+		))
 		return
 	}
 
 	if deviceInfo.UserID != userID {
-		middleware.RespondError(c, http.StatusForbidden, "SYSTEM.FORBIDDEN", "只能撤销自己的设备")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemForbidden,
+			"只能撤销自己的设备",
+			http.StatusForbidden,
+		))
 		return
 	}
 
 	if err := h.tokenService.RevokeDeviceByToken(c.Request.Context(), token); err != nil {
-		middleware.RespondError(c, http.StatusInternalServerError, "SYSTEM.INTERNAL_ERROR", "撤销设备失败")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemInternal,
+			"撤销设备失败",
+			http.StatusInternalServerError,
+		))
 		return
 	}
 
@@ -352,7 +363,11 @@ func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
 
 	if err := h.tokenService.RevokeAllDevices(c.Request.Context(), userID); err != nil {
-		middleware.RespondError(c, http.StatusInternalServerError, "SYSTEM.INTERNAL_ERROR", "退出所有设备失败")
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemInternal,
+			"退出所有设备失败",
+			http.StatusInternalServerError,
+		))
 		return
 	}
 
@@ -361,31 +376,16 @@ func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 
 // detectDeviceType 根据 User-Agent 检测设备类型
 func detectDeviceType(userAgent string) string {
-	ua := userAgent
-	if ua == "" {
+	if userAgent == "" {
 		return "unknown"
 	}
 
-	if containsAny(ua, []string{"Mobile", "Android", "iPhone", "iPad"}) {
-		if containsAny(ua, []string{"iPad", "Tablet"}) {
-			return "tablet"
-		}
+	if strings.Contains(userAgent, "iPad") || strings.Contains(userAgent, "Tablet") {
+		return "tablet"
+	}
+	if strings.ContainsAny(userAgent, "MobileAndroidiPhone") {
 		return "mobile"
 	}
 
 	return "desktop"
-}
-
-// containsAny 检查字符串是否包含任意一个子串
-func containsAny(s string, substrs []string) bool {
-	for _, substr := range substrs {
-		if len(s) >= len(substr) {
-			for i := 0; i <= len(s)-len(substr); i++ {
-				if s[i:i+len(substr)] == substr {
-					return true
-				}
-			}
-		}
-	}
-	return false
 }

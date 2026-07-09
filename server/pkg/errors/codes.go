@@ -36,3 +36,8 @@ const (
 const (
 	ErrCodeSecurityTooManyAttempts = "SECURITY.TOO_MANY_ATTEMPTS"
 )
+
+// 菜单域错误码 (MENU.*)
+const (
+	ErrCodeMenuKeyAlreadyExists = "MENU.KEY_ALREADY_EXISTS"
+)

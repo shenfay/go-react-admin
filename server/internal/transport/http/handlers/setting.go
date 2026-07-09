@@ -125,8 +125,12 @@ func (h *SettingHandler) BatchUpdateSettings(c *gin.Context) {
 		}
 	}
 
-	// TODO: 从 JWT context 中获取当前用户 ID 作为 updated_by
+	// 从 JWT context 中获取当前用户 ID 作为 updated_by
+	updatedByStr := c.GetString("user_id")
 	var updatedBy *string
+	if updatedByStr != "" {
+		updatedBy = &updatedByStr
+	}
 
 	if err := h.service.BatchUpdate(c.Request.Context(), updates, updatedBy); err != nil {
 		response.Error(c, err)
