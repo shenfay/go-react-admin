@@ -46,6 +46,7 @@ type TokenPair struct {
 
 // DeviceInfo 设备会话信息
 type DeviceInfo struct {
+	TokenID    string `json:"token_id"`
 	UserID     string `json:"user_id"`
 	IP         string `json:"ip"`
 	UserAgent  string `json:"user_agent"`
@@ -189,6 +190,7 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 
 	// 6. 存储设备信息到 Redis
 	if err := s.tokenService.StoreDeviceInfo(ctx, tokens.RefreshToken, DeviceInfo{
+		TokenID:    tokens.RefreshToken,
 		UserID:     u.ID,
 		IP:         cmd.IP,
 		UserAgent:  cmd.UserAgent,
@@ -290,6 +292,7 @@ func (s *Service) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*S
 
 	// 5. 存储新设备信息
 	if err := s.tokenService.StoreDeviceInfo(ctx, tokens.RefreshToken, DeviceInfo{
+		TokenID:    tokens.RefreshToken,
 		UserID:     u.ID,
 		IP:         deviceInfo.IP,
 		UserAgent:  deviceInfo.UserAgent,
