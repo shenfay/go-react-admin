@@ -33,7 +33,7 @@ export default function SidebarLogo({ collapsed, onToggle }: SidebarLogoProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: 8,
+            borderRadius: 'var(--radius-md)',
             transition: 'all 0.15s',
           }}
         />
@@ -79,7 +79,7 @@ export default function SidebarLogo({ collapsed, onToggle }: SidebarLogoProps) {
               minWidth: 28,
               padding: 0,
               color: 'var(--text-muted)',
-              borderRadius: 8,
+              borderRadius: 'var(--radius-md)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
