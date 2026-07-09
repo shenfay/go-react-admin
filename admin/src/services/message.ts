@@ -24,6 +24,21 @@ export interface MessageListResponse {
   total: number
 }
 
+export interface UnreadCountItem {
+  type: string
+  count: number
+}
+
+export interface UnreadCountResponse {
+  counts: UnreadCountItem[]
+  total: number
+}
+
+/** 获取当前用户未读消息数 */
+export async function getUnreadCount(): Promise<UnreadCountResponse> {
+  return request.get('/v1/messages/unread-count')
+}
+
 /** 管理员获取所有消息列表 */
 export async function getMessages(params: {
   type?: string

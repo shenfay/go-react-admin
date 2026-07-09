@@ -8,9 +8,9 @@ import (
 
 // messagePO GORM 持久化对象
 type messagePO struct {
-	ID          string                 `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	SenderID    *string                `gorm:"type:uuid"`
-	RecipientID string                 `gorm:"type:uuid;not null;index:idx_messages_recipient"`
+	ID          string                 `gorm:"primaryKey;type:varchar(50)"`
+	SenderID    *string                `gorm:"type:varchar(50)"`
+	RecipientID string                 `gorm:"type:varchar(50);not null;index:idx_messages_recipient"`
 	Type        string                 `gorm:"type:varchar(20);not null;index:idx_messages_type_category"`
 	Category    string                 `gorm:"type:varchar(30);not null;index:idx_messages_type_category"`
 	Title       string                 `gorm:"type:varchar(200);not null"`
@@ -18,7 +18,7 @@ type messagePO struct {
 	IsRead      bool                   `gorm:"default:false;index:idx_messages_recipient"`
 	ReadAt      *time.Time             `gorm:"type:timestamptz"`
 	RefType     string                 `gorm:"type:varchar(30)"`
-	RefID       string                 `gorm:"type:uuid"`
+	RefID       string                 `gorm:"type:varchar(50)"`
 	Metadata    map[string]interface{} `gorm:"type:jsonb;default:'{}'::jsonb;serializer:json"`
 	CreatedAt   time.Time              `gorm:"not null;index:idx_messages_recipient;default:now()"`
 }

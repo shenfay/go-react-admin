@@ -1,4 +1,5 @@
-import { Avatar, Dropdown } from 'antd'
+import { useState, useEffect, useCallback } from 'react'
+import { Avatar, Dropdown, Badge } from 'antd'
 import {
   UserOutlined,
   SettingOutlined,
@@ -8,6 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { message } from 'antd'
 import { useTranslation } from 'react-i18next'
+import { getUnreadCount } from '@/services/message'
 
 interface SidebarUserProps {
   collapsed: boolean
@@ -18,6 +20,22 @@ interface SidebarUserProps {
 export default function SidebarUser({ collapsed, username, onLogout }: SidebarUserProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const fetchUnread = useCallback(async () => {
+    try {
+      const res = await getUnreadCount()
+      setUnreadCount(res.total ?? 0)
+    } catch {
+      // 静默失败，不影响主流程
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchUnread()
+    const timer = setInterval(fetchUnread, 60_000) // 每分钟轮询
+    return () => clearInterval(timer)
+  }, [fetchUnread])
 
   const handleUserMenuClick = ({ key }: { key: string }) => {
     switch (key) {
@@ -122,14 +140,18 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
+              cursor: 'pointer',
             }}
+            onClick={() => navigate('/messages')}
           >
-            <BellOutlined
-              style={{
-                fontSize: 16,
-                color: 'var(--text-secondary)',
-              }}
-            />
+            <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+              <BellOutlined
+                style={{
+                  fontSize: 16,
+                  color: 'var(--text-secondary)',
+                }}
+              />
+            </Badge>
           </div>
         </>
       )}
