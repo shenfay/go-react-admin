@@ -2,17 +2,17 @@ import { Tag } from 'antd'
 import type { ReactNode } from 'react'
 
 export type StatusType =
-  | '完成'
-  | '处理中'
-  | '待审核'
-  | '失败'
-  | '正常'
-  | '警告'
-  | '异常'
-  | '活跃'
-  | '待激活'
-  | '已禁用'
-  | '延迟'
+  | 'success'
+  | 'processing'
+  | 'pending'
+  | 'failed'
+  | 'normal'
+  | 'warning'
+  | 'error'
+  | 'active'
+  | 'inactive'
+  | 'disabled'
+  | 'delayed'
   | string
 
 interface StatusTagProps {
@@ -21,24 +21,24 @@ interface StatusTagProps {
 }
 
 const statusColorMap: Record<string, { color: string; bg: string }> = {
-  完成: { color: 'var(--green-text)', bg: 'var(--green-light)' },
-  正常: { color: 'var(--green-text)', bg: 'var(--green-light)' },
-  活跃: { color: 'var(--green-text)', bg: 'var(--green-light)' },
-  处理中: { color: 'var(--blue)', bg: 'var(--blue-light)' },
-  待审核: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  警告: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  延迟: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  待激活: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
-  失败: { color: 'var(--red)', bg: 'var(--red-light)' },
-  异常: { color: 'var(--red)', bg: 'var(--red-light)' },
-  已禁用: { color: 'var(--red)', bg: 'var(--red-light)' },
-  管理员: { color: 'var(--blue)', bg: 'var(--blue-light)' },
-  编辑: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
-  成员: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
-  MySQL: { color: 'var(--blue)', bg: 'var(--blue-light)' },
-  Elasticsearch: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
-  S3: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
-  Kafka: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
+  success: { color: 'var(--green-text)', bg: 'var(--green-light)' },
+  normal: { color: 'var(--green-text)', bg: 'var(--green-light)' },
+  active: { color: 'var(--green-text)', bg: 'var(--green-light)' },
+  processing: { color: 'var(--blue)', bg: 'var(--blue-light)' },
+  pending: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
+  warning: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
+  delayed: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
+  inactive: { color: 'var(--yellow-text)', bg: 'var(--yellow-light)' },
+  failed: { color: 'var(--red)', bg: 'var(--red-light)' },
+  error: { color: 'var(--red)', bg: 'var(--red-light)' },
+  disabled: { color: 'var(--red)', bg: 'var(--red-light)' },
+  admin: { color: 'var(--blue)', bg: 'var(--blue-light)' },
+  editor: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
+  member: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
+  mysql: { color: 'var(--blue)', bg: 'var(--blue-light)' },
+  elasticsearch: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
+  s3: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
+  kafka: { color: 'var(--text-secondary)', bg: 'var(--hover-bg-light)' },
 }
 
 export default function StatusTag({ status, children }: StatusTagProps) {
@@ -50,7 +50,7 @@ export default function StatusTag({ status, children }: StatusTagProps) {
         color: style.color,
         background: style.bg,
         border: 'none',
-        borderRadius: 6,
+        borderRadius: 'var(--radius-sm)',
         fontSize: 12,
         fontWeight: 500,
         padding: '2px 10px',

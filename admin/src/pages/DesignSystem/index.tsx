@@ -21,7 +21,7 @@ function Swatch({ color, name, variable }: { color: string; name: string; variab
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
       <div style={{
-        width: 36, height: 36, borderRadius: 8,
+        width: 36, height: 36, borderRadius: 'var(--radius-md)',
         backgroundColor: color,
         border: color === '#ffffff' || color.startsWith('rgba') ? '1px solid var(--border-color)' : 'none',
         flexShrink: 0,
@@ -139,7 +139,7 @@ function DesignTokens() {
             { label: t('numFont'), family: 'var(--font-family-num)', sample: '0123456789 .,%', stack: 'Inter, JetBrains Mono, SF Mono, Roboto Mono, monospace' },
             { label: t('monoFont'), family: 'var(--font-family-mono)', sample: 'const hello = "Qoder" // 2024-07-09', stack: 'JetBrains Mono, SF Mono, Menlo, Roboto Mono, monospace' },
           ].map(f => (
-            <div key={f.label} style={{ background: 'var(--bg-light)', borderRadius: 12, padding: '16px 20px' }}>
+            <div key={f.label} style={{ background: 'var(--bg-light)', borderRadius: 'var(--radius-md)', padding: '16px 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <Text style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{f.label}</Text>
                 <Text style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{f.stack}</Text>
@@ -147,7 +147,7 @@ function DesignTokens() {
               <div style={{ fontSize: 24, fontFamily: f.family, color: 'var(--text-primary)', lineHeight: 1.6 }}>{f.sample}</div>
             </div>
           ))}
-          <div style={{ background: 'var(--bg-light)', borderRadius: 12, padding: '16px 20px' }}>
+          <div style={{ background: 'var(--bg-light)', borderRadius: 'var(--radius-md)', padding: '16px 20px' }}>
             <Text style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>{t('mainFontStack')}</Text>
             <Text style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>Inter, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Microsoft YaHei, Noto Sans SC, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji</Text>
             <div style={{ marginTop: 10, fontSize: 15, fontFamily: 'var(--font-family)', color: 'var(--text-primary)', lineHeight: 1.8 }}>
@@ -194,7 +194,7 @@ function DesignTokens() {
                 ['--shadow-md', '0 4px 12px rgba(0,0,0,0.08)', 'StatCard hover'],
                 ['--shadow-lg', '0 8px 24px rgba(0,0,0,0.12)', t('reserved')],
               ].map(([v, val, desc]) => (
-                <div key={v} style={{ padding: '10px 14px', background: '#fff', borderRadius: 8, boxShadow: v === '--shadow-sm' ? 'var(--shadow-sm)' : v === '--shadow-md' ? 'var(--shadow-md)' : 'var(--shadow-lg)', marginBottom: 8 }}>
+                <div key={v} style={{ padding: '10px 14px', background: 'var(--bg-white)', borderRadius: 'var(--radius-md)', boxShadow: v === '--shadow-sm' ? 'var(--shadow-sm)' : v === '--shadow-md' ? 'var(--shadow-md)' : 'var(--shadow-lg)', marginBottom: 8 }}>
                   <Text style={{ fontSize: 13, fontWeight: 500 }}>{v}</Text><br />
                   <Text style={{ fontSize: 12, color: 'var(--text-muted)' }}>{val} — {desc}</Text>
                 </div>
@@ -219,7 +219,7 @@ function DesignTokens() {
                   { title: t('desc'), dataIndex: 'desc', key: 'desc' },
                 ]}
                 dataSource={cat.items.map((i, idx) => ({ ...i, key: idx }))}
-                pagination={false} size="small" style={{ background: '#fff' }}
+                pagination={false} size="small" style={{ background: 'var(--bg-white)' }}
               />
             </div>
           ))}
@@ -266,7 +266,7 @@ function Components() {
       <div>
         <SectionTitle>{t('tableActionBtn')}</SectionTitle>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ background: 'var(--bg-light)', padding: '14px 20px', borderRadius: 12 }}>
+          <div style={{ background: 'var(--bg-light)', padding: '14px 20px', borderRadius: 'var(--radius-md)' }}>
             <Space size={0} className="action-btn-group">
               <Button type="link" size="small" icon={<EditOutlined />}>{t('edit')}</Button>
               <Button type="link" size="small" icon={<SettingOutlined />}>{t('configPerm')}</Button>
@@ -292,7 +292,7 @@ function Components() {
             { bg: 'var(--gray-light)', color: 'var(--gray-text)', label: t('unassigned') },
             { bg: 'var(--gray-light)', color: 'var(--gray-text)', label: 'Viewer' },
           ].map(item => (
-            <Tag key={item.label} style={{ background: item.bg, color: item.color, border: 'none', borderRadius: 6 }}>{item.label}</Tag>
+            <Tag key={item.label} style={{ background: item.bg, color: item.color, border: 'none', borderRadius: 'var(--radius-sm)' }}>{item.label}</Tag>
           ))}
         </Space>
       </div>
@@ -437,10 +437,10 @@ function DataDisplay() {
     { title: t('status'), dataIndex: 'status', key: 'status', width: 100 },
   ]
   const demoData = [
-    { key: '1', name: 'Zhang San', email: 'zhangsan@example.com', role: <Tag style={{ background: 'var(--blue-light)', color: 'var(--blue-text)', border: 'none', borderRadius: 6 }}>Admin</Tag>, status: <span style={{ color: 'var(--green)' }}>{t('active')}</span> },
-    { key: '2', name: 'Li Si', email: 'lisi@example.com', role: <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)', border: 'none', borderRadius: 6 }}>Viewer</Tag>, status: <span style={{ color: 'var(--green)' }}>{t('active')}</span> },
-    { key: '3', name: 'Wang Wu', email: 'wangwu@example.com', role: <Tag style={{ background: 'var(--yellow-light)', color: 'var(--yellow-text)', border: 'none', borderRadius: 6 }}>Pending</Tag>, status: <span style={{ color: 'var(--yellow)' }}>{t('pending')}</span> },
-    { key: '4', name: 'Zhao Liu', email: 'zhaoliu@example.com', role: <Tag style={{ background: 'var(--red-light)', color: 'var(--red-text)', border: 'none', borderRadius: 6 }}>{t('disabled')}</Tag>, status: <span style={{ color: 'var(--red)' }}>{t('abnormal')}</span> },
+    { key: '1', name: 'Zhang San', email: 'zhangsan@example.com', role: <Tag style={{ background: 'var(--blue-light)', color: 'var(--blue-text)', border: 'none', borderRadius: 'var(--radius-sm)' }}>Admin</Tag>, status: <span style={{ color: 'var(--green)' }}>{t('active')}</span> },
+    { key: '2', name: 'Li Si', email: 'lisi@example.com', role: <Tag style={{ background: 'var(--gray-light)', color: 'var(--gray-text)', border: 'none', borderRadius: 'var(--radius-sm)' }}>Viewer</Tag>, status: <span style={{ color: 'var(--green)' }}>{t('active')}</span> },
+    { key: '3', name: 'Wang Wu', email: 'wangwu@example.com', role: <Tag style={{ background: 'var(--yellow-light)', color: 'var(--yellow-text)', border: 'none', borderRadius: 'var(--radius-sm)' }}>Pending</Tag>, status: <span style={{ color: 'var(--yellow)' }}>{t('pending')}</span> },
+    { key: '4', name: 'Zhao Liu', email: 'zhaoliu@example.com', role: <Tag style={{ background: 'var(--red-light)', color: 'var(--red-text)', border: 'none', borderRadius: 'var(--radius-sm)' }}>{t('disabled')}</Tag>, status: <span style={{ color: 'var(--red)' }}>{t('abnormal')}</span> },
   ]
 
   return (
@@ -476,11 +476,11 @@ function DataDisplay() {
 
       <div>
         <SectionTitle>{t('descList')}</SectionTitle>
-        <Descriptions column={2} size="small" bordered style={{ background: '#fff' }}>
+        <Descriptions column={2} size="small" bordered style={{ background: 'var(--bg-white)' }}>
           <Descriptions.Item label={t('username')}>admin</Descriptions.Item>
           <Descriptions.Item label={t('email')}>admin@kiqi.app</Descriptions.Item>
           <Descriptions.Item label={t('role')}>{t('founder')}</Descriptions.Item>
-          <Descriptions.Item label={t('status')}><Tag color="green" style={{ background: 'var(--green-light)', color: 'var(--green-text)', border: 'none', borderRadius: 6 }}>{t('normal')}</Tag></Descriptions.Item>
+          <Descriptions.Item label={t('status')}><Tag style={{ background: 'var(--green-light)', color: 'var(--green-text)', border: 'none', borderRadius: 'var(--radius-sm)' }}>{t('normal')}</Tag></Descriptions.Item>
           <Descriptions.Item label={t('registerTime')}>2024-01-15</Descriptions.Item>
           <Descriptions.Item label={t('lastLogin')}>2026-07-08</Descriptions.Item>
         </Descriptions>
@@ -522,8 +522,8 @@ function LayoutAndPatterns() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div>
         <SectionTitle>{t('dataPanelStructure')}</SectionTitle>
-        <div style={{ border: '1px solid var(--border-color)', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--divider)', background: '#fff' }}>
+        <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--divider)', background: 'var(--bg-white)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text style={{ fontSize: 14, fontWeight: 600 }}>title</Text>
               <div>
@@ -540,7 +540,7 @@ function LayoutAndPatterns() {
               <Button size="small" icon={<ExportOutlined />} style={{ color: 'var(--text-secondary)' }}>toolbarActions</Button>
             </div>
           </div>
-          <div style={{ padding: '40px 20px', background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ padding: '40px 20px', background: 'var(--bg-white)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ color: 'var(--text-muted)', fontSize: 13 }}>children</Text>
           </div>
         </div>
@@ -562,7 +562,7 @@ function LayoutAndPatterns() {
 
       <div>
         <SectionTitle>{t('pageTitleArea')}</SectionTitle>
-        <div style={{ background: 'var(--bg-light)', padding: 20, borderRadius: 12 }}>
+        <div style={{ background: 'var(--bg-light)', padding: 20, borderRadius: 'var(--radius-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <Text style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}>{t('userManagement')}</Text>

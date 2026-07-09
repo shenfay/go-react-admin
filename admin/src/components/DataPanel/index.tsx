@@ -19,33 +19,6 @@ interface DataPanelProps {
   compact?: boolean
 }
 
-/** 图标按钮样式（顶栏/筛选栏通用） */
-export const iconButtonStyle: React.CSSProperties = {
-  width: 34,
-  height: 34,
-  borderRadius: 8,
-  border: '1px solid var(--border-color)',
-  background: 'var(--bg-light)',
-  cursor: 'pointer',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'all 0.15s',
-}
-
-export function IconButton({ icon, onClick, title }: { icon: ReactNode; onClick?: () => void; title?: string }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className="icon-btn"
-    >
-      {icon}
-    </button>
-  )
-}
-
 /** 筛选搜索框 */
 export function FilterSearch({ value, onChange, placeholder = '搜索...', onSearch }: {
   value?: string

@@ -158,7 +158,7 @@ export default function TopBar({ onRefresh }: TopBarProps) {
             allowClear
             style={{
               height: 34,
-              borderRadius: 8,
+              borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-color)',
               background: 'var(--bg-light)',
               fontSize: 13,

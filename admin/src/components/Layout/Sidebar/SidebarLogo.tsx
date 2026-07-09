@@ -49,7 +49,7 @@ export default function SidebarLogo({ collapsed, onToggle }: SidebarLogoProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: 'var(--bg-white)',
               fontWeight: 700,
               fontSize: 15,
             }}
