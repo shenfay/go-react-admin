@@ -96,6 +96,15 @@ func (u *User) VerifyEmail() {
 	u.UpdatedAt = utils.Now()
 }
 
+// SetLocked 设置账户锁定状态
+func (u *User) SetLocked(locked bool) {
+	u.Locked = locked
+	u.UpdatedAt = utils.Now()
+	if !locked {
+		u.FailedAttempts = 0
+	}
+}
+
 // ChangePassword 修改密码
 func (u *User) ChangePassword(newPassword string) error {
 	hashedPassword, err := HashPassword(newPassword)

@@ -21,6 +21,73 @@ func NewAdminHandler(service *admin.Service) *AdminHandler {
 	return &AdminHandler{service: service}
 }
 
+// ---- 请求 DTO ----
+
+// createUserRequest 创建用户请求
+type createUserRequest struct {
+	Email    string   `json:"email" binding:"required,email"`
+	Name     string   `json:"name" binding:"required"`
+	Password string   `json:"password" binding:"required,min=8"`
+	RoleIDs  []string `json:"role_ids"`
+}
+
+// updateUserRequest 更新用户请求
+type updateUserRequest struct {
+	Name    string   `json:"name"`
+	Email   string   `json:"email"`
+	RoleIDs []string `json:"role_ids"`
+}
+
+// toggleStatusRequest 切换状态请求
+type toggleStatusRequest struct {
+	Locked bool `json:"locked"`
+}
+
+// createRoleRequest 创建角色请求
+type createRoleRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	Description string `json:"description"`
+}
+
+// updateRoleRequest 更新角色请求
+type updateRoleRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+}
+
+// updatePermissionsRequest 更新权限请求
+type updatePermissionsRequest struct {
+	Permissions []string `json:"permissions" binding:"required"`
+}
+
+// createMenuRequest 创建菜单请求
+type createMenuRequest struct {
+	Key        string `json:"key" binding:"required"`
+	Label      string `json:"label" binding:"required"`
+	Icon       string `json:"icon"`
+	Path       string `json:"path"`
+	Permission string `json:"permission"`
+	ParentID   string `json:"parent_id"`
+	SortOrder  int    `json:"sort_order"`
+}
+
+// updateMenuRequest 更新菜单请求
+type updateMenuRequest struct {
+	Label      string `json:"label" binding:"required"`
+	Icon       string `json:"icon"`
+	Path       string `json:"path"`
+	Permission string `json:"permission"`
+}
+
+// sortMenuRequest 菜单排序请求
+type sortMenuRequest struct {
+	Items []struct {
+		ID        string `json:"id"`
+		SortOrder int    `json:"sort_order"`
+	} `json:"items" binding:"required"`
+}
+
 // ---- 用户管理 ----
 
 // ListUsers 用户列表
@@ -76,12 +143,7 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /admin/users [post]
 func (h *AdminHandler) CreateUser(c *gin.Context) {
-	var req struct {
-		Email    string   `json:"email" binding:"required,email"`
-		Name     string   `json:"name" binding:"required"`
-		Password string   `json:"password" binding:"required,min=8"`
-		RoleIDs  []string `json:"role_ids"`
-	}
+	var req createUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -121,11 +183,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	userID := c.Param("id")
 
-	var req struct {
-		Name    string   `json:"name"`
-		Email   string   `json:"email"`
-		RoleIDs []string `json:"role_ids"`
-	}
+	var req updateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -165,9 +223,7 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 func (h *AdminHandler) ToggleUserStatus(c *gin.Context) {
 	userID := c.Param("id")
 
-	var req struct {
-		Locked bool `json:"locked"`
-	}
+	var req toggleStatusRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -217,11 +273,7 @@ func (h *AdminHandler) ListRoles(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /admin/roles [post]
 func (h *AdminHandler) CreateRole(c *gin.Context) {
-	var req struct {
-		Name        string `json:"name" binding:"required"`
-		Code        string `json:"code" binding:"required"`
-		Description string `json:"description"`
-	}
+	var req createRoleRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -260,10 +312,7 @@ func (h *AdminHandler) CreateRole(c *gin.Context) {
 func (h *AdminHandler) UpdateRole(c *gin.Context) {
 	roleID := c.Param("id")
 
-	var req struct {
-		Name        string `json:"name" binding:"required"`
-		Description string `json:"description"`
-	}
+	var req updateRoleRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -371,9 +420,7 @@ func (h *AdminHandler) GetRolePermissions(c *gin.Context) {
 func (h *AdminHandler) UpdateRolePermissions(c *gin.Context) {
 	roleID := c.Param("id")
 
-	var req struct {
-		Permissions []string `json:"permissions" binding:"required"`
-	}
+	var req updatePermissionsRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -465,15 +512,7 @@ func (h *AdminHandler) ListMenus(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /admin/menus [post]
 func (h *AdminHandler) CreateMenu(c *gin.Context) {
-	var req struct {
-		Key        string `json:"key" binding:"required"`
-		Label      string `json:"label" binding:"required"`
-		Icon       string `json:"icon"`
-		Path       string `json:"path"`
-		Permission string `json:"permission"`
-		ParentID   string `json:"parent_id"`
-		SortOrder  int    `json:"sort_order"`
-	}
+	var req createMenuRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -516,12 +555,7 @@ func (h *AdminHandler) CreateMenu(c *gin.Context) {
 func (h *AdminHandler) UpdateMenu(c *gin.Context) {
 	menuID := c.Param("id")
 
-	var req struct {
-		Label      string `json:"label" binding:"required"`
-		Icon       string `json:"icon"`
-		Path       string `json:"path"`
-		Permission string `json:"permission"`
-	}
+	var req updateMenuRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))
@@ -602,12 +636,7 @@ func (h *AdminHandler) ToggleMenuStatus(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /admin/menus/sort [put]
 func (h *AdminHandler) UpdateMenuSort(c *gin.Context) {
-	var req struct {
-		Items []struct {
-			ID        string `json:"id"`
-			SortOrder int    `json:"sort_order"`
-		} `json:"items" binding:"required"`
-	}
+	var req sortMenuRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, validationErr.FromGinError(err))

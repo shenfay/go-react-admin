@@ -150,13 +150,7 @@ func (s *Service) ToggleUserStatus(ctx context.Context, userID string, locked bo
 		return err
 	}
 
-	if locked {
-		u.Locked = true
-	} else {
-		u.Locked = false
-		u.ResetFailedAttempts()
-	}
-	u.UpdatedAt = utils.Now()
+	u.SetLocked(locked)
 
 	if err := s.userRepo.Update(ctx, u); err != nil {
 		return err
