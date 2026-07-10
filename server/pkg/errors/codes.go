@@ -29,7 +29,12 @@ const (
 const (
 	ErrCodeUserNotFound           = "USER.NOT_FOUND"
 	ErrCodeUserEmailAlreadyExists = "USER.EMAIL_ALREADY_EXISTS"
-	ErrCodeUserEmailNotVerified   = "USER.EMAIL_NOT_VERIFIED"
+)
+
+// 通知域错误码 (NOTIFICATION.*)
+const (
+	ErrCodeMessageNotFound     = "NOTIFICATION.MESSAGE_NOT_FOUND"
+	ErrCodeMessageAccessDenied = "NOTIFICATION.MESSAGE_ACCESS_DENIED"
 )
 
 // 菜单域错误码 (MENU.*)

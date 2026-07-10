@@ -2,14 +2,24 @@ package notification
 
 import (
 	"context"
-	"errors"
+	"net/http"
+
+	"github.com/shenfay/kiqi/pkg/errors"
 )
 
 var (
 	// ErrMessageNotFound 消息不存在
-	ErrMessageNotFound = errors.New("message not found")
+	ErrMessageNotFound = &errors.AppError{
+		Code:       errors.ErrCodeMessageNotFound,
+		Message:    "消息不存在",
+		HTTPStatus: http.StatusNotFound,
+	}
 	// ErrMessageAccessDenied 无权操作该消息
-	ErrMessageAccessDenied = errors.New("access denied: message belongs to another user")
+	ErrMessageAccessDenied = &errors.AppError{
+		Code:       errors.ErrCodeMessageAccessDenied,
+		Message:    "无权操作该消息",
+		HTTPStatus: http.StatusForbidden,
+	}
 )
 
 // Service 消息领域服务
