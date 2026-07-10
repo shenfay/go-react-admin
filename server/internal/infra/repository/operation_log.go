@@ -146,6 +146,23 @@ func (r *operationLogRepository) FindAll(ctx context.Context, limit int, offset 
 	return toDomainList(pos), err
 }
 
+// Count 统计日志总数（支持按 category/action/userID 筛选）
+func (r *operationLogRepository) Count(ctx context.Context, category, action, userID string) (int64, error) {
+	query := r.db.WithContext(ctx).Model(&operationLogPO{})
+	if category != "" {
+		query = query.Where("category = ?", category)
+	}
+	if action != "" {
+		query = query.Where("action = ?", action)
+	}
+	if userID != "" {
+		query = query.Where("user_id = ?", userID)
+	}
+	var count int64
+	err := query.Count(&count).Error
+	return count, err
+}
+
 // toDomainList 批量转换持久化对象为领域模型
 func toDomainList(pos []*operationLogPO) []*operation.OperationLog {
 	result := make([]*operation.OperationLog, len(pos))

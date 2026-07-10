@@ -77,10 +77,9 @@ func main() {
 
 	// 6. 注册 Asynq 任务处理器
 	mux := asynq.NewServeMux()
-
-	// 从 Bridge 获取所有路由到 logs 队列的事件类型（单一真相来源）
-	bridge := messaging.NewBridge(nil)
-	for _, eventName := range bridge.LogEventTypes() {
+	
+	// 从事件注册表获取所有路由到 logs 队列的事件类型（单一真相来源）
+	for _, eventName := range messaging.LogEventTypes() {
 		mux.HandleFunc(string(eventName), operationLogHandler.ProcessTask)
 	}
 

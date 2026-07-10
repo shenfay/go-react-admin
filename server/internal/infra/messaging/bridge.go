@@ -19,18 +19,8 @@ type DomainToIntegrationBridge struct {
 // NewBridge 创建桥接器
 func NewBridge(client *asynq.Client) *DomainToIntegrationBridge {
 	return &DomainToIntegrationBridge{
-		client: client,
-		queueMap: map[constants.EventName]constants.QueueName{
-			// 所有操作日志类事件统一路由到 logs 队列
-			constants.EventUserRegistered:     constants.QueueLogs,
-			constants.EventUserLoggedIn:       constants.QueueLogs,
-			constants.EventUserLoginFailed:    constants.QueueLogs,
-			constants.EventUserAccountLocked:  constants.QueueLogs,
-			constants.EventUserLoggedOut:      constants.QueueLogs,
-			constants.EventUserTokenRefreshed: constants.QueueLogs,
-			constants.EventUserProfileUpdated: constants.QueueLogs,
-			constants.EventOperationLog:       constants.QueueLogs, // 统一操作日志事件
-		},
+		client:   client,
+		queueMap: logEventQueueMap,
 	}
 }
 
@@ -50,13 +40,32 @@ func (b *DomainToIntegrationBridge) SubscribeTo(bus events.Bus) {
 // LogEventTypes 返回路由到 logs 队列的所有事件类型
 // 作为事件注册表的单一真相来源，供 Worker 进程统一注册
 func (b *DomainToIntegrationBridge) LogEventTypes() []constants.EventName {
-	types := make([]constants.EventName, 0, len(b.queueMap))
-	for eventName, queue := range b.queueMap {
+	return LogEventTypes()
+}
+
+// LogEventTypes 包级函数：返回路由到 logs 队列的所有事件类型
+// 无需 Bridge 实例即可获取事件注册表，供 Worker 进程独立使用
+func LogEventTypes() []constants.EventName {
+	types := make([]constants.EventName, 0, len(logEventQueueMap))
+	for eventName, queue := range logEventQueueMap {
 		if queue == constants.QueueLogs {
 			types = append(types, eventName)
 		}
 	}
 	return types
+}
+
+// logEventQueueMap 事件到队列的路由映射表（包级变量，作为单一真相来源）
+var logEventQueueMap = map[constants.EventName]constants.QueueName{
+	// 所有操作日志类事件统一路由到 logs 队列
+	constants.EventUserRegistered:     constants.QueueLogs,
+	constants.EventUserLoggedIn:       constants.QueueLogs,
+	constants.EventUserLoginFailed:    constants.QueueLogs,
+	constants.EventUserAccountLocked:  constants.QueueLogs,
+	constants.EventUserLoggedOut:      constants.QueueLogs,
+	constants.EventUserTokenRefreshed: constants.QueueLogs,
+	constants.EventUserProfileUpdated: constants.QueueLogs,
+	constants.EventOperationLog:       constants.QueueLogs, // 统一操作日志事件
 }
 
 // enqueue 将领域事件入队到 Asynq

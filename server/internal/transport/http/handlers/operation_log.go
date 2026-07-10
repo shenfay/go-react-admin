@@ -64,8 +64,11 @@ func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
 		return
 	}
 
+	total, _ := h.operationLogRepo.Count(c.Request.Context(), category, action, "")
+
 	response.Success(c, gin.H{
 		"data":   logs,
+		"total":  total,
 		"limit":  limit,
 		"offset": offset,
 	})
@@ -94,8 +97,11 @@ func (h *OperationLogHandler) GetUserOperationLogs(c *gin.Context) {
 		return
 	}
 
+	total, _ := h.operationLogRepo.Count(c.Request.Context(), "", "", userID)
+
 	response.Success(c, gin.H{
 		"data":   logs,
+		"total":  total,
 		"limit":  limit,
 		"offset": offset,
 	})
@@ -124,8 +130,11 @@ func (h *OperationLogHandler) GetCategoryOperationLogs(c *gin.Context) {
 		return
 	}
 
+	total, _ := h.operationLogRepo.Count(c.Request.Context(), category, "", "")
+
 	response.Success(c, gin.H{
 		"data":   logs,
+		"total":  total,
 		"limit":  limit,
 		"offset": offset,
 	})

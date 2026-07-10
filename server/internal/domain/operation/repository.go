@@ -18,4 +18,7 @@ type LogRepository interface {
 
 	// FindAll 查找所有日志（支持分页）
 	FindAll(ctx context.Context, limit int, offset int) ([]*OperationLog, error)
+
+	// Count 统计日志总数（支持按 category/action/userID 筛选）
+	Count(ctx context.Context, category, action, userID string) (int64, error)
 }

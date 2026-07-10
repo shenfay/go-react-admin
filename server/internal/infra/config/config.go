@@ -152,7 +152,7 @@ func setDefaults() {
 	viper.SetDefault("logger.output_path", "stdout")
 
 	// CORS
-	viper.SetDefault("cors.allowed_origins", []string{"*"})
+	viper.SetDefault("cors.allowed_origins", []string{"http://localhost:5173"})
 	viper.SetDefault("cors.allowed_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 	viper.SetDefault("cors.allowed_headers", []string{"Authorization", "Content-Type", "X-Requested-With"})
 	viper.SetDefault("cors.allow_credentials", true)
