@@ -32,9 +32,15 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
     }
   }, [])
 
-  // 初始加载 + WebSocket 实时推送更新
+  // 初始加载 + WebSocket 实时推送 + 切回 tab 刷新
   useEffect(() => {
     fetchUnread()
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') fetchUnread()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
   }, [fetchUnread])
 
   useWebSocketPush(() => {

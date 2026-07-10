@@ -66,9 +66,15 @@ export default function MyMessages() {
     }
   }, [])
 
-  // 初始加载未读数
+  // 初始加载未读数 + 切回 tab 刷新
   useEffect(() => {
     fetchUnread()
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') fetchUnread()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
   }, [fetchUnread])
 
   // WebSocket 实时推送：弹出通知 + 刷新列表和未读数
