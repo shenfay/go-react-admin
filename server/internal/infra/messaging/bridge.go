@@ -57,15 +57,8 @@ func LogEventTypes() []constants.EventName {
 
 // logEventQueueMap 事件到队列的路由映射表（包级变量，作为单一真相来源）
 var logEventQueueMap = map[constants.EventName]constants.QueueName{
-	// 所有操作日志类事件统一路由到 logs 队列
-	constants.EventUserRegistered:     constants.QueueLogs,
-	constants.EventUserLoggedIn:       constants.QueueLogs,
-	constants.EventUserLoginFailed:    constants.QueueLogs,
-	constants.EventUserAccountLocked:  constants.QueueLogs,
-	constants.EventUserLoggedOut:      constants.QueueLogs,
-	constants.EventUserTokenRefreshed: constants.QueueLogs,
-	constants.EventUserProfileUpdated: constants.QueueLogs,
-	constants.EventOperationLog:       constants.QueueLogs, // 统一操作日志事件
+	// 统一操作日志事件路由到 logs 队列
+	constants.EventOperationLog: constants.QueueLogs,
 }
 
 // enqueue 将领域事件入队到 Asynq

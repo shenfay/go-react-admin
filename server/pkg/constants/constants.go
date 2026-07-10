@@ -42,14 +42,7 @@ type AsynqTaskType string
 
 // 领域事件名称常量
 const (
-	EventUserRegistered     EventName = "user.registered"
-	EventUserLoggedIn       EventName = "user.logged_in"
-	EventUserLoginFailed    EventName = "user.login_failed"
-	EventUserAccountLocked  EventName = "user.account_locked"
-	EventUserLoggedOut      EventName = "user.logged_out"
-	EventUserTokenRefreshed EventName = "user.token_refreshed"
-	EventUserProfileUpdated EventName = "user.profile_updated"
-	EventOperationLog       EventName = "operation.log" // 统一操作日志事件
+	EventOperationLog EventName = "operation.log" // 统一操作日志事件
 )
 
 // Asynq 任务类型
