@@ -5,30 +5,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/errors"
 )
-
-// BaseResponse 响应基础结构
-type BaseResponse struct {
-	TraceID   string `json:"trace_id"`  // 链路追踪 ID（用于日志关联和分布式追踪）
-	Timestamp string `json:"timestamp"` // 响应时间（RFC3339 格式）
-}
-
-// SuccessResponse 成功响应结构
-type SuccessResponse struct {
-	BaseResponse             // 嵌套，JSON 自动扁平化
-	Code         string      `json:"code"`
-	Message      string      `json:"message"`
-	Data         interface{} `json:"data,omitempty"`
-}
-
-// ErrorResponse 错误响应结构
-type ErrorResponse struct {
-	BaseResponse             // 嵌套
-	Code         string      `json:"code"`
-	Message      string      `json:"message"`
-	Details      interface{} `json:"details,omitempty"`
-}
 
 // ErrorHandling 统一错误处理中间件
 // 自动处理通过 c.Error() 设置的错误，并注入 trace_id 和 timestamp
@@ -47,14 +26,14 @@ func ErrorHandling() gin.HandlerFunc {
 
 // handleAppError 处理应用错误（自动注入 trace_id 和 timestamp）
 func handleAppError(c *gin.Context, err error) {
-	baseResponse := BaseResponse{
-		TraceID:   GetTraceID(c),
+	baseResponse := response.BaseResponse{
+		TraceID:   response.GetTraceID(c),
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
 
 	// 尝试转换为 AppError
 	if appErr, ok := err.(*errors.AppError); ok {
-		c.JSON(appErr.HTTPStatus, ErrorResponse{
+		c.JSON(appErr.HTTPStatus, response.ErrorResponse{
 			BaseResponse: baseResponse,
 			Code:         appErr.Code,
 			Message:      appErr.Message,
@@ -64,7 +43,7 @@ func handleAppError(c *gin.Context, err error) {
 	}
 
 	// 未知错误，返回 500
-	c.JSON(http.StatusInternalServerError, ErrorResponse{
+	c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 		BaseResponse: baseResponse,
 		Code:         "SYSTEM.INTERNAL_ERROR",
 		Message:      "服务器内部错误",
@@ -73,9 +52,9 @@ func handleAppError(c *gin.Context, err error) {
 
 // RespondError 中间件统一错误响应（含 trace_id 和 timestamp）
 func RespondError(c *gin.Context, httpStatus int, code string, message string) {
-	c.JSON(httpStatus, ErrorResponse{
-		BaseResponse: BaseResponse{
-			TraceID:   GetTraceID(c),
+	c.JSON(httpStatus, response.ErrorResponse{
+		BaseResponse: response.BaseResponse{
+			TraceID:   response.GetTraceID(c),
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 		},
 		Code:    code,

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shenfay/kiqi/internal/app/notification"
 	domain "github.com/shenfay/kiqi/internal/domain/notification"
-	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
@@ -43,9 +42,9 @@ func (h *NotificationHandler) RegisterAdminRoutes(rg *gin.RouterGroup) {
 // @Param is_read query bool false "已读状态"
 // @Param limit query int false "每页条数" default(20)
 // @Param offset query int false "偏移量" default(0)
-// @Success 200 {object} middleware.SuccessResponse "消息列表"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "消息列表"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /messages [get]
 func (h *NotificationHandler) ListMessages(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -80,9 +79,9 @@ func (h *NotificationHandler) ListMessages(c *gin.Context) {
 // @Tags Messages
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} middleware.SuccessResponse "未读计数"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "未读计数"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /messages/unread-count [get]
 func (h *NotificationHandler) GetUnreadCount(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -107,11 +106,11 @@ func (h *NotificationHandler) GetUnreadCount(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "消息ID"
-// @Success 200 {object} middleware.SuccessResponse "标记成功"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 403 {object} middleware.ErrorResponse "无权操作"
-// @Failure 404 {object} middleware.ErrorResponse "消息不存在"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "标记成功"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 403 {object} response.ErrorResponse "无权操作"
+// @Failure 404 {object} response.ErrorResponse "消息不存在"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /messages/{id}/read [post]
 func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -137,9 +136,9 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param request body notification.ReadAllCmd false "可选类型筛选"
-// @Success 200 {object} middleware.SuccessResponse "标记成功"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "标记成功"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /messages/read-all [post]
 func (h *NotificationHandler) MarkAllAsRead(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -170,9 +169,9 @@ func (h *NotificationHandler) MarkAllAsRead(c *gin.Context) {
 // @Param category query string false "消息分类"
 // @Param limit query int false "每页条数" default(20)
 // @Param offset query int false "偏移量" default(0)
-// @Success 200 {object} middleware.SuccessResponse "消息列表"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "消息列表"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /admin/messages [get]
 func (h *NotificationHandler) ListAllMessages(c *gin.Context) {
 	msgType := domain.MessageType(c.Query("type"))

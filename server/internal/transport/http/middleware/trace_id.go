@@ -5,14 +5,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
 	"go.uber.org/zap"
 )
 
 const (
-	// TraceIDKey Context 键
-	TraceIDKey = "trace_id"
 	// TraceIDHeader HTTP Header
 	TraceIDHeader = "X-Trace-ID"
 )
@@ -37,7 +36,7 @@ func TraceID() gin.HandlerFunc {
 		}
 
 		// 存入 Gin Context
-		c.Set(TraceIDKey, traceID)
+		c.Set(response.TraceIDKey, traceID)
 
 		// 响应头中也包含 trace_id
 		c.Header(TraceIDHeader, traceID)
@@ -74,11 +73,9 @@ func TraceID() gin.HandlerFunc {
 }
 
 // GetTraceID 从 Gin Context 获取 trace_id
+// Deprecated: 使用 response.GetTraceID 替代
 func GetTraceID(c *gin.Context) string {
-	if id, exists := c.Get(TraceIDKey); exists {
-		return id.(string)
-	}
-	return ""
+	return response.GetTraceID(c)
 }
 
 // GetTraceIDFromContext 从标准 Context 获取 trace_id（供 Service 层使用）

@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shenfay/kiqi/internal/app/authentication"
-	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/errors"
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
@@ -55,10 +54,10 @@ type RefreshTokenRequest struct {
 // @Accept json
 // @Produce json
 // @Param request body RegisterRequest true "用户注册数据"
-// @Success 201 {object} middleware.SuccessResponse{data=authentication.AuthResponse} "注册成功"
-// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
-// @Failure 409 {object} middleware.ErrorResponse "邮箱已存在"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 201 {object} response.SuccessResponse{data=authentication.AuthResponse} "注册成功"
+// @Failure 400 {object} response.ErrorResponse "请求参数错误"
+// @Failure 409 {object} response.ErrorResponse "邮箱已存在"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
@@ -91,11 +90,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body LoginRequest true "Login credentials"
-// @Success 200 {object} middleware.SuccessResponse{data=authentication.AuthResponse} "登录成功"
-// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
-// @Failure 401 {object} middleware.ErrorResponse "账号或密码错误"
-// @Failure 423 {object} middleware.ErrorResponse "账户已锁定"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse{data=authentication.AuthResponse} "登录成功"
+// @Failure 400 {object} response.ErrorResponse "请求参数错误"
+// @Failure 401 {object} response.ErrorResponse "账号或密码错误"
+// @Failure 423 {object} response.ErrorResponse "账户已锁定"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -128,7 +127,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
 // @Router /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -152,8 +151,8 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Produce json
 // @Param request body RefreshTokenRequest true "Refresh token"
 // @Success 200 {object} authentication.AuthResponse
-// @Failure 400 {object} middleware.ErrorResponse
-// @Failure 401 {object} middleware.ErrorResponse "Invalid or expired token"
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 401 {object} response.ErrorResponse "Invalid or expired token"
 // @Router /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var req RefreshTokenRequest
@@ -182,8 +181,8 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path string true "User ID"
 // @Success 200 {object} authentication.UserResponse
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 404 {object} middleware.ErrorResponse "User not found"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 404 {object} response.ErrorResponse "User not found"
 // @Router /users/{id} [get]
 func (h *AuthHandler) GetUserByID(c *gin.Context) {
 	userID := c.Param("id")
@@ -211,7 +210,7 @@ func (h *AuthHandler) GetUserByID(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} authentication.UserResponse
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
 // @Router /auth/me [get]
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -274,7 +273,7 @@ type DevicesResponse struct {
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} DevicesResponse
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
 // @Router /auth/devices [get]
 func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -322,8 +321,8 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 // @Security BearerAuth
 // @Param token path string true "Device token"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} middleware.ErrorResponse
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
 // @Router /auth/devices/{token} [delete]
 func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 	userID := c.GetString("user_id")
@@ -375,7 +374,7 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
 // @Router /auth/logout-all [post]
 func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 	userID := c.GetString("user_id")

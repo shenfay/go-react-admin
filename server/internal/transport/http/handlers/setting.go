@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shenfay/kiqi/internal/domain/setting"
-	_ "github.com/shenfay/kiqi/internal/transport/http/middleware" // for swagger doc type resolution
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 )
 
@@ -33,9 +32,9 @@ func (h *SettingHandler) RegisterRoutes(rg *gin.RouterGroup) {
 // @Produce json
 // @Security BearerAuth
 // @Param category query string false "设置分类"
-// @Success 200 {object} middleware.SuccessResponse "设置列表"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "设置列表"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /settings [get]
 func (h *SettingHandler) ListSettings(c *gin.Context) {
 	category := c.Query("category")
@@ -63,10 +62,10 @@ func (h *SettingHandler) ListSettings(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param key path string true "设置项Key"
-// @Success 200 {object} middleware.SuccessResponse "设置详情"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 404 {object} middleware.ErrorResponse "设置项不存在"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "设置详情"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 404 {object} response.ErrorResponse "设置项不存在"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /settings/{key} [get]
 func (h *SettingHandler) GetSetting(c *gin.Context) {
 	key := c.Param("key")
@@ -104,10 +103,10 @@ type settingItem struct {
 // @Produce json
 // @Security BearerAuth
 // @Param request body batchUpdateRequest true "批量更新数据"
-// @Success 200 {object} middleware.SuccessResponse "更新成功"
-// @Failure 400 {object} middleware.ErrorResponse "请求参数错误"
-// @Failure 401 {object} middleware.ErrorResponse "Unauthorized"
-// @Failure 500 {object} middleware.ErrorResponse "服务器内部错误"
+// @Success 200 {object} response.SuccessResponse "更新成功"
+// @Failure 400 {object} response.ErrorResponse "请求参数错误"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /settings [put]
 func (h *SettingHandler) BatchUpdateSettings(c *gin.Context) {
 	var req batchUpdateRequest

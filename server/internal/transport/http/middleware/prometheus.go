@@ -28,6 +28,10 @@ func PrometheusMiddleware(m *metrics.Metrics) gin.HandlerFunc {
 		m.IncHTTPRequests(status)
 
 		// 记录请求耗时
-		m.ObserveHTTPDuration(c.Request.Method, c.FullPath(), status, duration)
+		path := c.FullPath()
+		if path == "" {
+			path = "unknown" // 未匹配路由（404）时 FullPath 为空
+		}
+		m.ObserveHTTPDuration(c.Request.Method, path, status, duration)
 	}
 }

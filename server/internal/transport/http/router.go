@@ -7,6 +7,7 @@ import (
 	"github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/internal/transport/http/handlers"
 	"github.com/shenfay/kiqi/internal/transport/http/middleware"
+	"github.com/shenfay/kiqi/pkg/health"
 )
 
 // Router 路由配置
@@ -19,6 +20,7 @@ type Router struct {
 	notificationHandler *handlers.NotificationHandler
 	tokenService        authentication.TokenService
 	enforcer            *authorize.Enforcer
+	healthHandler       *health.Handler
 }
 
 // NewRouter 创建路由器
@@ -44,6 +46,11 @@ func NewRouter(
 	}
 }
 
+// SetHealthHandler 设置健康检查处理器（可选，未设置时使用简单 fallback）
+func (r *Router) SetHealthHandler(h *health.Handler) {
+	r.healthHandler = h
+}
+
 // Setup 配置所有路由
 func (r *Router) Setup() {
 	// 注册全局中间件（顺序很重要！）
@@ -51,10 +58,14 @@ func (r *Router) Setup() {
 	r.engine.Use(middleware.RequestInfo())   // 2. 注入请求元数据（IP/UA/设备信息）
 	r.engine.Use(middleware.ErrorHandling()) // 3. 错误处理
 
-	// 健康检查
-	r.engine.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "healthy"})
-	})
+	// 健康检查（使用完整的 DB/Redis/Asynq 检查）
+	if r.healthHandler != nil {
+		r.healthHandler.RegisterRoutes(r.engine)
+	} else {
+		r.engine.GET("/health", func(c *gin.Context) {
+			c.JSON(200, gin.H{"status": "healthy"})
+		})
+	}
 
 	// Prometheus 指标端点
 	r.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))

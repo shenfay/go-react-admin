@@ -22,10 +22,10 @@ import (
 	notificationapp "github.com/shenfay/kiqi/internal/app/notification"
 	"github.com/shenfay/kiqi/internal/domain/notification"
 	"github.com/shenfay/kiqi/internal/domain/operation"
-	"github.com/shenfay/kiqi/internal/domain/rbac"
-	"github.com/shenfay/kiqi/internal/domain/setting"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
+	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/user"
+	"github.com/shenfay/kiqi/internal/domain/setting"
 	casbinenforcer "github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/internal/infra/config"
 	"github.com/shenfay/kiqi/internal/infra/messaging"
@@ -33,6 +33,7 @@ import (
 	transhttp "github.com/shenfay/kiqi/internal/transport/http"
 	"github.com/shenfay/kiqi/internal/transport/http/handlers"
 	pkglogger "github.com/shenfay/kiqi/pkg/logger"
+	"github.com/shenfay/kiqi/pkg/health"
 	"github.com/shenfay/kiqi/pkg/metrics"
 
 	// 导入生成的 Swagger 文档
@@ -84,7 +85,7 @@ func main() {
 	hdls := initHandlers(svcs, repos)
 
 	// 7. 启动 HTTP 服务器
-	startServer(cfg, m, hdls, svcs.tokenService, infra.enforcer)
+	startServer(cfg, m, hdls, svcs.tokenService, infra.enforcer, infra.db, infra.redisClient)
 }
 
 // --- Provider 结构体 ---
@@ -243,7 +244,7 @@ func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
 }
 
 // startServer 创建并启动 HTTP 服务器（含优雅关闭）
-func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, tokenService authentication.TokenService, enforcer *casbinenforcer.Enforcer) {
+func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, tokenService authentication.TokenService, enforcer *casbinenforcer.Enforcer, db *gorm.DB, redisClient *redis.Client) {
 	if cfg.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -252,6 +253,11 @@ func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, toke
 	transhttp.Middlewares(engine, m, cfg.CORS)
 
 	apiRouter := transhttp.NewRouter(engine, hdls.authHandler, hdls.adminHandler, hdls.operLogHdlr, hdls.settingHdlr, hdls.notificationHdlr, tokenService, enforcer)
+
+	// 设置完整健康检查处理器（包含 DB/Redis 检查）
+	healthHandler := health.NewHandler(db, redisClient, "1.0.0", cfg.Server.Mode)
+	apiRouter.SetHealthHandler(healthHandler)
+
 	apiRouter.Setup()
 
 	srv := &http.Server{
