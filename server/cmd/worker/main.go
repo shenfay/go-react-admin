@@ -67,13 +67,11 @@ func main() {
 	}
 	logger.Info("Database connection established")
 
-	// 4. 初始化仓储（统一操作日志 + 消息通知）
+	// 4. 初始化仓储
 	operationLogRepo := repository.NewOperationLogRepository(db)
-	messageRepo := repository.NewMessageRepository(db)
 
 	// 5. 创建处理器
 	operationLogHandler := workerhandlers.NewOperationLogHandler(operationLogRepo)
-	notificationHandler := workerhandlers.NewNotificationHandler(messageRepo)
 
 	// 6. 注册 Asynq 任务处理器
 	mux := asynq.NewServeMux()
@@ -83,11 +81,8 @@ func main() {
 		mux.HandleFunc(string(eventName), operationLogHandler.ProcessTask)
 	}
 
-	// AsynqTaskOperationLog 由 TaskPublisher 直接入队，不在 Bridge 路由表中，单独注册
+	// AsynqTaskOperationLog 通过 InProcessBus → Bridge 入队，由于事件名与任务名不同，单独注册路由
 	mux.HandleFunc(string(constants.AsynqTaskOperationLog), operationLogHandler.ProcessTask)
-
-	// 消息通知任务
-	mux.HandleFunc(string(constants.AsynqTaskNotification), notificationHandler.ProcessTask)
 
 	// 7. 创建 Asynq 服务器
 	srv := asynq.NewServer(

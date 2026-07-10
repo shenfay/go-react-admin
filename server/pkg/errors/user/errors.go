@@ -21,20 +21,5 @@ var (
 		Message:    "该邮箱已被注册",
 		HTTPStatus: http.StatusConflict,
 	}
-
-	// ErrEmailNotVerified 邮箱未验证
-	ErrEmailNotVerified = &errors.AppError{
-		Code:       errors.ErrCodeUserEmailNotVerified,
-		Message:    "邮箱尚未验证",
-		HTTPStatus: http.StatusForbidden,
-	}
 )
 
-// NewUserError 创建用户域错误（工厂方法）
-func NewUserError(code string, message string) *errors.AppError {
-	return &errors.AppError{
-		Code:       "USER." + code,
-		Message:    message,
-		HTTPStatus: http.StatusBadRequest,
-	}
-}
