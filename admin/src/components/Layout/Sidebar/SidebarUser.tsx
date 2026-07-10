@@ -142,7 +142,7 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
               flexShrink: 0,
               cursor: 'pointer',
             }}
-            onClick={() => navigate('/messages')}
+            onClick={() => navigate('/my-messages')}
           >
             <Badge count={unreadCount} size="small" offset={[-2, 2]}>
               <BellOutlined

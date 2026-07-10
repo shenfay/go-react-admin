@@ -41,6 +41,7 @@ const menuKeyMap: Record<string, string> = {
   profile: 'menuProfile',
   system: 'menuSystem',
   'operation-log': 'menuOperationLog',
+  'my-messages': 'menuMessage',
   'design-system': 'menuDesignSystem',
   'system-settings': 'menuSystemSettings',
 }
@@ -73,7 +74,14 @@ export default function TopBar({ onRefresh }: TopBarProps) {
       }
       return false
     }
-    search(menuTree)
+    if (!search(menuTree)) {
+      // 非菜单路径回退：尝试从 menuKeyMap 查找
+      const key = location.pathname.replace(/^\/|\/$/g, '')
+      const i18nKey = menuKeyMap[key]
+      if (i18nKey) {
+        result.push({ title: t(i18nKey) })
+      }
+    }
     return result
   }
 
