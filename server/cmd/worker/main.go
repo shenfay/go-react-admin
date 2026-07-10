@@ -97,14 +97,8 @@ func main() {
 			DB:       cfg.Redis.DB,
 		},
 		asynq.Config{
-			Concurrency: cfg.Asynq.Concurrency,
-			Queues: map[string]int{
-				"critical":     6,
-				"default":      3,
-				"logs":         4, // 操作日志专用队列
-				"notification": 4, // 消息通知专用队列
-				"low":          1,
-			},
+			Concurrency:    cfg.Asynq.Concurrency,
+			Queues:         cfg.Asynq.Queues,
 			StrictPriority: true,
 		},
 	)

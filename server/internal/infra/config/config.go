@@ -145,6 +145,13 @@ func setDefaults() {
 	// Asynq
 	viper.SetDefault("asynq.addr", "localhost:6379")
 	viper.SetDefault("asynq.concurrency", 10)
+	viper.SetDefault("asynq.queues", map[string]int{
+		"critical":     6,
+		"default":      3,
+		"logs":         4,
+		"notification": 4,
+		"low":          1,
+	})
 
 	// Logger
 	viper.SetDefault("logger.level", "debug")
