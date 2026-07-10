@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shenfay/kiqi/internal/app/authentication"
+	"github.com/shenfay/kiqi/internal/app/emailverification"
+	"github.com/shenfay/kiqi/internal/app/passwordreset"
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 	"github.com/shenfay/kiqi/pkg/errors"
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
@@ -15,13 +17,17 @@ import (
 
 // AuthHandler 认证 HTTP 处理器
 type AuthHandler struct {
-	service *authentication.Service
+	service          *authentication.Service
+	emailVerifySvc   *emailverification.Service
+	passwordResetSvc *passwordreset.Service
 }
 
 // NewAuthHandler 创建认证处理器实例
-func NewAuthHandler(service *authentication.Service) *AuthHandler {
+func NewAuthHandler(service *authentication.Service, emailVerifySvc *emailverification.Service, passwordResetSvc *passwordreset.Service) *AuthHandler {
 	return &AuthHandler{
-		service: service,
+		service:          service,
+		emailVerifySvc:   emailVerifySvc,
+		passwordResetSvc: passwordResetSvc,
 	}
 }
 
@@ -74,6 +80,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		response.Error(c, err)
 		return
 	}
+
+	// 触发发送验证邮件（异步非阻塞）
+	_ = h.emailVerifySvc.SendVerificationEmail(c.Request.Context(), resp.User.ID, resp.User.Email)
 
 	response.Created(c, authentication.ToAuthResponse(resp))
 }
@@ -364,6 +373,124 @@ func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"message": "Logged out from all devices successfully"})
+}
+
+// VerifyEmailRequest 邮箱验证请求
+// GET /auth/verify-email?token=xxx&user_id=xxx
+type VerifyEmailRequest struct {
+	Token  string `form:"token" binding:"required"`
+	UserID string `form:"user_id" binding:"required"`
+}
+
+// VerifyEmail 验证邮箱
+// @Summary Verify email address
+// @Tags Authentication
+// @Produce json
+// @Param token query string true "验证令牌"
+// @Param user_id query string true "用户 ID"
+// @Success 200 {object} response.SuccessResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 410 {object} response.ErrorResponse "令牌已过期或已使用"
+// @Router /auth/verify-email [get]
+func (h *AuthHandler) VerifyEmail(c *gin.Context) {
+	var req VerifyEmailRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	if err := h.emailVerifySvc.VerifyEmail(c.Request.Context(), req.Token, req.UserID); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "邮箱验证成功"})
+}
+
+// ResendVerification 重新发送验证邮件
+// @Summary Resend verification email
+// @Tags Authentication
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} response.SuccessResponse
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Router /auth/resend-verification [post]
+func (h *AuthHandler) ResendVerification(c *gin.Context) {
+	userID := c.GetString("user_id")
+	email := c.GetString("email")
+
+	if userID == "" || email == "" {
+		response.Error(c, errors.NewAppError(
+			errors.ErrCodeSystemUnauthorized,
+			"缺少用户身份信息",
+			http.StatusUnauthorized,
+		))
+		return
+	}
+
+	if err := h.emailVerifySvc.SendVerificationEmail(c.Request.Context(), userID, email); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "验证邮件已发送"})
+}
+
+// ForgotPasswordRequest 忘记密码请求
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+// ForgotPassword 请求密码重置
+// @Summary Request password reset
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body ForgotPasswordRequest true "注册邮箱"
+// @Success 200 {object} response.SuccessResponse
+// @Router /auth/forgot-password [post]
+func (h *AuthHandler) ForgotPassword(c *gin.Context) {
+	var req ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	// 始终返回成功（防枚举）
+	_ = h.passwordResetSvc.ForgotPassword(c.Request.Context(), req.Email)
+	response.Success(c, gin.H{"message": "如果该邮箱已注册，重置密码邮件已发送"})
+}
+
+// ResetPasswordRequest 密码重置请求
+type ResetPasswordRequest struct {
+	Token       string `json:"token" binding:"required"`
+	UserID      string `json:"user_id" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=8,max=72"`
+}
+
+// ResetPassword 执行密码重置
+// @Summary Reset password
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body ResetPasswordRequest true "重置令牌和新密码"
+// @Success 200 {object} response.SuccessResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 410 {object} response.ErrorResponse "令牌已过期或已使用"
+// @Router /auth/reset-password [post]
+func (h *AuthHandler) ResetPassword(c *gin.Context) {
+	var req ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	if err := h.passwordResetSvc.ResetPassword(c.Request.Context(), req.Token, req.UserID, req.NewPassword); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "密码已重置，请重新登录"})
 }
 
 // detectDeviceType 根据 User-Agent 检测设备类型
