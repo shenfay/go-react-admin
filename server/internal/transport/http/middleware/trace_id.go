@@ -50,10 +50,10 @@ func TraceID() gin.HandlerFunc {
 
 		// 记录请求开始日志（包含 trace_id）
 		logger.Info("Request started",
-			zap.String("trace_id", traceID),
-			zap.String("method", c.Request.Method),
-			zap.String("path", c.Request.URL.Path),
-			zap.String("ip", c.ClientIP()),
+			"trace_id", traceID,
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+			"ip", c.ClientIP(),
 		)
 
 		c.Next()
@@ -63,11 +63,11 @@ func TraceID() gin.HandlerFunc {
 
 		// 记录请求结束日志（包含 trace_id 和响应状态）
 		logger.Info("Request completed",
-			zap.String("trace_id", traceID),
-			zap.String("method", c.Request.Method),
-			zap.String("path", c.Request.URL.Path),
-			zap.Int("status", c.Writer.Status()),
-			zap.Duration("latency_ms", latency),
+			"trace_id", traceID,
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+			"status", c.Writer.Status(),
+			"latency_ms", latency,
 		)
 	}
 }

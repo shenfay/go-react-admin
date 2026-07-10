@@ -9,7 +9,6 @@ import (
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
-	"go.uber.org/zap"
 )
 
 // OperationRecorder 操作日志记录器
@@ -44,9 +43,9 @@ func (r *OperationRecorder) Record(ctx context.Context, action, category, status
 
 	if err := r.eventBus.Publish(ctx, evt); err != nil {
 		logger.Warn("Failed to record operation log",
-			zap.String("action", action),
-			zap.String("user_id", userID),
-			zap.Error(err),
+			"action", action,
+			"user_id", userID,
+			"error", err,
 		)
 	}
 }

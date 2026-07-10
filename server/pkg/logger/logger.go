@@ -48,31 +48,31 @@ func parseLevel(level string) zapcore.Level {
 	}
 }
 
-// Debug 输出调试日志
-func Debug(args ...interface{}) {
+// Debug 输出调试日志（结构化键值对）
+func Debug(msg string, keysAndValues ...interface{}) {
 	if Logger != nil {
-		Logger.Debug(args...)
+		Logger.Debugw(msg, keysAndValues...)
 	}
 }
 
-// Info 输出信息日志
-func Info(args ...interface{}) {
+// Info 输出信息日志（结构化键值对）
+func Info(msg string, keysAndValues ...interface{}) {
 	if Logger != nil {
-		Logger.Info(args...)
+		Logger.Infow(msg, keysAndValues...)
 	}
 }
 
-// Warn 输出警告日志
-func Warn(args ...interface{}) {
+// Warn 输出警告日志（结构化键值对）
+func Warn(msg string, keysAndValues ...interface{}) {
 	if Logger != nil {
-		Logger.Warn(args...)
+		Logger.Warnw(msg, keysAndValues...)
 	}
 }
 
-// Error 输出错误日志
-func Error(args ...interface{}) {
+// Error 输出错误日志（结构化键值对）
+func Error(msg string, keysAndValues ...interface{}) {
 	if Logger != nil {
-		Logger.Error(args...)
+		Logger.Errorw(msg, keysAndValues...)
 	}
 }
 

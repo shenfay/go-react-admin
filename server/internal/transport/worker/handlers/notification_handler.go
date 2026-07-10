@@ -7,7 +7,6 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/shenfay/kiqi/internal/domain/notification"
 	"github.com/shenfay/kiqi/pkg/logger"
-	"go.uber.org/zap"
 )
 
 // NotificationHandler 消息通知 Worker 处理器
@@ -37,7 +36,7 @@ type notificationPayload struct {
 func (h *NotificationHandler) ProcessTask(ctx context.Context, task *asynq.Task) error {
 	var payload notificationPayload
 	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
-		logger.Error("Failed to unmarshal notification payload", zap.Error(err))
+		logger.Error("Failed to unmarshal notification payload", "error", err)
 		return err
 	}
 
@@ -56,18 +55,18 @@ func (h *NotificationHandler) ProcessTask(ctx context.Context, task *asynq.Task)
 
 	if err := h.repo.Save(ctx, msg); err != nil {
 		logger.Error("Failed to save notification message",
-			zap.String("type", payload.Type),
-			zap.String("category", payload.Category),
-			zap.String("recipient_id", payload.RecipientID),
-			zap.Error(err),
+			"type", payload.Type,
+			"category", payload.Category,
+			"recipient_id", payload.RecipientID,
+			"error", err,
 		)
 		return err
 	}
 
 	logger.Debug("Notification message saved",
-		zap.String("type", payload.Type),
-		zap.String("category", payload.Category),
-		zap.String("recipient_id", payload.RecipientID),
+		"type", payload.Type,
+		"category", payload.Category,
+		"recipient_id", payload.RecipientID,
 	)
 	return nil
 }

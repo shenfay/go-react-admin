@@ -37,6 +37,13 @@ const (
 	ErrCodeMessageAccessDenied = "NOTIFICATION.MESSAGE_ACCESS_DENIED"
 )
 
+// 令牌域错误码 (TOKEN.*)
+const (
+	ErrCodeTokenAlreadyUsed = "TOKEN.ALREADY_USED"
+	ErrCodeTokenExpired     = "TOKEN.EXPIRED"
+	ErrCodeTokenInvalid     = "TOKEN.INVALID"
+)
+
 // 菜单域错误码 (MENU.*)
 const (
 	ErrCodeMenuKeyAlreadyExists = "MENU.KEY_ALREADY_EXISTS"

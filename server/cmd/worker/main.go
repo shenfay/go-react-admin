@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/mail"
 	"github.com/shenfay/kiqi/internal/infra/messaging"
 	"github.com/shenfay/kiqi/internal/infra/repository"
 	workerhandlers "github.com/shenfay/kiqi/internal/transport/worker/handlers"
@@ -73,9 +74,13 @@ func main() {
 	// 5. 创建处理器
 	operationLogHandler := workerhandlers.NewOperationLogHandler(operationLogRepo)
 
+	// 邮件发送处理器
+	emailSender := mail.NewNoopSender()
+	emailHandler := workerhandlers.NewSendEmailHandler(emailSender)
+
 	// 6. 注册 Asynq 任务处理器
 	mux := asynq.NewServeMux()
-	
+
 	// 从事件注册表获取所有路由到 logs 队列的事件类型（单一真相来源）
 	for _, eventName := range messaging.LogEventTypes() {
 		mux.HandleFunc(string(eventName), operationLogHandler.ProcessTask)
@@ -83,6 +88,9 @@ func main() {
 
 	// AsynqTaskOperationLog 通过 InProcessBus → Bridge 入队，由于事件名与任务名不同，单独注册路由
 	mux.HandleFunc(string(constants.AsynqTaskOperationLog), operationLogHandler.ProcessTask)
+
+	// 发送邮件事件（auth:send_email 通过 Bridge 入队，事件名与任务名相同）
+	mux.HandleFunc(string(constants.EventSendEmail), emailHandler.ProcessTask)
 
 	// 7. 创建 Asynq 服务器
 	srv := asynq.NewServer(

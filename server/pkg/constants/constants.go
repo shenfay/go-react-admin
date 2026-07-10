@@ -42,7 +42,8 @@ type AsynqTaskType string
 
 // 领域事件名称常量
 const (
-	EventOperationLog EventName = "operation.log" // 统一操作日志事件
+	EventOperationLog EventName = "operation.log"   // 统一操作日志事件
+	EventSendEmail    EventName = "auth:send_email" // 发送邮件事件
 )
 
 // Asynq 任务类型

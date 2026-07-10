@@ -8,7 +8,6 @@ import (
 	appevents "github.com/shenfay/kiqi/internal/app/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/pkg/logger"
-	"go.uber.org/zap"
 )
 
 // OperationLogHandler 统一操作日志 Worker 处理器
@@ -30,7 +29,7 @@ func (h *OperationLogHandler) ProcessTask(ctx context.Context, task *asynq.Task)
 func (h *OperationLogHandler) processOperationLog(ctx context.Context, task *asynq.Task) error {
 	var evt appevents.OperationEvent
 	if err := json.Unmarshal(task.Payload(), &evt); err != nil {
-		logger.Error("Failed to unmarshal operation log payload", zap.Error(err))
+		logger.Error("Failed to unmarshal operation log payload", "error", err)
 		return err
 	}
 
@@ -50,15 +49,15 @@ func (h *OperationLogHandler) processOperationLog(ctx context.Context, task *asy
 
 	if err := h.repo.Save(ctx, log); err != nil {
 		logger.Error("Failed to save operation log",
-			zap.String("action", log.Action),
-			zap.Error(err),
+			"action", log.Action,
+			"error", err,
 		)
 		return err
 	}
 
 	logger.Debug("Operation log saved",
-		zap.String("action", log.Action),
-		zap.String("user_id", log.UserID),
+		"action", log.Action,
+		"user_id", log.UserID,
 	)
 	return nil
 }

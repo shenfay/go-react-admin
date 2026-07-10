@@ -59,6 +59,8 @@ func LogEventTypes() []constants.EventName {
 var logEventQueueMap = map[constants.EventName]constants.QueueName{
 	// 统一操作日志事件路由到 logs 队列
 	constants.EventOperationLog: constants.QueueLogs,
+	// 发送邮件事件路由到 notification 队列
+	constants.EventSendEmail: constants.QueueNotification,
 }
 
 // enqueue 将领域事件入队到 Asynq
