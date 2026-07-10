@@ -5,6 +5,7 @@ package operationlog
 import (
 	"context"
 
+	appevents "github.com/shenfay/kiqi/internal/app/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/utils"
@@ -30,7 +31,7 @@ func (r *OperationRecorder) Record(ctx context.Context, action, category, status
 		return
 	}
 
-	evt := events.NewOperationEvent(action, category, status).
+	evt := appevents.NewOperationEvent(action, category, status).
 		WithUser(userID, email).
 		WithRequestInfo(
 			utils.GetRequestIP(ctx),

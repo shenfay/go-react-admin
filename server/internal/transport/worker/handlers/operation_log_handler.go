@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 
 	"github.com/hibiken/asynq"
+	appevents "github.com/shenfay/kiqi/internal/app/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/pkg/logger"
-	"github.com/shenfay/kiqi/pkg/utils"
 	"go.uber.org/zap"
 )
 
@@ -28,28 +28,24 @@ func (h *OperationLogHandler) ProcessTask(ctx context.Context, task *asynq.Task)
 
 // processOperationLog 处理统一操作日志
 func (h *OperationLogHandler) processOperationLog(ctx context.Context, task *asynq.Task) error {
-	var payload map[string]interface{}
-	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
+	var evt appevents.OperationEvent
+	if err := json.Unmarshal(task.Payload(), &evt); err != nil {
 		logger.Error("Failed to unmarshal operation log payload", zap.Error(err))
 		return err
 	}
 
 	log := &operation.OperationLog{
-		UserID:    utils.ToString(payload["user_id"]),
-		Email:     utils.ToString(payload["email"]),
-		Action:    utils.ToString(payload["action"]),
-		Category:  utils.ToString(payload["category"]),
-		Status:    utils.ToString(payload["status"]),
-		IP:        utils.ToString(payload["ip"]),
-		UserAgent: utils.ToString(payload["user_agent"]),
-		Device:    utils.ToString(payload["device"]),
-		Browser:   utils.ToString(payload["browser"]),
-		OS:        utils.ToString(payload["os"]),
-	}
-
-	// metadata 字段单独处理
-	if metadata, ok := payload["metadata"].(map[string]interface{}); ok {
-		log.Metadata = metadata
+		UserID:    evt.UserID,
+		Email:     evt.Email,
+		Action:    evt.Action,
+		Category:  evt.Category,
+		Status:    evt.Status,
+		IP:        evt.IP,
+		UserAgent: evt.UserAgent,
+		Device:    evt.Device,
+		Browser:   evt.Browser,
+		OS:        evt.OS,
+		Metadata:  evt.Metadata,
 	}
 
 	if err := h.repo.Save(ctx, log); err != nil {

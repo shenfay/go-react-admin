@@ -22,12 +22,12 @@ import (
 	notificationapp "github.com/shenfay/kiqi/internal/app/notification"
 	"github.com/shenfay/kiqi/internal/domain/notification"
 	"github.com/shenfay/kiqi/internal/domain/operation"
-	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/domain/setting"
 	casbinenforcer "github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/bus"
 	"github.com/shenfay/kiqi/internal/infra/messaging"
 	"github.com/shenfay/kiqi/internal/infra/repository"
 	transhttp "github.com/shenfay/kiqi/internal/transport/http"
@@ -94,7 +94,7 @@ type infraDeps struct {
 	db          *gorm.DB
 	redisClient *redis.Client
 	asynqClient *asynq.Client
-	bus         *events.InProcessBus
+	bus         *bus.InProcessBus
 	bridge      *messaging.DomainToIntegrationBridge
 	enforcer    *casbinenforcer.Enforcer
 }
@@ -171,7 +171,7 @@ func initInfrastructure(cfg *config.Config, m *metrics.Metrics) *infraDeps {
 	redisClient := initRedis(cfg.Redis)
 	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: cfg.Asynq.Addr})
 
-	bus := events.NewInProcessBus()
+	bus := bus.NewInProcessBus()
 	bridge := messaging.NewBridge(asynqClient)
 	bridge.SubscribeTo(bus)
 
@@ -220,6 +220,7 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 	authService := authentication.NewService(
 		repos.userRepo,
 		tokenService, infra.bus, m, adminService,
+		authentication.ServiceConfig{},
 	)
 	settingSvc := setting.NewService(repos.settingRepo, infra.bus)
 
