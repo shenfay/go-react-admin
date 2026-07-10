@@ -112,17 +112,17 @@ func (r *operationLogRepository) FindWithFilter(ctx context.Context, filter oper
 	return toDomainList(pos), err
 }
 
-// Count 统计日志总数（支持按 category/action/userID 筛选）
-func (r *operationLogRepository) Count(ctx context.Context, category, action, userID string) (int64, error) {
+// Count 统计日志总数（统一使用 LogFilter 过滤）
+func (r *operationLogRepository) Count(ctx context.Context, filter operation.LogFilter) (int64, error) {
 	query := r.db.WithContext(ctx).Model(&operationLogPO{})
-	if category != "" {
-		query = query.Where("category = ?", category)
+	if filter.Category != "" {
+		query = query.Where("category = ?", filter.Category)
 	}
-	if action != "" {
-		query = query.Where("action = ?", action)
+	if filter.Action != "" {
+		query = query.Where("action = ?", filter.Action)
 	}
-	if userID != "" {
-		query = query.Where("user_id = ?", userID)
+	if filter.UserID != "" {
+		query = query.Where("user_id = ?", filter.UserID)
 	}
 	var count int64
 	err := query.Count(&count).Error

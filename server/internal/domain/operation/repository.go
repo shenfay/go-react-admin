@@ -19,6 +19,6 @@ type LogRepository interface {
 	// FindWithFilter 根据过滤条件查询日志（统一查询入口）
 	FindWithFilter(ctx context.Context, filter LogFilter) ([]*OperationLog, error)
 
-	// Count 统计日志总数（支持按 category/action/userID 筛选）
-	Count(ctx context.Context, category, action, userID string) (int64, error)
+	// Count 统计日志总数（统一使用 LogFilter 过滤）
+	Count(ctx context.Context, filter LogFilter) (int64, error)
 }

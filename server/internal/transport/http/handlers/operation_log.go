@@ -19,6 +19,24 @@ func NewOperationLogHandler(operationLogRepo operation.LogRepository) *Operation
 	}
 }
 
+// respondLogList 统一操作日志列表响应格式
+func (h *OperationLogHandler) respondLogList(c *gin.Context, filter operation.LogFilter) {
+	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	total, _ := h.operationLogRepo.Count(c.Request.Context(), filter)
+
+	response.Success(c, gin.H{
+		"data":   logs,
+		"total":  total,
+		"limit":  filter.Limit,
+		"offset": filter.Offset,
+	})
+}
+
 // RegisterRoutes 注册操作日志路由（路由组已由外部创建，此处注册子路由）
 func (h *OperationLogHandler) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.GET("", h.ListOperationLogs)
@@ -41,30 +59,13 @@ func (h *OperationLogHandler) RegisterRoutes(rg *gin.RouterGroup) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /operation-logs [get]
 func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
-	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
-	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
-
 	filter := operation.LogFilter{
 		Category: c.Query("category"),
 		Action:   c.Query("action"),
-		Limit:    limit,
-		Offset:   offset,
+		Limit:    utils.ToInt(c.DefaultQuery("limit", "20")),
+		Offset:   utils.ToInt(c.DefaultQuery("offset", "0")),
 	}
-
-	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
-	if err != nil {
-		response.Error(c, err)
-		return
-	}
-
-	total, _ := h.operationLogRepo.Count(c.Request.Context(), filter.Category, filter.Action, "")
-
-	response.Success(c, gin.H{
-		"data":   logs,
-		"total":  total,
-		"limit":  limit,
-		"offset": offset,
-	})
+	h.respondLogList(c, filter)
 }
 
 // GetUserOperationLogs 查询用户操作日志
@@ -80,30 +81,12 @@ func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /operation-logs/user/{user_id} [get]
 func (h *OperationLogHandler) GetUserOperationLogs(c *gin.Context) {
-	userID := c.Param("user_id")
-	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
-	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
-
 	filter := operation.LogFilter{
-		UserID: userID,
-		Limit:  limit,
-		Offset: offset,
+		UserID: c.Param("user_id"),
+		Limit:  utils.ToInt(c.DefaultQuery("limit", "20")),
+		Offset: utils.ToInt(c.DefaultQuery("offset", "0")),
 	}
-
-	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
-	if err != nil {
-		response.Error(c, err)
-		return
-	}
-
-	total, _ := h.operationLogRepo.Count(c.Request.Context(), "", "", userID)
-
-	response.Success(c, gin.H{
-		"data":   logs,
-		"total":  total,
-		"limit":  limit,
-		"offset": offset,
-	})
+	h.respondLogList(c, filter)
 }
 
 // GetCategoryOperationLogs 按分类查询操作日志
@@ -119,28 +102,10 @@ func (h *OperationLogHandler) GetUserOperationLogs(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse "服务器内部错误"
 // @Router /operation-logs/category/{category} [get]
 func (h *OperationLogHandler) GetCategoryOperationLogs(c *gin.Context) {
-	category := c.Param("category")
-	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
-	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
-
 	filter := operation.LogFilter{
-		Category: category,
-		Limit:    limit,
-		Offset:   offset,
+		Category: c.Param("category"),
+		Limit:    utils.ToInt(c.DefaultQuery("limit", "20")),
+		Offset:   utils.ToInt(c.DefaultQuery("offset", "0")),
 	}
-
-	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
-	if err != nil {
-		response.Error(c, err)
-		return
-	}
-
-	total, _ := h.operationLogRepo.Count(c.Request.Context(), category, "", "")
-
-	response.Success(c, gin.H{
-		"data":   logs,
-		"total":  total,
-		"limit":  limit,
-		"offset": offset,
-	})
+	h.respondLogList(c, filter)
 }
