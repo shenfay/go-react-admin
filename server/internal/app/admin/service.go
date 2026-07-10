@@ -44,12 +44,17 @@ func (s *Service) ListUsers(ctx context.Context, params user.UserListParams) (*U
 		return nil, err
 	}
 
-	// 查询每个用户的角色
+	// 批量查询所有用户的角色（解决 N+1 问题）
+	userIDs := make([]string, 0, len(result.Users))
+	for _, u := range result.Users {
+		userIDs = append(userIDs, u.ID)
+	}
+	rolesMap, _ := s.roleRepo.FindByUserIDs(ctx, userIDs)
+
 	userDTOs := make([]*UserDTO, 0, len(result.Users))
 	for _, u := range result.Users {
 		dto := toUserDTO(u)
-		roles, _ := s.roleRepo.FindByUserID(ctx, u.ID)
-		if roles != nil {
+		if roles, ok := rolesMap[u.ID]; ok {
 			dto.Roles = rolesToBriefs(roles)
 		}
 		userDTOs = append(userDTOs, dto)
@@ -381,10 +386,16 @@ func (s *Service) UpdateMenuSort(ctx context.Context, cmd SortMenuCmd) error {
 
 // GetUserPermissions 获取用户权限（登录时使用）
 func (s *Service) GetUserPermissions(ctx context.Context, userID string) (*rbac.UserPermission, error) {
+	perm, _, err := s.getUserPermissionsWithMenus(ctx, userID)
+	return perm, err
+}
+
+// getUserPermissionsWithMenus 内部方法：获取用户权限并返回菜单列表（供 GetUserMenuTree 复用）
+func (s *Service) getUserPermissionsWithMenus(ctx context.Context, userID string) (*rbac.UserPermission, []*rbac.Menu, error) {
 	// 1. 查用户角色
 	roles, err := s.roleRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	roleBriefs := make([]rbac.RoleBrief, 0, len(roles))
@@ -399,18 +410,19 @@ func (s *Service) GetUserPermissions(ctx context.Context, userID string) (*rbac.
 	// 2. 从 Casbin 查权限
 	permissions, err := s.enforcer.GetPermissionsForUser(userID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// 3. 从数据库查询所有菜单，动态推导菜单 key
 	allMenus, _ := s.menuRepo.FindAll(ctx)
 	menus := rbac.DeriveMenusFromMenus(permissions, allMenus)
 
-	return &rbac.UserPermission{
+	perm := &rbac.UserPermission{
 		Roles:       roleBriefs,
 		Permissions: permissions,
 		Menus:       menus,
-	}, nil
+	}
+	return perm, allMenus, nil
 }
 
 // ---- 命令对象 ----
@@ -581,10 +593,20 @@ func toMenuDTO(m *rbac.Menu) *MenuDTO {
 }
 
 func buildMenuTree(menus []*rbac.Menu, parentID string) []*rbac.MenuTreeNode {
-	var tree []*rbac.MenuTreeNode
+	// 一次遍历建立 parentID → children 索引，O(n) 构建树
+	childrenMap := make(map[string][]*rbac.Menu, len(menus))
 	for _, m := range menus {
-		if m.ParentID == parentID {
-			node := &rbac.MenuTreeNode{
+		childrenMap[m.ParentID] = append(childrenMap[m.ParentID], m)
+	}
+	var build func(pid string) []*rbac.MenuTreeNode
+	build = func(pid string) []*rbac.MenuTreeNode {
+		children := childrenMap[pid]
+		if len(children) == 0 {
+			return nil
+		}
+		nodes := make([]*rbac.MenuTreeNode, 0, len(children))
+		for _, m := range children {
+			nodes = append(nodes, &rbac.MenuTreeNode{
 				ID:         m.ID,
 				Key:        m.Key,
 				Label:      m.Label,
@@ -594,41 +616,34 @@ func buildMenuTree(menus []*rbac.Menu, parentID string) []*rbac.MenuTreeNode {
 				ParentID:   m.ParentID,
 				SortOrder:  m.SortOrder,
 				Status:     m.Status,
-				Children:   buildMenuTree(menus, m.ID),
-			}
-			tree = append(tree, node)
+				Children:   build(m.ID),
+			})
 		}
+		return nodes
 	}
-	return tree
+	return build(parentID)
 }
 
 // GetUserMenuTree 获取当前用户可见的菜单树（根据权限过滤）
 func (s *Service) GetUserMenuTree(ctx context.Context, userID string) ([]*rbac.MenuTreeNode, error) {
-	// 1. 获取用户权限
-	userPerm, err := s.GetUserPermissions(ctx, userID)
+	// 1. 获取用户权限并复用菜单查询结果（只查一次 FindAll）
+	userPerm, allMenus, err := s.getUserPermissionsWithMenus(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. 查询所有菜单
-	allMenus, err := s.menuRepo.FindAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 3. 构建用户可见菜单 key 集合
-	menuKeySet := make(map[string]bool)
+	// 2. 构建用户可见菜单 key 集合
+	menuKeySet := make(map[string]bool, len(userPerm.Menus))
 	for _, k := range userPerm.Menus {
 		menuKeySet[k] = true
 	}
 
-	// 4. 过滤出用户可见的菜单（包含父级菜单）
+	// 3. 过滤出用户可见的菜单（包含父级菜单）
 	visibleMenus := make([]*rbac.Menu, 0)
 	parentIDs := make(map[string]bool)
 	for _, m := range allMenus {
 		if menuKeySet[m.Key] && m.Status {
 			visibleMenus = append(visibleMenus, m)
-			// 收集所有父级 ID，确保父级菜单也显示
 			if m.ParentID != "" {
 				parentIDs[m.ParentID] = true
 			}
@@ -641,7 +656,7 @@ func (s *Service) GetUserMenuTree(ctx context.Context, userID string) ([]*rbac.M
 		}
 	}
 
-	// 5. 构建树
+	// 4. 构建树
 	return buildMenuTree(visibleMenus, ""), nil
 }
 

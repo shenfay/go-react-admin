@@ -158,6 +158,36 @@ func (r *roleRepository) FindByUserID(ctx context.Context, userID string) ([]*rb
 	return roles, nil
 }
 
+// FindByUserIDs 批量查询多个用户的所有角色，返回 userID → roles 映射
+func (r *roleRepository) FindByUserIDs(ctx context.Context, userIDs []string) (map[string][]*rbac.Role, error) {
+	if len(userIDs) == 0 {
+		return make(map[string][]*rbac.Role), nil
+	}
+
+	type userRoleRow struct {
+		UserID string
+		RolePO
+	}
+
+	var rows []userRoleRow
+	err := r.db.WithContext(ctx).
+		Table("user_roles").
+		Select("user_roles.user_id, roles.*").
+		Joins("JOIN roles ON roles.id = user_roles.role_id").
+		Where("user_roles.user_id IN ? AND roles.status = ?", userIDs, true).
+		Find(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string][]*rbac.Role)
+	for _, row := range rows {
+		role := row.RolePO.ToDomain()
+		result[row.UserID] = append(result[row.UserID], role)
+	}
+	return result, nil
+}
+
 // AssignRolesToUser 分配角色给用户（先删后插 user_roles）
 func (r *roleRepository) AssignRolesToUser(ctx context.Context, userID string, roleIDs []string) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {

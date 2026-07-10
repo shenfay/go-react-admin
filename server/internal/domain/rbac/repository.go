@@ -25,6 +25,9 @@ type RoleRepository interface {
 	// FindByUserID 查询用户的所有角色（通过 user_roles 关联表）
 	FindByUserID(ctx context.Context, userID string) ([]*Role, error)
 
+	// FindByUserIDs 批量查询多个用户的所有角色（解决 N+1 问题）
+	FindByUserIDs(ctx context.Context, userIDs []string) (map[string][]*Role, error)
+
 	// AssignRolesToUser 分配角色给用户（先删后插 user_roles）
 	AssignRolesToUser(ctx context.Context, userID string, roleIDs []string) error
 
