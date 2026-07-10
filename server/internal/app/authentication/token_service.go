@@ -14,8 +14,8 @@ import (
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
-// TokenServiceImpl Token服务实现
-type TokenServiceImpl struct {
+// jwtTokenService JWT Token 服务实现
+type jwtTokenService struct {
 	redisClient   *redis.Client
 	jwtSecret     []byte
 	issuer        string
@@ -25,7 +25,7 @@ type TokenServiceImpl struct {
 
 // NewTokenServiceImpl 创建Token服务实现
 func NewTokenServiceImpl(redisClient *redis.Client, jwtSecret string, issuer string, accessExpire, refreshExpire time.Duration) TokenService {
-	return &TokenServiceImpl{
+	return &jwtTokenService{
 		redisClient:   redisClient,
 		jwtSecret:     []byte(jwtSecret),
 		issuer:        issuer,
@@ -34,8 +34,26 @@ func NewTokenServiceImpl(redisClient *redis.Client, jwtSecret string, issuer str
 	}
 }
 
+// --- Redis Key 构建 ---
+
+func (s *jwtTokenService) refreshTokenKey(tokenID string) string {
+	return constants.RedisKeyRefreshToken + tokenID
+}
+
+func (s *jwtTokenService) deviceKey(token string) string {
+	return constants.RedisKeyPrefix + "device:" + token
+}
+
+func (s *jwtTokenService) userDevicesKey(userID string) string {
+	return constants.RedisKeyPrefix + "user_devices:" + userID
+}
+
+func (s *jwtTokenService) accessDeviceKey(accessToken string) string {
+	return constants.RedisKeyAccessDevice + accessToken
+}
+
 // GenerateTokens 生成 Token 对
-func (s *TokenServiceImpl) GenerateTokens(ctx context.Context, userID, email string) (*TokenPair, error) {
+func (s *jwtTokenService) GenerateTokens(ctx context.Context, userID, email string) (*TokenPair, error) {
 	now := utils.Now()
 
 	accessToken, err := s.generateAccessToken(userID, email, now)
@@ -57,7 +75,7 @@ func (s *TokenServiceImpl) GenerateTokens(ctx context.Context, userID, email str
 	}, nil
 }
 
-func (s *TokenServiceImpl) generateAccessToken(userID, email string, issuedAt time.Time) (string, error) {
+func (s *jwtTokenService) generateAccessToken(userID, email string, issuedAt time.Time) (string, error) {
 	claims := JWTClaims{
 		UserID:    userID,
 		Email:     email,
@@ -74,13 +92,12 @@ func (s *TokenServiceImpl) generateAccessToken(userID, email string, issuedAt ti
 	return token.SignedString(s.jwtSecret)
 }
 
-func (s *TokenServiceImpl) storeRefreshToken(ctx context.Context, tokenID, userID string) error {
-	key := fmt.Sprintf("%s%s", constants.RedisKeyRefreshToken, tokenID)
-	return s.redisClient.Set(ctx, key, userID, s.refreshExpire).Err()
+func (s *jwtTokenService) storeRefreshToken(ctx context.Context, tokenID, userID string) error {
+	return s.redisClient.Set(ctx, s.refreshTokenKey(tokenID), userID, s.refreshExpire).Err()
 }
 
 // ValidateAccessToken 验证 Access Token
-func (s *TokenServiceImpl) ValidateAccessToken(tokenString string) (*JWTClaims, error) {
+func (s *jwtTokenService) ValidateAccessToken(tokenString string) (*JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return s.jwtSecret, nil
 	})
@@ -102,9 +119,8 @@ func (s *TokenServiceImpl) ValidateAccessToken(tokenString string) (*JWTClaims, 
 }
 
 // ValidateRefreshTokenWithDevice 验证 Refresh Token 并返回设备信息
-func (s *TokenServiceImpl) ValidateRefreshTokenWithDevice(ctx context.Context, token string) (*DeviceInfo, error) {
-	key := fmt.Sprintf("%s%s", constants.RedisKeyRefreshToken, token)
-	userID, err := s.redisClient.Get(ctx, key).Result()
+func (s *jwtTokenService) ValidateRefreshTokenWithDevice(ctx context.Context, token string) (*DeviceInfo, error) {
+	userID, err := s.redisClient.Get(ctx, s.refreshTokenKey(token)).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, authErr.ErrTokenExpired
@@ -112,8 +128,7 @@ func (s *TokenServiceImpl) ValidateRefreshTokenWithDevice(ctx context.Context, t
 		return nil, authErr.ErrInvalidToken
 	}
 
-	deviceKey := fmt.Sprintf("%sdevice:%s", constants.RedisKeyPrefix, token)
-	deviceData, err := s.redisClient.Get(ctx, deviceKey).Result()
+	deviceData, err := s.redisClient.Get(ctx, s.deviceKey(token)).Result()
 	if err == nil {
 		var deviceInfo DeviceInfo
 		if err := json.Unmarshal([]byte(deviceData), &deviceInfo); err == nil {
@@ -127,7 +142,7 @@ func (s *TokenServiceImpl) ValidateRefreshTokenWithDevice(ctx context.Context, t
 }
 
 // StoreDeviceInfo 存储设备信息到 Redis
-func (s *TokenServiceImpl) StoreDeviceInfo(ctx context.Context, token string, deviceInfo DeviceInfo) error {
+func (s *jwtTokenService) StoreDeviceInfo(ctx context.Context, token string, deviceInfo DeviceInfo) error {
 	deviceInfo.CreatedAt = utils.NowRFC3339()
 
 	data, err := json.Marshal(deviceInfo)
@@ -135,12 +150,11 @@ func (s *TokenServiceImpl) StoreDeviceInfo(ctx context.Context, token string, de
 		return fmt.Errorf("failed to marshal device info: %w", err)
 	}
 
-	deviceKey := fmt.Sprintf("%sdevice:%s", constants.RedisKeyPrefix, token)
-	if err := s.redisClient.Set(ctx, deviceKey, string(data), s.refreshExpire).Err(); err != nil {
+	if err := s.redisClient.Set(ctx, s.deviceKey(token), string(data), s.refreshExpire).Err(); err != nil {
 		return err
 	}
 
-	userDevicesKey := fmt.Sprintf("%suser_devices:%s", constants.RedisKeyPrefix, deviceInfo.UserID)
+	userDevicesKey := s.userDevicesKey(deviceInfo.UserID)
 	if err := s.redisClient.SAdd(ctx, userDevicesKey, token).Err(); err != nil {
 		return err
 	}
@@ -151,50 +165,40 @@ func (s *TokenServiceImpl) StoreDeviceInfo(ctx context.Context, token string, de
 }
 
 // LinkAccessToDevice 建立 access_token → device_token_id 映射，用于标识当前请求对应的设备
-func (s *TokenServiceImpl) LinkAccessToDevice(ctx context.Context, accessToken, deviceTokenID string) error {
-	key := fmt.Sprintf("%s%s", constants.RedisKeyAccessDevice, accessToken)
-	return s.redisClient.Set(ctx, key, deviceTokenID, s.accessExpire).Err()
+func (s *jwtTokenService) LinkAccessToDevice(ctx context.Context, accessToken, deviceTokenID string) error {
+	return s.redisClient.Set(ctx, s.accessDeviceKey(accessToken), deviceTokenID, s.accessExpire).Err()
 }
 
 // GetCurrentDeviceTokenID 根据 access_token 获取当前设备对应的 device_token_id
-func (s *TokenServiceImpl) GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error) {
-	key := fmt.Sprintf("%s%s", constants.RedisKeyAccessDevice, accessToken)
-	return s.redisClient.Get(ctx, key).Result()
+func (s *jwtTokenService) GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error) {
+	return s.redisClient.Get(ctx, s.accessDeviceKey(accessToken)).Result()
 }
 
 // RevokeToken 撤销 Token
-func (s *TokenServiceImpl) RevokeToken(ctx context.Context, tokenID string) error {
-	key := fmt.Sprintf("%s%s", constants.RedisKeyRefreshToken, tokenID)
-	if err := s.redisClient.Del(ctx, key).Err(); err != nil {
-		return err
-	}
-	return nil
+func (s *jwtTokenService) RevokeToken(ctx context.Context, tokenID string) error {
+	return s.redisClient.Del(ctx, s.refreshTokenKey(tokenID)).Err()
 }
 
 // RevokeDeviceByToken 根据 Token 撤销特定设备
-func (s *TokenServiceImpl) RevokeDeviceByToken(ctx context.Context, token string) error {
+func (s *jwtTokenService) RevokeDeviceByToken(ctx context.Context, token string) error {
 	deviceInfo, err := s.ValidateRefreshTokenWithDevice(ctx, token)
 	if err != nil {
 		return err
 	}
 
-	deviceKey := fmt.Sprintf("%sdevice:%s", constants.RedisKeyPrefix, token)
-	s.redisClient.Del(ctx, deviceKey)
-
-	tokenKey := fmt.Sprintf("%s%s", constants.RedisKeyRefreshToken, token)
-	s.redisClient.Del(ctx, tokenKey)
+	s.redisClient.Del(ctx, s.deviceKey(token))
+	s.redisClient.Del(ctx, s.refreshTokenKey(token))
 
 	if deviceInfo.UserID != "" {
-		userDevicesKey := fmt.Sprintf("%suser_devices:%s", constants.RedisKeyPrefix, deviceInfo.UserID)
-		s.redisClient.SRem(ctx, userDevicesKey, token)
+		s.redisClient.SRem(ctx, s.userDevicesKey(deviceInfo.UserID), token)
 	}
 
 	return nil
 }
 
 // RevokeAllDevices 撤销用户的所有设备
-func (s *TokenServiceImpl) RevokeAllDevices(ctx context.Context, userID string) error {
-	userDevicesKey := fmt.Sprintf("%suser_devices:%s", constants.RedisKeyPrefix, userID)
+func (s *jwtTokenService) RevokeAllDevices(ctx context.Context, userID string) error {
+	userDevicesKey := s.userDevicesKey(userID)
 	tokens, err := s.redisClient.SMembers(ctx, userDevicesKey).Result()
 	if err != nil {
 		return err
@@ -212,8 +216,8 @@ func (s *TokenServiceImpl) RevokeAllDevices(ctx context.Context, userID string) 
 }
 
 // GetUserDevices 获取用户的所有设备列表
-func (s *TokenServiceImpl) GetUserDevices(ctx context.Context, userID string) ([]DeviceInfo, error) {
-	userDevicesKey := fmt.Sprintf("%suser_devices:%s", constants.RedisKeyPrefix, userID)
+func (s *jwtTokenService) GetUserDevices(ctx context.Context, userID string) ([]DeviceInfo, error) {
+	userDevicesKey := s.userDevicesKey(userID)
 	tokens, err := s.redisClient.SMembers(ctx, userDevicesKey).Result()
 	if err != nil {
 		return nil, err
@@ -221,8 +225,7 @@ func (s *TokenServiceImpl) GetUserDevices(ctx context.Context, userID string) ([
 
 	var devices []DeviceInfo
 	for _, token := range tokens {
-		deviceKey := fmt.Sprintf("%sdevice:%s", constants.RedisKeyPrefix, token)
-		deviceData, err := s.redisClient.Get(ctx, deviceKey).Result()
+		deviceData, err := s.redisClient.Get(ctx, s.deviceKey(token)).Result()
 		if err == nil {
 			var deviceInfo DeviceInfo
 			if err := json.Unmarshal([]byte(deviceData), &deviceInfo); err == nil {
