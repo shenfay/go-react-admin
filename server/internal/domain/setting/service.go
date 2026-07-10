@@ -5,24 +5,18 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/shenfay/kiqi/internal/app/shared/operationlog"
-	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/pkg/errors"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
 // Service 系统设置业务逻辑
 type Service struct {
-	repo     Repository
-	recorder *operationlog.OperationRecorder
+	repo Repository
 }
 
 // NewService 创建系统设置服务
-func NewService(repo Repository, eventBus events.Bus) *Service {
-	return &Service{
-		repo:     repo,
-		recorder: operationlog.NewOperationRecorder(eventBus),
-	}
+func NewService(repo Repository) *Service {
+	return &Service{repo: repo}
 }
 
 // GetAllSettings 获取所有设置（可选按分类过滤）
@@ -63,20 +57,7 @@ func (s *Service) BatchUpdate(ctx context.Context, updates []SettingUpdate, upda
 		}
 	}
 
-	if err := s.repo.BatchUpsert(ctx, settings); err != nil {
-		return err
-	}
-
-	// 记录操作日志
-	keys := make([]string, len(updates))
-	for i, u := range updates {
-		keys[i] = u.Key
-	}
-	s.recorder.RecordFromContext(ctx, "SYSTEM.CONFIG.UPDATED", "SYSTEM", "SUCCESS",
-		map[string]interface{}{"updated_keys": keys},
-	)
-
-	return nil
+	return s.repo.BatchUpsert(ctx, settings)
 }
 
 // GetSettingsMap 获取所有设置并返回 map 结构（方便业务代码读取配置）

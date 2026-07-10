@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
+	appsetting "github.com/shenfay/kiqi/internal/app/setting"
 	"github.com/shenfay/kiqi/internal/domain/setting"
 	"github.com/shenfay/kiqi/internal/transport/http/response"
 )
 
 // SettingHandler 系统设置 HTTP 处理器
 type SettingHandler struct {
-	service *setting.Service
+	service *appsetting.Service
 }
 
 // NewSettingHandler 创建系统设置处理器
-func NewSettingHandler(service *setting.Service) *SettingHandler {
+func NewSettingHandler(service *appsetting.Service) *SettingHandler {
 	return &SettingHandler{service: service}
 }
 
