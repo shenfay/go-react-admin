@@ -14,7 +14,6 @@ import (
 // Service 系统设置业务逻辑
 type Service struct {
 	repo     Repository
-	eventBus events.Bus
 	recorder *operationlog.OperationRecorder
 }
 
@@ -22,7 +21,6 @@ type Service struct {
 func NewService(repo Repository, eventBus events.Bus) *Service {
 	return &Service{
 		repo:     repo,
-		eventBus: eventBus,
 		recorder: operationlog.NewOperationRecorder(eventBus),
 	}
 }

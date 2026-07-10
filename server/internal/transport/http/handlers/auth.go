@@ -21,11 +21,11 @@ type AuthHandler struct {
 }
 
 // NewAuthHandler 创建认证处理器实例
-func NewAuthHandler(service *authentication.Service, tokenManager authentication.TokenManager, deviceManager authentication.DeviceManager) *AuthHandler {
+func NewAuthHandler(service *authentication.Service, tokenService authentication.TokenService) *AuthHandler {
 	return &AuthHandler{
 		service:       service,
-		tokenManager:  tokenManager,
-		deviceManager: deviceManager,
+		tokenManager:  tokenService,
+		deviceManager: tokenService,
 	}
 }
 

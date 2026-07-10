@@ -6,7 +6,6 @@ type Recorder interface {
 	IncUserRegistration()
 	IncAuthSuccess(authType string)
 	IncAuthFailure(authType, reason string)
-	UpdateDBConnections(open, max int)
 }
 
 // NoopRecorder 空操作指标记录器（Nil Object 模式）
@@ -16,7 +15,6 @@ type NoopRecorder struct{}
 func (NoopRecorder) IncUserRegistration()                  {}
 func (NoopRecorder) IncAuthSuccess(_ string)               {}
 func (NoopRecorder) IncAuthFailure(_, _ string)            {}
-func (NoopRecorder) UpdateDBConnections(_, _ int)          {}
 
 // compile-time check: *Metrics implements Recorder
 var _ Recorder = (*Metrics)(nil)

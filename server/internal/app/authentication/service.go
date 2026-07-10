@@ -79,7 +79,6 @@ type ServiceConfig struct {
 type Service struct {
 	userRepo          user.UserRepository
 	tokenService      TokenService
-	eventBus          events.Bus
 	metrics           metrics.Recorder
 	maxAttempts       int
 	permissionQuerier PermissionQuerier
@@ -94,7 +93,6 @@ func NewService(userRepo user.UserRepository, tokenService TokenService, eventBu
 	return &Service{
 		userRepo:          userRepo,
 		tokenService:      tokenService,
-		eventBus:          eventBus,
 		metrics:           m,
 		maxAttempts:       cfg.MaxLoginAttempts,
 		permissionQuerier: permissionQuerier,

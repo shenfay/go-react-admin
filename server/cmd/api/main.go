@@ -240,7 +240,7 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 // initHandlers 初始化 HTTP 处理器
 func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
 	return &handlerDeps{
-		authHandler:      handlers.NewAuthHandler(svcs.authService, svcs.tokenService, svcs.tokenService),
+		authHandler:      handlers.NewAuthHandler(svcs.authService, svcs.tokenService),
 		adminHandler:     handlers.NewAdminHandler(svcs.adminService),
 		operLogHdlr:      handlers.NewOperationLogHandler(repos.operLogRepo),
 		settingHdlr:      handlers.NewSettingHandler(svcs.settingSvc),

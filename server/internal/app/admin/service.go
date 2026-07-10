@@ -19,7 +19,6 @@ type Service struct {
 	roleRepo rbac.RoleRepository
 	menuRepo rbac.MenuRepository
 	enforcer *authorize.Enforcer
-	eventBus events.Bus
 	recorder *operationlog.OperationRecorder
 }
 
@@ -30,7 +29,6 @@ func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menu
 		roleRepo: roleRepo,
 		menuRepo: menuRepo,
 		enforcer: enforcer,
-		eventBus: eventBus,
 		recorder: operationlog.NewOperationRecorder(eventBus),
 	}
 }
