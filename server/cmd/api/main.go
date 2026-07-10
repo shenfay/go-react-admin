@@ -212,11 +212,14 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 		cfg.JWT.AccessExpire,
 		cfg.JWT.RefreshExpire,
 	)
-	authService := authentication.NewService(
-		repos.userRepo, repos.roleRepo, repos.menuRepo,
-		tokenService, infra.bus, m, infra.enforcer,
-	)
+
+	// admin.Service 先创建，作为 PermissionQuerier 注入 authentication.Service
 	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer, infra.bus)
+
+	authService := authentication.NewService(
+		repos.userRepo,
+		tokenService, infra.bus, m, adminService,
+	)
 	settingSvc := setting.NewService(repos.settingRepo, infra.bus)
 
 	// 消息模块
@@ -235,7 +238,7 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 // initHandlers 初始化 HTTP 处理器
 func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
 	return &handlerDeps{
-		authHandler:      handlers.NewAuthHandler(svcs.authService, svcs.tokenService),
+		authHandler:      handlers.NewAuthHandler(svcs.authService, svcs.tokenService, svcs.tokenService),
 		adminHandler:     handlers.NewAdminHandler(svcs.adminService),
 		operLogHdlr:      handlers.NewOperationLogHandler(repos.operLogRepo),
 		settingHdlr:      handlers.NewSettingHandler(svcs.settingSvc),
@@ -244,7 +247,7 @@ func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
 }
 
 // startServer 创建并启动 HTTP 服务器（含优雅关闭）
-func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, tokenService authentication.TokenService, enforcer *casbinenforcer.Enforcer, db *gorm.DB, redisClient *redis.Client) {
+func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, tokenService authentication.TokenManager, enforcer *casbinenforcer.Enforcer, db *gorm.DB, redisClient *redis.Client) {
 	if cfg.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}

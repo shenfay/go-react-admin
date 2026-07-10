@@ -18,7 +18,7 @@ type Router struct {
 	operationLogHandler *handlers.OperationLogHandler
 	settingHandler      *handlers.SettingHandler
 	notificationHandler *handlers.NotificationHandler
-	tokenService        authentication.TokenService
+	tokenManager        authentication.TokenManager
 	enforcer            *authorize.Enforcer
 	healthHandler       *health.Handler
 }
@@ -31,7 +31,7 @@ func NewRouter(
 	operationLogHandler *handlers.OperationLogHandler,
 	settingHandler *handlers.SettingHandler,
 	notificationHandler *handlers.NotificationHandler,
-	tokenService authentication.TokenService,
+	tokenManager authentication.TokenManager,
 	enforcer *authorize.Enforcer,
 ) *Router {
 	return &Router{
@@ -41,7 +41,7 @@ func NewRouter(
 		operationLogHandler: operationLogHandler,
 		settingHandler:      settingHandler,
 		notificationHandler: notificationHandler,
-		tokenService:        tokenService,
+		tokenManager:        tokenManager,
 		enforcer:            enforcer,
 	}
 }
@@ -97,7 +97,7 @@ func (r *Router) setupAuthRoutes(v1 *gin.RouterGroup) {
 
 		// 需要认证的路由
 		authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
-			TokenService: r.tokenService,
+			TokenService: r.tokenManager,
 		})
 		auth.GET("/me", authMiddleware, r.authHandler.GetCurrentUser)
 		auth.GET("/devices", authMiddleware, r.authHandler.GetUserDevices)
@@ -110,7 +110,7 @@ func (r *Router) setupAuthRoutes(v1 *gin.RouterGroup) {
 func (r *Router) setupUserRoutes(v1 *gin.RouterGroup) {
 	users := v1.Group("/users")
 	users.Use(middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
-		TokenService: r.tokenService,
+		TokenService: r.tokenManager,
 	}))
 	{
 		users.GET("/:id", r.authHandler.GetUserByID)
@@ -120,7 +120,7 @@ func (r *Router) setupUserRoutes(v1 *gin.RouterGroup) {
 // setupAdminRoutes 配置管理员路由组
 func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
 	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
-		TokenService: r.tokenService,
+		TokenService: r.tokenManager,
 	})
 	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
 
@@ -165,7 +165,7 @@ func (r *Router) setupAdminRoutes(v1 *gin.RouterGroup) {
 // setupOperationLogRoutes 配置操作日志路由（需要认证 + 管理员权限）
 func (r *Router) setupOperationLogRoutes(v1 *gin.RouterGroup) {
 	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
-		TokenService: r.tokenService,
+		TokenService: r.tokenManager,
 	})
 	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
 
@@ -179,7 +179,7 @@ func (r *Router) setupOperationLogRoutes(v1 *gin.RouterGroup) {
 // setupSettingRoutes 配置系统设置路由（需要认证 + setting:manage 权限）
 func (r *Router) setupSettingRoutes(v1 *gin.RouterGroup) {
 	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
-		TokenService: r.tokenService,
+		TokenService: r.tokenManager,
 	})
 	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
 
@@ -193,7 +193,7 @@ func (r *Router) setupSettingRoutes(v1 *gin.RouterGroup) {
 // setupNotificationRoutes 配置消息路由
 func (r *Router) setupNotificationRoutes(v1 *gin.RouterGroup) {
 	authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
-		TokenService: r.tokenService,
+		TokenService: r.tokenManager,
 	})
 	permMiddleware := middleware.PermissionMiddleware(r.enforcer)
 
