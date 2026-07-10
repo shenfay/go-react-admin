@@ -8,7 +8,6 @@ import (
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
-	"github.com/shenfay/kiqi/internal/infra/authorize"
 	authErr "github.com/shenfay/kiqi/pkg/errors/auth"
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
 	"github.com/shenfay/kiqi/pkg/logger"
@@ -25,18 +24,28 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-// TokenService Token 服务接口
-type TokenService interface {
+// TokenManager Token 核心操作接口（生成/验证/撤销）
+type TokenManager interface {
 	GenerateTokens(ctx context.Context, userID, email string) (*TokenPair, error)
-	RevokeToken(ctx context.Context, tokenID string) error
-	ValidateRefreshTokenWithDevice(ctx context.Context, token string) (*DeviceInfo, error)
 	ValidateAccessToken(tokenString string) (*JWTClaims, error)
-	StoreDeviceInfo(ctx context.Context, token string, deviceInfo DeviceInfo) error
-	LinkAccessToDevice(ctx context.Context, accessToken, deviceTokenID string) error
-	GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error)
+	ValidateRefreshTokenWithDevice(ctx context.Context, token string) (*DeviceInfo, error)
+	RevokeToken(ctx context.Context, tokenID string) error
 	RevokeDeviceByToken(ctx context.Context, token string) error
 	RevokeAllDevices(ctx context.Context, userID string) error
+}
+
+// DeviceManager 设备会话管理接口（设备信息存储/查询/映射）
+type DeviceManager interface {
+	StoreDeviceInfo(ctx context.Context, token string, deviceInfo DeviceInfo) error
 	GetUserDevices(ctx context.Context, userID string) ([]DeviceInfo, error)
+	LinkAccessToDevice(ctx context.Context, accessToken, deviceTokenID string) error
+	GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error)
+}
+
+// TokenService Token 服务完整接口（组合 TokenManager + DeviceManager）
+type TokenService interface {
+	TokenManager
+	DeviceManager
 }
 
 // TokenPair 访问令牌和刷新令牌对
@@ -56,29 +65,30 @@ type DeviceInfo struct {
 	CreatedAt  string `json:"created_at"`
 }
 
+// PermissionQuerier 权限查询接口（由 admin.Service 实现，消除 Login 中的重复逻辑）
+type PermissionQuerier interface {
+	GetUserPermissions(ctx context.Context, userID string) (*rbac.UserPermission, error)
+}
+
 // Service 认证应用服务
 type Service struct {
-	userRepo     user.UserRepository
-	roleRepo     rbac.RoleRepository
-	menuRepo     rbac.MenuRepository
-	tokenService TokenService
-	eventBus     events.Bus
-	metrics      *metrics.Metrics
-	maxAttempts  int
-	enforcer     *authorize.Enforcer
+	userRepo           user.UserRepository
+	tokenService       TokenService
+	eventBus           events.Bus
+	metrics            *metrics.Metrics
+	maxAttempts        int
+	permissionQuerier  PermissionQuerier
 }
 
 // NewService 创建认证服务实例
-func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menuRepo rbac.MenuRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics, enforcer *authorize.Enforcer) *Service {
+func NewService(userRepo user.UserRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics, permissionQuerier PermissionQuerier) *Service {
 	return &Service{
-		userRepo:     userRepo,
-		roleRepo:     roleRepo,
-		menuRepo:     menuRepo,
-		tokenService: tokenService,
-		eventBus:     eventBus,
-		metrics:      m,
-		maxAttempts:  5,
-		enforcer:     enforcer,
+		userRepo:          userRepo,
+		tokenService:      tokenService,
+		eventBus:          eventBus,
+		metrics:           m,
+		maxAttempts:       5,
+		permissionQuerier: permissionQuerier,
 	}
 }
 
@@ -211,34 +221,17 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		nil,
 	)
 
-	// 8. 查询用户权限（通过 Casbin）
+	// 8. 查询用户权限（委托给 PermissionQuerier，消除重复逻辑）
 	var permissions *rbac.UserPermission
-	if s.enforcer != nil {
-		// 查询用户角色
-		roles, _ := s.roleRepo.FindByUserID(ctx, u.ID)
-		roleBriefs := make([]rbac.RoleBrief, 0, len(roles))
-		for _, role := range roles {
-			roleBriefs = append(roleBriefs, rbac.RoleBrief{
-				ID:   role.ID,
-				Name: role.Name,
-				Code: role.Code,
-			})
-		}
-
-		// 从 Casbin 查询权限
-		perms, _ := s.enforcer.GetPermissionsForUser(u.ID)
-		if perms == nil {
-			perms = []string{}
-		}
-
-		// 从数据库查询所有菜单，动态推导菜单
-		allMenus, _ := s.menuRepo.FindAll(ctx)
-		menus := rbac.DeriveMenusFromMenus(perms, allMenus)
-
-		permissions = &rbac.UserPermission{
-			Roles:       roleBriefs,
-			Permissions: perms,
-			Menus:       menus,
+	if s.permissionQuerier != nil {
+		perm, err := s.permissionQuerier.GetUserPermissions(ctx, u.ID)
+		if err != nil {
+			logger.Warn("Failed to query user permissions on login",
+				zap.String("user_id", u.ID),
+				zap.Error(err),
+			)
+		} else {
+			permissions = perm
 		}
 	}
 

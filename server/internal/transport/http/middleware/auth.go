@@ -12,7 +12,7 @@ import (
 
 // JWTAuthConfig JWT 认证中间件配置
 type JWTAuthConfig struct {
-	TokenService authentication.TokenService
+	TokenService authentication.TokenManager
 }
 
 // JWTAuthMiddleware JWT 认证中间件

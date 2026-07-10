@@ -15,15 +15,17 @@ import (
 
 // AuthHandler 认证 HTTP 处理器
 type AuthHandler struct {
-	service      *authentication.Service
-	tokenService authentication.TokenService
+	service       *authentication.Service
+	tokenManager  authentication.TokenManager
+	deviceManager authentication.DeviceManager
 }
 
 // NewAuthHandler 创建认证处理器实例
-func NewAuthHandler(service *authentication.Service, tokenService authentication.TokenService) *AuthHandler {
+func NewAuthHandler(service *authentication.Service, tokenManager authentication.TokenManager, deviceManager authentication.DeviceManager) *AuthHandler {
 	return &AuthHandler{
-		service:      service,
-		tokenService: tokenService,
+		service:       service,
+		tokenManager:  tokenManager,
+		deviceManager: deviceManager,
 	}
 }
 
@@ -278,7 +280,7 @@ type DevicesResponse struct {
 func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
 
-	devices, err := h.tokenService.GetUserDevices(c.Request.Context(), userID)
+	devices, err := h.deviceManager.GetUserDevices(c.Request.Context(), userID)
 	if err != nil {
 		response.Error(c, errors.NewAppError(
 			errors.ErrCodeSystemInternal,
@@ -292,7 +294,7 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 	currentDeviceTokenID := ""
 	authHeader := c.GetHeader("Authorization")
 	if parts := strings.SplitN(authHeader, " ", 2); len(parts) == 2 && parts[0] == "Bearer" {
-		if id, err := h.tokenService.GetCurrentDeviceTokenID(c.Request.Context(), parts[1]); err == nil {
+		if id, err := h.deviceManager.GetCurrentDeviceTokenID(c.Request.Context(), parts[1]); err == nil {
 			currentDeviceTokenID = id
 		}
 	}
@@ -337,7 +339,7 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 		return
 	}
 
-	deviceInfo, err := h.tokenService.ValidateRefreshTokenWithDevice(c.Request.Context(), token)
+	deviceInfo, err := h.tokenManager.ValidateRefreshTokenWithDevice(c.Request.Context(), token)
 	if err != nil {
 		response.Error(c, errors.NewAppError(
 			errors.ErrCodeAuthInvalidToken,
@@ -356,7 +358,7 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 		return
 	}
 
-	if err := h.tokenService.RevokeDeviceByToken(c.Request.Context(), token); err != nil {
+	if err := h.tokenManager.RevokeDeviceByToken(c.Request.Context(), token); err != nil {
 		response.Error(c, errors.NewAppError(
 			errors.ErrCodeSystemInternal,
 			"撤销设备失败",
@@ -379,7 +381,7 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
 
-	if err := h.tokenService.RevokeAllDevices(c.Request.Context(), userID); err != nil {
+	if err := h.tokenManager.RevokeAllDevices(c.Request.Context(), userID); err != nil {
 		response.Error(c, errors.NewAppError(
 			errors.ErrCodeSystemInternal,
 			"退出所有设备失败",
