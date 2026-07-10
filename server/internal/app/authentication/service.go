@@ -70,25 +70,33 @@ type PermissionQuerier interface {
 	GetUserPermissions(ctx context.Context, userID string) (*rbac.UserPermission, error)
 }
 
+// ServiceConfig 认证服务配置
+type ServiceConfig struct {
+	MaxLoginAttempts int
+}
+
 // Service 认证应用服务
 type Service struct {
 	userRepo          user.UserRepository
 	tokenService      TokenService
 	eventBus          events.Bus
-	metrics           *metrics.Metrics
+	metrics           metrics.Recorder
 	maxAttempts       int
 	permissionQuerier PermissionQuerier
 	recorder          *operationlog.OperationRecorder
 }
 
 // NewService 创建认证服务实例
-func NewService(userRepo user.UserRepository, tokenService TokenService, eventBus events.Bus, m *metrics.Metrics, permissionQuerier PermissionQuerier) *Service {
+func NewService(userRepo user.UserRepository, tokenService TokenService, eventBus events.Bus, m metrics.Recorder, permissionQuerier PermissionQuerier, cfg ServiceConfig) *Service {
+	if cfg.MaxLoginAttempts <= 0 {
+		cfg.MaxLoginAttempts = 5
+	}
 	return &Service{
 		userRepo:          userRepo,
 		tokenService:      tokenService,
 		eventBus:          eventBus,
 		metrics:           m,
-		maxAttempts:       5,
+		maxAttempts:       cfg.MaxLoginAttempts,
 		permissionQuerier: permissionQuerier,
 		recorder:          operationlog.NewOperationRecorder(eventBus),
 	}
@@ -126,9 +134,7 @@ func (s *Service) Register(ctx context.Context, cmd RegisterCommand) (*ServiceAu
 	}
 
 	// 记录用户注册指标
-	if s.metrics != nil {
-		s.metrics.IncUserRegistration()
-	}
+	s.metrics.IncUserRegistration()
 
 	// 3. 生成 Token
 	tokens, err := s.tokenService.GenerateTokens(ctx, u.ID, u.Email)
@@ -169,12 +175,10 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		s.userRepo.Update(ctx, u)
 
 		// 记录认证失败指标
-		if s.metrics != nil {
-			if u.IsLocked() {
-				s.metrics.IncAuthFailure("password", "account_locked")
-			} else {
-				s.metrics.IncAuthFailure("password", "invalid_credentials")
-			}
+		if u.IsLocked() {
+			s.metrics.IncAuthFailure("password", "account_locked")
+		} else {
+			s.metrics.IncAuthFailure("password", "invalid_credentials")
 		}
 
 		if u.IsLocked() {
@@ -198,9 +202,7 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 	}
 
 	// 记录认证成功指标
-	if s.metrics != nil {
-		s.metrics.IncAuthSuccess("password")
-	}
+	s.metrics.IncAuthSuccess("password")
 
 	// 6. 存储设备信息到 Redis
 	if err := s.tokenService.StoreDeviceInfo(ctx, tokens.RefreshToken, DeviceInfo{

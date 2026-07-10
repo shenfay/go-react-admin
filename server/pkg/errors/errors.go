@@ -54,11 +54,3 @@ func NewAppError(code string, message string, httpStatus int) *AppError {
 	}
 }
 
-// NewMenuError 创建菜单域错误
-func NewMenuError(code string, message string) *AppError {
-	return &AppError{
-		Code:       "MENU." + code,
-		Message:    message,
-		HTTPStatus: 409,
-	}
-}
