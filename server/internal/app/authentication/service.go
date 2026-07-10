@@ -253,19 +253,30 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 
 // Logout 处理用户退出
 func (s *Service) Logout(ctx context.Context, cmd LogoutCommand) error {
-	// 1. 撤销 Refresh Token
-	if err := s.tokenService.RevokeToken(ctx, cmd.UserID); err != nil {
-		return err
+	// 1. 撤销该用户所有设备的登录状态（Refresh Token + 设备信息）
+	if err := s.tokenService.RevokeAllDevices(ctx, cmd.UserID); err != nil {
+		logger.Warn("Failed to revoke devices on logout",
+			zap.String("user_id", cmd.UserID),
+			zap.Error(err),
+		)
 	}
 
 	// 2. 记录操作日志
 	u, err := s.userRepo.FindByID(ctx, cmd.UserID)
-	if err == nil {
-		s.recordOperation(ctx, "AUTH.LOGOUT", "AUTH", "SUCCESS",
-			u.ID, u.Email,
-			nil,
+	if err != nil {
+		logger.Warn("Failed to find user for operation log",
+			zap.String("user_id", cmd.UserID),
+			zap.Error(err),
 		)
+		// 降级：使用 userID 记录，不阻塞登出流程
+		s.recordOperation(ctx, "AUTH.LOGOUT", "AUTH", "SUCCESS", cmd.UserID, "", nil)
+		return nil
 	}
+
+	s.recordOperation(ctx, "AUTH.LOGOUT", "AUTH", "SUCCESS",
+		u.ID, u.Email,
+		nil,
+	)
 
 	return nil
 }
