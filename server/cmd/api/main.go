@@ -213,13 +213,13 @@ func initRepositories(db *gorm.DB) *repoDeps {
 
 // initServices 初始化应用服务
 func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metrics.Metrics) *svcDeps {
-	tokenService := authentication.NewTokenServiceImpl(
-		infra.redisClient,
-		cfg.JWT.Secret,
-		cfg.JWT.Issuer,
-		cfg.JWT.AccessExpire,
-		cfg.JWT.RefreshExpire,
-	)
+	tokenService := authentication.NewTokenServiceImpl(authentication.TokenServiceConfig{
+		RedisClient:    infra.redisClient,
+		JWTSecret:      cfg.JWT.Secret,
+		Issuer:         cfg.JWT.Issuer,
+		AccessExpire:   cfg.JWT.AccessExpire,
+		RefreshExpire:  cfg.JWT.RefreshExpire,
+	})
 
 	// admin.Service 必须先创建：作为 PermissionQuerier 注入 authentication.Service，
 	// 用于 Login 时查询用户权限（避免 auth 服务重复持有 roleRepo/menuRepo/enforcer）

@@ -14,6 +14,15 @@ import (
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
+// TokenServiceConfig Token 服务配置
+type TokenServiceConfig struct {
+	RedisClient    *redis.Client
+	JWTSecret      string
+	Issuer         string
+	AccessExpire   time.Duration
+	RefreshExpire  time.Duration
+}
+
 // jwtTokenService JWT Token 服务实现
 type jwtTokenService struct {
 	redisClient   *redis.Client
@@ -24,13 +33,13 @@ type jwtTokenService struct {
 }
 
 // NewTokenServiceImpl 创建Token服务实现
-func NewTokenServiceImpl(redisClient *redis.Client, jwtSecret string, issuer string, accessExpire, refreshExpire time.Duration) TokenService {
+func NewTokenServiceImpl(cfg TokenServiceConfig) TokenService {
 	return &jwtTokenService{
-		redisClient:   redisClient,
-		jwtSecret:     []byte(jwtSecret),
-		issuer:        issuer,
-		accessExpire:  accessExpire,
-		refreshExpire: refreshExpire,
+		redisClient:   cfg.RedisClient,
+		jwtSecret:     []byte(cfg.JWTSecret),
+		issuer:        cfg.Issuer,
+		accessExpire:  cfg.AccessExpire,
+		refreshExpire: cfg.RefreshExpire,
 	}
 }
 
