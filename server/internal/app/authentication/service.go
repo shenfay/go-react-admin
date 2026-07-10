@@ -75,6 +75,15 @@ type ServiceConfig struct {
 	MaxLoginAttempts int
 }
 
+// ServiceDeps 认证服务依赖
+type ServiceDeps struct {
+	UserRepo          user.UserRepository
+	TokenService      TokenService
+	EventBus          events.Bus
+	Metrics           metrics.Recorder
+	PermissionQuerier PermissionQuerier
+}
+
 // Service 认证应用服务
 type Service struct {
 	userRepo          user.UserRepository
@@ -86,17 +95,17 @@ type Service struct {
 }
 
 // NewService 创建认证服务实例
-func NewService(userRepo user.UserRepository, tokenService TokenService, eventBus events.Bus, m metrics.Recorder, permissionQuerier PermissionQuerier, cfg ServiceConfig) *Service {
+func NewService(deps ServiceDeps, cfg ServiceConfig) *Service {
 	if cfg.MaxLoginAttempts <= 0 {
 		cfg.MaxLoginAttempts = 5
 	}
 	return &Service{
-		userRepo:          userRepo,
-		tokenService:      tokenService,
-		metrics:           m,
+		userRepo:          deps.UserRepo,
+		tokenService:      deps.TokenService,
+		metrics:           deps.Metrics,
 		maxAttempts:       cfg.MaxLoginAttempts,
-		permissionQuerier: permissionQuerier,
-		recorder:          operationlog.NewOperationRecorder(eventBus),
+		permissionQuerier: deps.PermissionQuerier,
+		recorder:          operationlog.NewOperationRecorder(deps.EventBus),
 	}
 }
 

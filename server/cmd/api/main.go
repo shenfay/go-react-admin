@@ -132,7 +132,7 @@ type svcDeps struct {
 	tokenService    authentication.TokenService
 	authService     *authentication.Service
 	adminService    *admin.Service
-	settingSvc      *setting.Service
+	settingSvc      *appsetting.Service
 	notificationSvc *notificationapp.AppService
 }
 
@@ -228,11 +228,19 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer, infra.bus)
 
 	authService := authentication.NewService(
-		repos.userRepo,
-		tokenService, infra.bus, m, adminService,
+		authentication.ServiceDeps{
+			UserRepo:          repos.userRepo,
+			TokenService:      tokenService,
+			EventBus:          infra.bus,
+			Metrics:           m,
+			PermissionQuerier: adminService,
+		},
 		authentication.ServiceConfig{},
 	)
-	settingSvc := setting.NewService(repos.settingRepo, infra.bus)
+	// 创建领域设置服务 → 应用层包装（注入操作日志）
+	domainSettingSvc := setting.NewService(repos.settingRepo)
+	settingRecorder := operationlog.NewOperationRecorder(infra.bus)
+	settingSvc := appsetting.NewService(domainSettingSvc, settingRecorder)
 
 	// 消息模块
 	notificationDomainSvc := notification.NewService(repos.messageRepo)
