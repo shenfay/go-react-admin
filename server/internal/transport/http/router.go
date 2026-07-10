@@ -10,6 +10,18 @@ import (
 	"github.com/shenfay/kiqi/pkg/health"
 )
 
+// RouterDeps 路由器依赖
+type RouterDeps struct {
+	Engine              *gin.Engine
+	AuthHandler         *handlers.AuthHandler
+	AdminHandler        *handlers.AdminHandler
+	OperationLogHandler *handlers.OperationLogHandler
+	SettingHandler      *handlers.SettingHandler
+	NotificationHandler *handlers.NotificationHandler
+	TokenManager        authentication.TokenManager
+	Enforcer            *authorize.Enforcer
+}
+
 // Router 路由配置
 type Router struct {
 	engine              *gin.Engine
@@ -24,25 +36,16 @@ type Router struct {
 }
 
 // NewRouter 创建路由器
-func NewRouter(
-	engine *gin.Engine,
-	authHandler *handlers.AuthHandler,
-	adminHandler *handlers.AdminHandler,
-	operationLogHandler *handlers.OperationLogHandler,
-	settingHandler *handlers.SettingHandler,
-	notificationHandler *handlers.NotificationHandler,
-	tokenManager authentication.TokenManager,
-	enforcer *authorize.Enforcer,
-) *Router {
+func NewRouter(deps *RouterDeps) *Router {
 	return &Router{
-		engine:              engine,
-		authHandler:         authHandler,
-		adminHandler:        adminHandler,
-		operationLogHandler: operationLogHandler,
-		settingHandler:      settingHandler,
-		notificationHandler: notificationHandler,
-		tokenManager:        tokenManager,
-		enforcer:            enforcer,
+		engine:              deps.Engine,
+		authHandler:         deps.AuthHandler,
+		adminHandler:        deps.AdminHandler,
+		operationLogHandler: deps.OperationLogHandler,
+		settingHandler:      deps.SettingHandler,
+		notificationHandler: deps.NotificationHandler,
+		tokenManager:        deps.TokenManager,
+		enforcer:            deps.Enforcer,
 	}
 }
 

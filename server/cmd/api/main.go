@@ -85,7 +85,15 @@ func main() {
 	hdls := initHandlers(svcs, repos)
 
 	// 7. 启动 HTTP 服务器
-	startServer(cfg, m, hdls, svcs.tokenService, infra.enforcer, infra.db, infra.redisClient)
+	startServer(&startDeps{
+		cfg:          cfg,
+		metrics:      m,
+		hdls:         hdls,
+		tokenService: svcs.tokenService,
+		enforcer:     infra.enforcer,
+		db:           infra.db,
+		redisClient:  infra.redisClient,
+	})
 }
 
 // --- Provider 结构体 ---
@@ -248,8 +256,23 @@ func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
 	}
 }
 
+// startDeps 服务器启动依赖
+type startDeps struct {
+	cfg          *config.Config
+	metrics      *metrics.Metrics
+	hdls         *handlerDeps
+	tokenService authentication.TokenManager
+	enforcer     *casbinenforcer.Enforcer
+	db           *gorm.DB
+	redisClient  *redis.Client
+}
+
 // startServer 创建并启动 HTTP 服务器（含优雅关闭）
-func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, tokenService authentication.TokenManager, enforcer *casbinenforcer.Enforcer, db *gorm.DB, redisClient *redis.Client) {
+func startServer(deps *startDeps) {
+	cfg := deps.cfg
+	m := deps.metrics
+	hdls := deps.hdls
+
 	if cfg.Server.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -257,10 +280,19 @@ func startServer(cfg *config.Config, m *metrics.Metrics, hdls *handlerDeps, toke
 	engine := gin.New()
 	transhttp.Middlewares(engine, m, cfg.CORS)
 
-	apiRouter := transhttp.NewRouter(engine, hdls.authHandler, hdls.adminHandler, hdls.operLogHdlr, hdls.settingHdlr, hdls.notificationHdlr, tokenService, enforcer)
+	apiRouter := transhttp.NewRouter(&transhttp.RouterDeps{
+		Engine:              engine,
+		AuthHandler:         hdls.authHandler,
+		AdminHandler:        hdls.adminHandler,
+		OperationLogHandler: hdls.operLogHdlr,
+		SettingHandler:      hdls.settingHdlr,
+		NotificationHandler: hdls.notificationHdlr,
+		TokenManager:        deps.tokenService,
+		Enforcer:            deps.enforcer,
+	})
 
 	// 设置完整健康检查处理器（包含 DB/Redis 检查）
-	healthHandler := health.NewHandler(db, redisClient, "1.0.0", cfg.Server.Mode)
+	healthHandler := health.NewHandler(deps.db, deps.redisClient, "1.0.0", cfg.Server.Mode)
 	apiRouter.SetHealthHandler(healthHandler)
 
 	apiRouter.Setup()
