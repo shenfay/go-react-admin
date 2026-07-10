@@ -42,6 +42,13 @@ var (
 		Message:    "账户已锁定，请稍后重试",
 		HTTPStatus: http.StatusLocked,
 	}
+
+	// ErrForbidden 操作无权限
+	ErrForbidden = &errors.AppError{
+		Code:       errors.ErrCodeSystemForbidden,
+		Message:    "禁止操作：只能管理自己的设备",
+		HTTPStatus: http.StatusForbidden,
+	}
 )
 
 // NewAuthError 创建认证域错误（工厂方法）

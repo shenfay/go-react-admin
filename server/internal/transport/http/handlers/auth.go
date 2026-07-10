@@ -15,17 +15,13 @@ import (
 
 // AuthHandler 认证 HTTP 处理器
 type AuthHandler struct {
-	service       *authentication.Service
-	tokenManager  authentication.TokenManager
-	deviceManager authentication.DeviceManager
+	service *authentication.Service
 }
 
 // NewAuthHandler 创建认证处理器实例
-func NewAuthHandler(service *authentication.Service, tokenService authentication.TokenService) *AuthHandler {
+func NewAuthHandler(service *authentication.Service) *AuthHandler {
 	return &AuthHandler{
-		service:       service,
-		tokenManager:  tokenService,
-		deviceManager: tokenService,
+		service: service,
 	}
 }
 
@@ -280,7 +276,7 @@ type DevicesResponse struct {
 func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
 
-	devices, err := h.deviceManager.GetUserDevices(c.Request.Context(), userID)
+	devices, err := h.service.ListUserDevices(c.Request.Context(), userID)
 	if err != nil {
 		response.Error(c, errors.NewAppError(
 			errors.ErrCodeSystemInternal,
@@ -294,7 +290,7 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 	currentDeviceTokenID := ""
 	authHeader := c.GetHeader("Authorization")
 	if parts := strings.SplitN(authHeader, " ", 2); len(parts) == 2 && parts[0] == "Bearer" {
-		if id, err := h.deviceManager.GetCurrentDeviceTokenID(c.Request.Context(), parts[1]); err == nil {
+		if id, err := h.service.GetCurrentDeviceTokenID(c.Request.Context(), parts[1]); err == nil {
 			currentDeviceTokenID = id
 		}
 	}
@@ -339,31 +335,8 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 		return
 	}
 
-	deviceInfo, err := h.tokenManager.ValidateRefreshTokenWithDevice(c.Request.Context(), token)
-	if err != nil {
-		response.Error(c, errors.NewAppError(
-			errors.ErrCodeAuthInvalidToken,
-			"无效或已过期的设备令牌",
-			http.StatusUnauthorized,
-		))
-		return
-	}
-
-	if deviceInfo.UserID != userID {
-		response.Error(c, errors.NewAppError(
-			errors.ErrCodeSystemForbidden,
-			"只能撤销自己的设备",
-			http.StatusForbidden,
-		))
-		return
-	}
-
-	if err := h.tokenManager.RevokeDeviceByToken(c.Request.Context(), token); err != nil {
-		response.Error(c, errors.NewAppError(
-			errors.ErrCodeSystemInternal,
-			"撤销设备失败",
-			http.StatusInternalServerError,
-		))
+	if err := h.service.RevokeDevice(c.Request.Context(), userID, token); err != nil {
+		response.Error(c, err)
 		return
 	}
 
@@ -381,7 +354,7 @@ func (h *AuthHandler) RevokeDevice(c *gin.Context) {
 func (h *AuthHandler) LogoutAllDevices(c *gin.Context) {
 	userID := c.GetString("user_id")
 
-	if err := h.tokenManager.RevokeAllDevices(c.Request.Context(), userID); err != nil {
+	if err := h.service.RevokeAllDevices(c.Request.Context(), userID); err != nil {
 		response.Error(c, errors.NewAppError(
 			errors.ErrCodeSystemInternal,
 			"退出所有设备失败",

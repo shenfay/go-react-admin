@@ -326,4 +326,31 @@ func (s *Service) GetUserByID(ctx context.Context, userID string) (*user.User, e
 	return s.userRepo.FindByID(ctx, userID)
 }
 
+// ListUserDevices 获取用户所有登录设备
+func (s *Service) ListUserDevices(ctx context.Context, userID string) ([]DeviceInfo, error) {
+	return s.tokenService.GetUserDevices(ctx, userID)
+}
+
+// GetCurrentDeviceTokenID 获取当前请求对应的设备令牌 ID
+func (s *Service) GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error) {
+	return s.tokenService.GetCurrentDeviceTokenID(ctx, accessToken)
+}
+
+// RevokeDevice 撤销指定设备（校验设备归属）
+func (s *Service) RevokeDevice(ctx context.Context, userID, token string) error {
+	deviceInfo, err := s.tokenService.ValidateRefreshTokenWithDevice(ctx, token)
+	if err != nil {
+		return err
+	}
+	if deviceInfo.UserID != userID {
+		return authErr.ErrForbidden
+	}
+	return s.tokenService.RevokeDeviceByToken(ctx, token)
+}
+
+// RevokeAllDevices 撤销用户所有设备
+func (s *Service) RevokeAllDevices(ctx context.Context, userID string) error {
+	return s.tokenService.RevokeAllDevices(ctx, userID)
+}
+
 
