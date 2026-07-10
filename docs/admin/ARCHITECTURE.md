@@ -51,7 +51,8 @@ admin/src/
 │   ├── pagination.ts    # 表格分页默认配置
 │   └── permission.ts    # 权限工具函数
 ├── hooks/               # 自定义 Hooks
-│   └── useCrudList.ts   # 列表页 CRUD 通用 Hook
+│   ├── useCrudList.ts   # 列表页 CRUD 通用 Hook
+│   └── useWebSocket.tsx  # WebSocket 连接管理 + 推送通知 Hook
 ├── locales/             # 国际化语言包
 │   ├── index.ts         # i18n 初始化配置
 │   ├── zh-CN.json       # 中文语言包
@@ -104,6 +105,8 @@ admin/src/
   /operation-log          → 操作日志
   /design-system          → 设计规范展示
   /settings               → 系统设置
+  /messages               → 我的消息
+  /ws-test                → WebSocket 测试（开发调试）
 ```
 
 ### 权限守卫
@@ -206,14 +209,34 @@ admin/src/
 
 ### 语言包结构
 
+国际化文件位于 `locales/` 目录，按业务模块组织 Key：
+
 ```json
-// locales/zh-CN.json
+// locales/zh-CN.json（约 250+ key）
 {
   "dashboard": "工作台",
   "userManagement": "用户管理",
   "totalRecords": "共 {{total}} 条记录",
   "sessionExpired": "登录已过期，请重新登录",
-  ...
+  // ...
+
+  // 消息模块
+  "menuMessage": "消息管理",
+  "menuWsTest": "WebSocket 测试",
+  "myMessages": "我的消息",
+  "markAsRead": "标记已读",
+  "markAllAsRead": "全部已读",
+  "unreadCount": "未读消息",
+  "noMessages": "暂无消息",
+
+  // WebSocket 测试页
+  "wsTest": "WebSocket 测试",
+  "wsCatPoints": "积分变动",
+  "wsCatGoal": "目标相关",
+  "wsCatRemind": "提醒通知",
+  "wsCatExchange": "兑换通知",
+  "wsCatCompanion": "伙伴相关",
+  "wsCatReview": "验收通知"
 }
 ```
 
@@ -263,12 +286,28 @@ import enUS from 'antd/locale/en_US'
 +------------------------------------------+
 ```
 
-**Props**：
-- `title` — 页面标题
-- `extra` — 标题右侧操作区（通常放「新增」按钮）
-- `filters` — 筛选栏内容（搜索框、下拉选择等）
-- `toolbarActions` — 筛选栏右侧工具栏（导出、刷新等）
-- `children` — 内容区
+**Props**（见组件源码）
+
+#### WebSocket Hooks
+
+**文件**：`hooks/useWebSocket.tsx`
+
+提供 WebSocket 连接管理和实时推送通知能力：
+
+| Hook | 用途 |
+|------|------|
+| `useWebSocket()` | 建立 WebSocket 连接（自动重连 + 指数退避） |
+| `useWebSocketPush(callback)` | 收到推送时执行回调（用于刷新未读数等） |
+| `usePushNotification(callback)` | 收到推送时弹出 Ant Design 通知 Toast + 执行回调 |
+
+**连接管理**：
+- 自动连接：`useWebSocket()` 在 `MainLayout` 中调用，页面加载即连接
+- 自动重连：断线后间隔递增重试（1s → 2s → 4s → 8s → 16s）
+- 连接销毁：页面关闭 / 组件卸载时自动关闭
+
+**WebSocket URL**：通过 Vite 代理 `/api/ws` → 后端 `GET /api/ws`
+
+**签名机制**：连接 URL 携带 `token` 参数，后端验证 JWT 后建立连接
 
 #### PermissionGuard（权限守卫）
 

@@ -41,15 +41,18 @@ graph TB
     
     subgraph Infrastructure["基础设施层 (Infrastructure Layer)"]
         RepoImpl[Repository Implementation]
-        DB[(Database)]
-        Redis[(Redis)]
+        DB[(PostgreSQL)]
+        Redis[(Redis Cache)]
         Bridge[DomainToIntegrationBridge]
         TaskPub[TaskPublisher]
+        WsHub[WebSocket Hub]
+        RedisPub[Redis Pub/Sub]
     end
     
     HTTP --> Service
     MW --> HTTP
     Service --> RepoInterface
+    Service --> WsHub
     Service --> Bus
     RepoImpl -.实现.-> RepoInterface
     RepoImpl --> DB
@@ -57,6 +60,7 @@ graph TB
     Bus --> Bridge
     Bridge --> TaskPub
     TaskPub --> Asynq[(Asynq Redis)]
+    WsHub --> RedisPub
 ```
 
 **核心原则**：
@@ -623,6 +627,41 @@ bridge.SubscribeTo(inProcessBus)
 authService := authentication.NewService(userRepo, tokenService, inProcessBus, m)
 ```
 
+### WebSocket 实时推送
+
+系统通过 **WebSocket + Redis Pub/Sub** 实现跨进程实时推送，用于消息通知、未读数同步等场景。
+
+```mermaid
+sequenceDiagram
+    participant App as Application Service
+    participant Pusher as Pusher Client
+    participant Hub as WebSocket Hub
+    participant WS as WebSocket Client
+    participant Redis as Redis Pub/Sub
+    participant Other as Other Instance
+    
+    App->>Pusher: SendToUser(userID, payload)
+    Pusher->>Hub: 本实例广播
+    Pusher->>Redis: Publish(push:realtime)
+    Redis->>Other: Subscribe
+    Other->>Other: Hub.BroadcastToUser
+    Hub->>WS: Write JSON
+```
+
+**核心组件**：
+
+| 组件 | 职责 | 文件 |
+|------|------|------|
+| Hub | 管理用户房间、连接注册/注销、同实例广播 | `infra/ws/hub.go` |
+| Client | 单个 WebSocket 连接的读写与心跳维护 | `infra/ws/client.go` |
+| RedisSubscriber | 跨进程订阅 Redis Pub/Sub 频道并转发至 Hub | `infra/ws/redis_push.go` |
+| Pusher | 应用层接口（`Pusher` interface），统一推送入口 | `app/notification/pusher.go` |
+
+**用途**：
+- 消息模块：新消息到达时实时弹出通知 Toast
+- 标记已读后推送 `unread_update` 事件，跨页面更新未读数
+- 跨多实例部署时通过 Redis Pub/Sub 广播至所有实例
+
 ## 代码组织
 
 ### 目录结构
@@ -635,6 +674,10 @@ internal/
 │   │   ├── value_objects.go   # 值对象
 │   │   ├── events.go          # 领域事件（实现 DomainEvent 接口）
 │   │   └── repository.go      # 仓储接口
+│   ├── notification/          # 消息通知聚合
+│   │   ├── entity.go          # Message 聚合根
+│   │   ├── events.go          # MessageSent 等事件
+│   │   └── repository.go      # MessageRepository 接口
 │   └── shared/                # 共享领域
 │       ├── errors.go          # 通用领域错误
 │       └── events/            # 事件基础设施
@@ -646,6 +689,10 @@ internal/
 │   │   ├── service.go         # 应用服务
 │   │   ├── dto.go             # DTO
 │   │   └── mapper.go          # 映射器
+│   ├── notification/          # 消息通知用例
+│   │   ├── service.go         # 应用服务（发送、标记已读、列表）
+│   │   ├── pusher.go          # Pusher 接口（包装 WebSocket 推送）
+│   │   └── dto.go             # DTO
 │   └── user/                  # 用户用例
 │       └── service.go
 │
@@ -653,9 +700,13 @@ internal/
 │   ├── repository/            # 仓储实现
 │   ├── persistence/           # 数据库连接
 │   ├── redis/                 # Redis 客户端
-│   └── messaging/             # 消息队列
-│       ├── event_bus.go       # TaskPublisher（简化的 Asynq 发布器）
-│       └── bridge.go          # DomainToIntegrationBridge 桥接器
+│   ├── messaging/             # 消息队列
+│   │   ├── event_bus.go       # TaskPublisher（简化的 Asynq 发布器）
+│   │   └── bridge.go          # DomainToIntegrationBridge 桥接器
+│   └── ws/                    # WebSocket 实时推送
+│       ├── hub.go             # Hub：用户房间管理与消息广播
+│       ├── client.go          # Client：单个连接读写
+│       └── redis_push.go      # RedisSubscriber：跨进程 Pub/Sub 推送
 │
 ├── listener/                  # 领域事件监听器
 │   ├── activity_log_listener.go  # 活动日志监听器（同步写 DB）

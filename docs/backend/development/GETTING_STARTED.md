@@ -1,6 +1,6 @@
 # 快速开始指南
 
-5 分钟内在本地运行 DDD Scaffold 项目。
+5 分钟内在本地运行 Kiqi 后端服务。
 
 ## 📋 前置要求
 
@@ -10,7 +10,7 @@
 |------|------|------|---------|
 | Go | 1.21+ | 后端运行时 | `brew install go` |
 | PostgreSQL | 14+ | 主数据库 | `brew install postgresql` |
-| Redis | 7+ | 缓存/会话存储 | `brew install redis` |
+| Redis | 7+ | 缓存/会话/实时消息总线 | `brew install redis` |
 
 ### 可选软件
 
@@ -20,6 +20,7 @@
 | Swag | Swagger 文档生成 | `go install github.com/swaggo/swag/cmd/swag@latest` |
 | Prometheus | 指标采集和存储 | `brew install prometheus` |
 | Grafana | 可视化仪表盘 | `brew install grafana` |
+| MailHog | 开发环境邮件捕获 | `brew install mailhog` |
 
 ## 🚀 快速启动（推荐方式）
 
@@ -37,7 +38,7 @@ docker-compose up -d postgres redis
 sleep 10
 
 # 4. 进入后端目录
-cd backend
+cd server
 
 # 5. 运行数据库迁移
 make migrate up
@@ -63,8 +64,11 @@ open http://localhost:8080/swagger/index.html
 # 启动 PostgreSQL
 brew services start postgresql
 
-# 启动 Redis
+# 启动 Redis（必需：WebSocket 实时推送依赖 Redis Pub/Sub）
 brew services start redis
+
+# （可选）启动 MailHog 捕获开发环境邮件
+brew services start mailhog
 
 # 验证服务
 psql -U postgres -c "SELECT version();"
@@ -83,7 +87,7 @@ psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE kiqi TO kiqi;"
 #### 步骤 3：配置环境变量
 
 ```bash
-cd backend
+cd server
 cp configs/.env.example configs/.env
 
 # 编辑配置文件（根据实际情况修改）
@@ -108,6 +112,9 @@ REDIS_PASSWORD=
 JWT_SECRET=your-secret-key-change-in-production
 JWT_ACCESS_TOKEN_EXPIRY=15m
 JWT_REFRESH_TOKEN_EXPIRY=7d
+
+# WebSocket 实时推送开关
+WEBSOCKET_ENABLED=true
 ```
 
 #### 步骤 4：安装依赖并运行
@@ -154,7 +161,51 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 }
 ```
 
-### 2. 用户登录
+        "email_verified": false
+      },
+      "access_token": "eyJhbGciOiJIUzI1NiIs...",
+      "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+      "expires_in": 900
+    }
+  }
+}
+```
+
+### 2. 测试 WebSocket 推送
+
+WebSocket 默认启用（配置文件 `configs/development.yaml` 中 `websocket.enabled: true`）。
+
+前端管理后台访问 `/ws-test` 可打开 WebSocket 测试页：
+
+```bash
+# 通过 Swagger POST /api/v1/admin/messages/system 发送测试推送
+curl -X POST http://localhost:8080/api/v1/admin/messages/system \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <access_token>" \
+  -d '{
+    "recipient_id": "user_founder",
+    "category": "points",
+    "title": "测试推送",
+    "content": "Hello WebSocket"
+  }'
+```
+
+### 3. 邮箱验证 & 密码重置
+
+注册后可调用以下接口测试（开发环境使用 NoopSender，验证码/重置链接会打印到日志）：
+
+```bash
+# 重新发送验证邮件
+curl -X POST http://localhost:8080/api/v1/auth/resend-verification \
+  -H "Authorization: Bearer <access_token>"
+
+# 查看日志中的验证链接
+grep -i "verify\|reset" /path/to/server/logs
+```
+
+详细测试步骤参见 [测试指南](../../server/TESTING_GUIDE.md)。
+
+### 4. 用户登录
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -178,7 +229,7 @@ curl http://localhost:8080/api/v1/auth/me \
 
 ```bash
 # 新终端窗口
-cd backend
+cd server
 make run worker
 ```
 
@@ -326,7 +377,7 @@ lsof -i :8080
 kill -9 <PID>
 
 # 或者修改配置使用其他端口
-vim configs/.env
+vim server/configs/.env
 # 修改 SERVER_PORT=8081
 ```
 

@@ -18,7 +18,8 @@
 ```mermaid
 graph TB
     Client[客户端] --> Nginx[Nginx 反向代理]
-    Nginx --> API[API 服务容器]
+    Nginx -->|HTTP| API[API 服务容器]
+    Nginx -->|WS| API
     Nginx --> Worker[Worker 服务容器]
     
     API --> PostgreSQL[(PostgreSQL)]
@@ -52,7 +53,7 @@ docker-compose up -d postgres redis
 sleep 10
 
 # 3. 运行数据库迁移
-cd backend
+cd server
 make migrate up
 
 # 4. 本地启动 API 服务（热重载）
@@ -416,6 +417,9 @@ networks:
 | `JWT_REFRESH_TOKEN_EXPIRY` | 7d | 刷新令牌过期时间 | 否 |
 | `LOG_LEVEL` | info | 日志级别 | 否 |
 | `LOG_FORMAT` | json | 日志格式（json/console） | 否 |
+| `WEBSOCKET_ENABLED` | true | WebSocket 实时推送开关 | 否 |
+
+> **注意**：启用 WebSocket 时需要确保 Nginx/反向代理配置了 WebSocket 协议升级头（`Upgrade: websocket`），且 `proxy_read_timeout` 不小于 60 秒以避免连接断裂。多实例部署时需保证所有实例连接同一 Redis 实例以实现跨进程广播。
 
 ### 生成安全密钥
 

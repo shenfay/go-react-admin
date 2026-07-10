@@ -51,6 +51,12 @@ graph TB
     UserContext --> RBACContext
     UserContext --> OperationContext
     RBACContext --> OperationContext
+    
+    subgraph NotificationContext["消息上下文 (Notification Bounded Context)"]
+        Message[Message 聚合根]
+        
+        UserContext -.发送.-> Message
+    end
 ```
 
 **核心聚合**：
@@ -58,6 +64,7 @@ graph TB
 - **Role** - 角色聚合根（RBAC 角色管理，通过 Casbin 引擎授权）
 - **Menu** - 菜单实体（树形菜单结构，驱动前端侧边栏）
 - **OperationLog** - 统一操作日志聚合根（合并安全审计与业务活动）
+- **Message** - 消息聚合根（站内信通知，支持 WebSocket 实时推送）
 
 ## 用户聚合（User Aggregate）
 
@@ -235,6 +242,46 @@ func (u *User) VerifyEmail() {
 **使用场景**：
 - 用户点击邮箱验证链接后调用
 
+### 邮箱验证令牌（VerificationToken）
+
+**代码位置**：`internal/domain/user/verification_token.go`
+
+#### 属性
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `ID` | string | 唯一标识（ULID） |
+| `UserID` | string | 用户 ID |
+| `Token` | string | 安全令牌字符串 |
+| `ExpiresAt` | time.Time | 过期时间（创建后 24 小时） |
+| `Used` | bool | 是否已使用 |
+| `CreatedAt` | time.Time | 创建时间 |
+
+### 密码重置令牌（ResetToken）
+
+**代码位置**：`internal/domain/user/reset_token.go`
+
+#### 属性
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `ID` | string | 唯一标识（ULID） |
+| `UserID` | string | 用户 ID |
+| `Token` | string | 安全令牌字符串 |
+| `ExpiresAt` | time.Time | 过期时间（创建后 1 小时） |
+| `Used` | bool | 是否已使用 |
+| `CreatedAt` | time.Time | 创建时间 |
+
+### 安全令牌值对象（SecureToken）
+
+**代码位置**：`internal/domain/user/secure_token.go`
+
+`SecureToken` 是使用 `crypto/rand` 生成 32 字节随机数并 Base64URL 编码的值对象，用于邮箱验证和密码重置的令牌生成。
+
+```go
+type SecureToken string
+```
+
 ## RBAC 权限领域
 
 ### 权限模型概述
@@ -391,6 +438,100 @@ type OperationLogRepository interface {
     FindByUserID(ctx context.Context, userID string, limit int) ([]*OperationLog, error)
     FindByCategory(ctx context.Context, category string, limit int) ([]*OperationLog, error)
     FindByAction(ctx context.Context, action string, limit int) ([]*OperationLog, error)
+}
+```
+
+## 消息通知聚合（Notification Aggregate）
+
+### 聚合根：Message
+
+**职责**：
+- 管理站内通知的创建和发送
+- 跟踪消息的已读状态
+- 通过 WebSocket 实时推送给用户
+
+**代码位置**：`internal/domain/notification/entity.go`
+
+#### 属性
+
+| 属性 | 类型 | 说明 | 不变量 |
+|------|------|------|--------|
+| `ID` | string | 消息唯一标识（ULID） | 不可变 |
+| `RecipientID` | string | 接收者用户 ID | 必填 |
+| `Category` | string | 消息分类（points/goal/remind/exchange/companion/review） | 枚举值 |
+| `Title` | string | 消息标题 | 必填 |
+| `Content` | string | 消息正文 | 必填 |
+| `IsRead` | bool | 是否已读 | 默认 false |
+| `ReadAt` | *time.Time | 读取时间 | 可为空 |
+| `CreatedAt` | time.Time | 创建时间 | 不可变 |
+
+#### 工厂方法
+
+```go
+func NewMessage(recipientID, category, title, content string) (*Message, error) {
+    if recipientID == "" {
+        return nil, ErrInvalidRecipient
+    }
+    if !isValidCategory(category) {
+        return nil, ErrInvalidCategory
+    }
+    if title == "" || content == "" {
+        return nil, ErrEmptyContent
+    }
+    return &Message{
+        ID:          generateULID(),
+        RecipientID: recipientID,
+        Category:    category,
+        Title:       title,
+        Content:     content,
+        IsRead:      false,
+        CreatedAt:   time.Now(),
+    }, nil
+}
+```
+
+#### 行为方法
+
+```go
+// MarkAsRead 标记消息为已读
+func (m *Message) MarkAsRead() {
+    if m.IsRead {
+        return
+    }
+    now := time.Now()
+    m.IsRead = true
+    m.ReadAt = &now
+}
+```
+
+#### 领域事件
+
+```go
+type MessageSent struct {
+    MessageID   string    `json:"message_id"`
+    RecipientID string    `json:"recipient_id"`
+    Category    string    `json:"category"`
+    Title       string    `json:"title"`
+    Content     string    `json:"content"`
+    Timestamp   time.Time `json:"timestamp"`
+}
+
+func (e *MessageSent) EventName() string { return "notification.message_sent" }
+func (e *MessageSent) OccurredAt() time.Time { return e.Timestamp }
+```
+
+#### 仓储接口
+
+**代码位置**：`internal/domain/notification/repository.go`
+
+```go
+type MessageRepository interface {
+    Create(ctx context.Context, msg *Message) error
+    FindByID(ctx context.Context, id string) (*Message, error)
+    FindByRecipient(ctx context.Context, recipientID string, page, pageSize int) ([]*Message, int64, error)
+    Update(ctx context.Context, msg *Message) error
+    CountUnread(ctx context.Context, recipientID string) (int64, error)
+    MarkAllAsRead(ctx context.Context, recipientID string) (int64, error)
 }
 ```
 

@@ -26,6 +26,7 @@
 | `casbin_rule` | Casbin 策略规则表 | - | 少 |
 | `menus` | 菜单管理表 | Menu 实体 | 少 |
 | `operation_logs` | 统一操作日志表 | OperationLog 聚合根 | 500 万+ |
+| `messages` | 站内消息通知表 | Message 聚合根 | 100 万+ |
 
 ## ER 图
 
@@ -124,6 +125,17 @@ erDiagram
         varchar_50 browser
         varchar_50 os
         jsonb metadata
+        timestamp created_at
+    }
+    
+    messages {
+        varchar_50 id PK
+        varchar_50 recipient_id FK
+        varchar_50 category
+        varchar_200 title
+        text content
+        bool is_read
+        timestamp read_at
         timestamp created_at
     }
 ```
@@ -406,6 +418,50 @@ CREATE INDEX idx_operation_logs_failed ON operation_logs(status, created_at DESC
   "changed_by": "admin-001"
 }
 ```
+
+### 6. messages（站内消息通知表）
+
+**功能**：存储系统发送给用户的站内通知消息
+
+**DDL**：
+```sql
+CREATE TABLE messages (
+    id VARCHAR(50) PRIMARY KEY,               -- ULID 主键
+    recipient_id VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category VARCHAR(50) NOT NULL,            -- 消息分类
+    title VARCHAR(200) NOT NULL,              -- 消息标题
+    content TEXT NOT NULL,                    -- 消息正文
+    is_read BOOLEAN DEFAULT FALSE,            -- 是否已读
+    read_at TIMESTAMP,                        -- 读取时间
+    created_at TIMESTAMP DEFAULT NOW()        -- 创建时间
+);
+
+-- 索引
+CREATE INDEX idx_messages_recipient ON messages(recipient_id, created_at DESC);
+CREATE INDEX idx_messages_unread ON messages(recipient_id) WHERE is_read = FALSE;
+```
+
+**字段说明**：
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| `id` | VARCHAR(50) | PK | ULID 主键 |
+| `recipient_id` | VARCHAR(50) | FK → users | 接收用户 |
+| `category` | VARCHAR(50) | NOT NULL | 分类：points/goal/remind/exchange/companion/review |
+| `title` | VARCHAR(200) | NOT NULL | 消息标题 |
+| `content` | TEXT | NOT NULL | 消息正文 |
+| `is_read` | BOOLEAN | DEFAULT FALSE | 未读/已读 |
+| `read_at` | TIMESTAMP | NULLABLE | 已读时记录 |
+| `created_at` | TIMESTAMP | DEFAULT NOW | 创建时间 |
+
+**分类枚举**：
+| category | 说明 |
+|----------|------|
+| `points` | 积分变动 |
+| `goal` | 目标相关 |
+| `remind` | 提醒通知 |
+| `exchange` | 兑换通知 |
+| `companion` | 伙伴相关 |
+| `review` | 验收通知 |
 
 ## 索引策略
 

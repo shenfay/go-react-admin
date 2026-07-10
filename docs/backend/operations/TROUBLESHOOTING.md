@@ -65,7 +65,7 @@ brew services start postgresql
 createdb -h localhost -U postgres kiqi
 
 # 运行迁移
-cd backend
+cd server
 make migrate up
 ```
 
@@ -145,7 +145,7 @@ ERROR: relation "users" already exists
 **解决方案**：
 ```bash
 # 查看迁移状态
-cd backend
+cd server
 go run ./cmd/cli migrate version
 
 # 强制设置版本号
