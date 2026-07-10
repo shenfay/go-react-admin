@@ -5,14 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/shenfay/kiqi/internal/app/shared/operationlog"
 	"github.com/shenfay/kiqi/internal/domain/rbac"
 	"github.com/shenfay/kiqi/internal/domain/shared/events"
 	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/infra/authorize"
 	"github.com/shenfay/kiqi/pkg/errors"
-	"github.com/shenfay/kiqi/pkg/logger"
-	"github.com/shenfay/kiqi/pkg/utils"
-	"go.uber.org/zap"
 )
 
 // Service 管理员应用服务
@@ -22,6 +20,7 @@ type Service struct {
 	menuRepo rbac.MenuRepository
 	enforcer *authorize.Enforcer
 	eventBus events.Bus
+	recorder *operationlog.OperationRecorder
 }
 
 // NewService 创建管理员应用服务
@@ -32,6 +31,7 @@ func NewService(userRepo user.UserRepository, roleRepo rbac.RoleRepository, menu
 		menuRepo: menuRepo,
 		enforcer: enforcer,
 		eventBus: eventBus,
+		recorder: operationlog.NewOperationRecorder(eventBus),
 	}
 }
 
@@ -87,14 +87,10 @@ func (s *Service) CreateUser(ctx context.Context, cmd CreateUserCmd) (*UserDTO, 
 		}
 	}
 
-	dto := toUserDTO(u)
-	roles, _ := s.roleRepo.FindByUserID(ctx, u.ID)
-	if roles != nil {
-		dto.Roles = rolesToBriefs(roles)
-	}
+	dto := s.buildUserDTO(ctx, u)
 
 	// 记录操作日志
-	s.recordOperation(ctx, "USER.CREATE", "USER", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "USER.CREATE", "USER", "SUCCESS",
 		map[string]interface{}{"target_user_id": u.ID, "email": u.Email},
 	)
 
@@ -129,14 +125,10 @@ func (s *Service) UpdateUser(ctx context.Context, cmd UpdateUserCmd) (*UserDTO, 
 		}
 	}
 
-	dto := toUserDTO(u)
-	roles, _ := s.roleRepo.FindByUserID(ctx, u.ID)
-	if roles != nil {
-		dto.Roles = rolesToBriefs(roles)
-	}
+	dto := s.buildUserDTO(ctx, u)
 
 	// 记录操作日志
-	s.recordOperation(ctx, "USER.UPDATE", "USER", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "USER.UPDATE", "USER", "SUCCESS",
 		map[string]interface{}{"target_user_id": u.ID, "name": cmd.Name, "email": cmd.Email},
 	)
 
@@ -161,7 +153,7 @@ func (s *Service) ToggleUserStatus(ctx context.Context, userID string, locked bo
 	if locked {
 		action = "USER.DISABLE"
 	}
-	s.recordOperation(ctx, action, "USER", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, action, "USER", "SUCCESS",
 		map[string]interface{}{"target_user_id": userID},
 	)
 
@@ -192,7 +184,7 @@ func (s *Service) CreateRole(ctx context.Context, cmd CreateRoleCmd) (*RoleDTO, 
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "ROLE.CREATE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "ROLE.CREATE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"role_id": r.ID, "role_name": cmd.Name, "role_code": cmd.Code},
 	)
 
@@ -212,7 +204,7 @@ func (s *Service) UpdateRole(ctx context.Context, cmd UpdateRoleCmd) (*RoleDTO, 
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "ROLE.UPDATE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "ROLE.UPDATE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"role_id": cmd.RoleID, "role_name": cmd.Name},
 	)
 
@@ -226,7 +218,7 @@ func (s *Service) DeleteRole(ctx context.Context, roleID string) error {
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "ROLE.DELETE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "ROLE.DELETE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"role_id": roleID},
 	)
 
@@ -245,7 +237,7 @@ func (s *Service) ToggleRoleStatus(ctx context.Context, roleID string) error {
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "ROLE.TOGGLE_STATUS", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "ROLE.TOGGLE_STATUS", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"role_id": roleID, "status": r.Status},
 	)
 
@@ -266,7 +258,7 @@ func (s *Service) UpdateRolePermissions(ctx context.Context, roleID string, perm
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "PERMISSION.UPDATE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "PERMISSION.UPDATE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"role_id": roleID, "permissions_count": len(permissions)},
 	)
 
@@ -302,7 +294,7 @@ func (s *Service) CreateMenu(ctx context.Context, cmd CreateMenuCmd) (*MenuDTO, 
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "MENU.CREATE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "MENU.CREATE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"menu_id": m.ID, "menu_key": cmd.Key, "label": cmd.Label},
 	)
 
@@ -322,7 +314,7 @@ func (s *Service) UpdateMenu(ctx context.Context, cmd UpdateMenuCmd) (*MenuDTO, 
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "MENU.UPDATE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "MENU.UPDATE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"menu_id": cmd.MenuID, "label": cmd.Label},
 	)
 
@@ -336,7 +328,7 @@ func (s *Service) DeleteMenu(ctx context.Context, menuID string) error {
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "MENU.DELETE", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "MENU.DELETE", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"menu_id": menuID},
 	)
 
@@ -355,7 +347,7 @@ func (s *Service) ToggleMenuStatus(ctx context.Context, menuID string) error {
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "MENU.TOGGLE_STATUS", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "MENU.TOGGLE_STATUS", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"menu_id": menuID, "status": m.Status},
 	)
 
@@ -371,7 +363,7 @@ func (s *Service) UpdateMenuSort(ctx context.Context, cmd SortMenuCmd) error {
 	}
 
 	// 记录操作日志
-	s.recordOperation(ctx, "MENU.SORT", "SYSTEM", "SUCCESS",
+	s.recorder.RecordFromContext(ctx, "MENU.SORT", "SYSTEM", "SUCCESS",
 		map[string]interface{}{"items_count": len(cmd.Items)},
 	)
 
@@ -417,6 +409,15 @@ func (s *Service) getUserPermissionsWithMenus(ctx context.Context, userID string
 		Menus:       menus,
 	}
 	return perm, allMenus, nil
+}
+
+// buildUserDTO 构建用户 DTO（包含角色信息）
+func (s *Service) buildUserDTO(ctx context.Context, u *user.User) *UserDTO {
+	dto := toUserDTO(u)
+	if roles, _ := s.roleRepo.FindByUserID(ctx, u.ID); roles != nil {
+		dto.Roles = rolesToBriefs(roles)
+	}
+	return dto
 }
 
 // ---- 命令对象 ----
@@ -654,31 +655,4 @@ func (s *Service) GetUserMenuTree(ctx context.Context, userID string) ([]*rbac.M
 	return buildMenuTree(visibleMenus, ""), nil
 }
 
-// recordOperation 统一操作日志记录方法
-// 发布 OperationEvent 到事件总线，通过 Bridge → Asynq → Worker 异步写入数据库
-// 操作人信息和请求元数据均从 context 自动提取
-// 日志记录失败不影响主流程，仅输出 warn 级别日志
-func (s *Service) recordOperation(ctx context.Context, action, category, status string, metadata map[string]interface{}) {
-	if s.eventBus == nil {
-		return
-	}
-	userID := utils.GetOperatorUserID(ctx)
-	email := utils.GetOperatorEmail(ctx)
-	ip := utils.GetRequestIP(ctx)
-	userAgent := utils.GetRequestUserAgent(ctx)
-	device := utils.GetRequestDevice(ctx)
-	browser := utils.GetRequestBrowser(ctx)
-	os := utils.GetRequestOS(ctx)
 
-	evt := events.NewOperationEvent(action, category, status).
-		WithUser(userID, email).
-		WithRequestInfo(ip, userAgent, device, browser, os).
-		WithMetadata(metadata)
-	if err := s.eventBus.Publish(ctx, evt); err != nil {
-		logger.Warn("Failed to record operation log",
-			zap.String("action", action),
-			zap.String("user_id", userID),
-			zap.Error(err),
-		)
-	}
-}

@@ -42,19 +42,19 @@ const docTemplate = `{
                     "200": {
                         "description": "菜单树",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -113,31 +113,31 @@ const docTemplate = `{
                     "201": {
                         "description": "创建成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "菜单Key已存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -191,25 +191,25 @@ const docTemplate = `{
                     "200": {
                         "description": "排序已更新",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -268,31 +268,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "菜单不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -323,25 +323,25 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "菜单不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -374,25 +374,25 @@ const docTemplate = `{
                     "200": {
                         "description": "状态已切换",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "菜单不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -444,19 +444,19 @@ const docTemplate = `{
                     "200": {
                         "description": "消息列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -480,19 +480,19 @@ const docTemplate = `{
                     "200": {
                         "description": "角色列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -539,31 +539,31 @@ const docTemplate = `{
                     "201": {
                         "description": "创建成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "角色编码已存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -616,31 +616,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "角色不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -671,25 +671,25 @@ const docTemplate = `{
                     "200": {
                         "description": "删除成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "角色不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -722,25 +722,25 @@ const docTemplate = `{
                     "200": {
                         "description": "权限列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "角色不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -791,31 +791,31 @@ const docTemplate = `{
                     "200": {
                         "description": "权限已更新",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "角色不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -848,25 +848,25 @@ const docTemplate = `{
                     "200": {
                         "description": "状态已切换",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "角色不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -928,19 +928,19 @@ const docTemplate = `{
                     "200": {
                         "description": "用户列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -993,31 +993,31 @@ const docTemplate = `{
                     "201": {
                         "description": "创建成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "邮箱已存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1076,31 +1076,31 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "用户不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1150,31 +1150,31 @@ const docTemplate = `{
                     "200": {
                         "description": "状态已更新",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "用户不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1197,13 +1197,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.DevicesResponse"
+                            "$ref": "#/definitions/internal_transport_http_handlers.DevicesResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1243,13 +1243,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1274,7 +1274,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginRequest"
+                            "$ref": "#/definitions/internal_transport_http_handlers.LoginRequest"
                         }
                     }
                 ],
@@ -1284,13 +1284,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/response.SuccessResponse"
+                                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/authentication.AuthResponse"
+                                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.AuthResponse"
                                         }
                                     }
                                 }
@@ -1300,25 +1300,25 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "账号或密码错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "423": {
                         "description": "账户已锁定",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1352,7 +1352,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1383,7 +1383,7 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1407,13 +1407,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/authentication.UserResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.UserResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1437,19 +1437,19 @@ const docTemplate = `{
                     "200": {
                         "description": "菜单树",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1473,19 +1473,19 @@ const docTemplate = `{
                     "200": {
                         "description": "权限列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1510,7 +1510,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RefreshTokenRequest"
+                            "$ref": "#/definitions/internal_transport_http_handlers.RefreshTokenRequest"
                         }
                     }
                 ],
@@ -1518,19 +1518,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/authentication.AuthResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.AuthResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Invalid or expired token",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1555,7 +1555,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterRequest"
+                            "$ref": "#/definitions/internal_transport_http_handlers.RegisterRequest"
                         }
                     }
                 ],
@@ -1565,13 +1565,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/response.SuccessResponse"
+                                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/authentication.AuthResponse"
+                                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.AuthResponse"
                                         }
                                     }
                                 }
@@ -1581,19 +1581,19 @@ const docTemplate = `{
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "邮箱已存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1655,19 +1655,19 @@ const docTemplate = `{
                     "200": {
                         "description": "消息列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1696,7 +1696,7 @@ const docTemplate = `{
                         "name": "request",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/notification.ReadAllCmd"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_notification.ReadAllCmd"
                         }
                     }
                 ],
@@ -1704,19 +1704,19 @@ const docTemplate = `{
                     "200": {
                         "description": "标记成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1740,19 +1740,19 @@ const docTemplate = `{
                     "200": {
                         "description": "未读计数",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1785,31 +1785,31 @@ const docTemplate = `{
                     "200": {
                         "description": "标记成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "无权操作",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "消息不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1861,19 +1861,19 @@ const docTemplate = `{
                     "200": {
                         "description": "操作日志列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1920,19 +1920,19 @@ const docTemplate = `{
                     "200": {
                         "description": "分类操作日志",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -1979,19 +1979,19 @@ const docTemplate = `{
                     "200": {
                         "description": "用户操作日志",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -2023,19 +2023,19 @@ const docTemplate = `{
                     "200": {
                         "description": "设置列表",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -2063,7 +2063,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.batchUpdateRequest"
+                            "$ref": "#/definitions/internal_transport_http_handlers.batchUpdateRequest"
                         }
                     }
                 ],
@@ -2071,25 +2071,25 @@ const docTemplate = `{
                     "200": {
                         "description": "更新成功",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "请求参数错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -2122,25 +2122,25 @@ const docTemplate = `{
                     "200": {
                         "description": "设置详情",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "设置项不存在",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -2173,19 +2173,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/authentication.UserResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.UserResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "User not found",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse"
                         }
                     }
                 }
@@ -2193,7 +2193,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "authentication.AuthResponse": {
+        "github_com_shenfay_kiqi_internal_app_authentication.AuthResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -2203,17 +2203,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "permissions": {
-                    "$ref": "#/definitions/rbac.UserPermission"
+                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_domain_rbac.UserPermission"
                 },
                 "refresh_token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/authentication.UserResponse"
+                    "$ref": "#/definitions/github_com_shenfay_kiqi_internal_app_authentication.UserResponse"
                 }
             }
         },
-        "authentication.UserResponse": {
+        "github_com_shenfay_kiqi_internal_app_authentication.UserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2236,7 +2236,92 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.DeviceResponse": {
+        "github_com_shenfay_kiqi_internal_app_notification.ReadAllCmd": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shenfay_kiqi_internal_domain_rbac.RoleBrief": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shenfay_kiqi_internal_domain_rbac.UserPermission": {
+            "type": "object",
+            "properties": {
+                "menus": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_shenfay_kiqi_internal_domain_rbac.RoleBrief"
+                    }
+                }
+            }
+        },
+        "github_com_shenfay_kiqi_internal_transport_http_response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "details": {},
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "响应时间（RFC3339 格式）",
+                    "type": "string"
+                },
+                "trace_id": {
+                    "description": "链路追踪 ID（用于日志关联和分布式追踪）",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_shenfay_kiqi_internal_transport_http_response.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "响应时间（RFC3339 格式）",
+                    "type": "string"
+                },
+                "trace_id": {
+                    "description": "链路追踪 ID（用于日志关联和分布式追踪）",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_transport_http_handlers.DeviceResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2259,18 +2344,18 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.DevicesResponse": {
+        "internal_transport_http_handlers.DevicesResponse": {
             "type": "object",
             "properties": {
                 "devices": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/handlers.DeviceResponse"
+                        "$ref": "#/definitions/internal_transport_http_handlers.DeviceResponse"
                     }
                 }
             }
         },
-        "handlers.LoginRequest": {
+        "internal_transport_http_handlers.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2287,7 +2372,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.RefreshTokenRequest": {
+        "internal_transport_http_handlers.RefreshTokenRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -2299,7 +2384,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.RegisterRequest": {
+        "internal_transport_http_handlers.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -2319,91 +2404,35 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.batchUpdateRequest": {
-            "type": "object"
-        },
-        "notification.ReadAllCmd": {
+        "internal_transport_http_handlers.batchUpdateRequest": {
             "type": "object",
+            "required": [
+                "settings"
+            ],
             "properties": {
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "rbac.RoleBrief": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "rbac.UserPermission": {
-            "type": "object",
-            "properties": {
-                "menus": {
+                "settings": {
                     "type": "array",
                     "items": {
-                        "type": "string"
-                    }
-                },
-                "permissions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/rbac.RoleBrief"
+                        "$ref": "#/definitions/internal_transport_http_handlers.settingItem"
                     }
                 }
             }
         },
-        "response.ErrorResponse": {
+        "internal_transport_http_handlers.settingItem": {
             "type": "object",
+            "required": [
+                "key",
+                "value"
+            ],
             "properties": {
-                "code": {
+                "key": {
                     "type": "string"
                 },
-                "details": {},
-                "message": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "description": "响应时间（RFC3339 格式）",
-                    "type": "string"
-                },
-                "trace_id": {
-                    "description": "链路追踪 ID（用于日志关联和分布式追踪）",
-                    "type": "string"
-                }
-            }
-        },
-        "response.SuccessResponse": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "data": {},
-                "message": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "description": "响应时间（RFC3339 格式）",
-                    "type": "string"
-                },
-                "trace_id": {
-                    "description": "链路追踪 ID（用于日志关联和分布式追踪）",
-                    "type": "string"
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         }
