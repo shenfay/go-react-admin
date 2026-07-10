@@ -88,59 +88,25 @@ func (r *operationLogRepository) Save(ctx context.Context, log *operation.Operat
 	return r.db.WithContext(ctx).Create(fromDomain(log)).Error
 }
 
-// FindByUserID 根据用户 ID 查找日志
-func (r *operationLogRepository) FindByUserID(ctx context.Context, userID string, limit int, offset int) ([]*operation.OperationLog, error) {
+// FindWithFilter 根据过滤条件查询日志（统一查询入口）
+// 替代原有的 FindByUserID/FindByCategory/FindByAction/FindAll 四个方法
+func (r *operationLogRepository) FindWithFilter(ctx context.Context, filter operation.LogFilter) ([]*operation.OperationLog, error) {
 	var pos []*operationLogPO
 
 	query := r.db.WithContext(ctx).Model(&operationLogPO{})
-	if userID != "" {
-		query = query.Where("user_id = ?", userID)
+	if filter.UserID != "" {
+		query = query.Where("user_id = ?", filter.UserID)
+	}
+	if filter.Category != "" {
+		query = query.Where("category = ?", filter.Category)
+	}
+	if filter.Action != "" {
+		query = query.Where("action = ?", filter.Action)
 	}
 
 	err := query.Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
-		Find(&pos).Error
-
-	return toDomainList(pos), err
-}
-
-// FindByCategory 根据分类查找日志
-func (r *operationLogRepository) FindByCategory(ctx context.Context, category string, limit int, offset int) ([]*operation.OperationLog, error) {
-	var pos []*operationLogPO
-
-	err := r.db.WithContext(ctx).
-		Where("category = ?", category).
-		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
-		Find(&pos).Error
-
-	return toDomainList(pos), err
-}
-
-// FindByAction 根据操作类型查找日志
-func (r *operationLogRepository) FindByAction(ctx context.Context, action string, limit int, offset int) ([]*operation.OperationLog, error) {
-	var pos []*operationLogPO
-
-	err := r.db.WithContext(ctx).
-		Where("action = ?", action).
-		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
-		Find(&pos).Error
-
-	return toDomainList(pos), err
-}
-
-// FindAll 查找所有日志（支持分页）
-func (r *operationLogRepository) FindAll(ctx context.Context, limit int, offset int) ([]*operation.OperationLog, error) {
-	var pos []*operationLogPO
-
-	err := r.db.WithContext(ctx).
-		Order("created_at DESC").
-		Limit(limit).
-		Offset(offset).
+		Limit(filter.Limit).
+		Offset(filter.Offset).
 		Find(&pos).Error
 
 	return toDomainList(pos), err

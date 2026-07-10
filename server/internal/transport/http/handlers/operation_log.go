@@ -43,27 +43,21 @@ func (h *OperationLogHandler) RegisterRoutes(rg *gin.RouterGroup) {
 func (h *OperationLogHandler) ListOperationLogs(c *gin.Context) {
 	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
 	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
-	category := c.Query("category")
-	action := c.Query("action")
 
-	var logs []*operation.OperationLog
-	var err error
-
-	switch {
-	case category != "":
-		logs, err = h.operationLogRepo.FindByCategory(c.Request.Context(), category, limit, offset)
-	case action != "":
-		logs, err = h.operationLogRepo.FindByAction(c.Request.Context(), action, limit, offset)
-	default:
-		logs, err = h.operationLogRepo.FindAll(c.Request.Context(), limit, offset)
+	filter := operation.LogFilter{
+		Category: c.Query("category"),
+		Action:   c.Query("action"),
+		Limit:    limit,
+		Offset:   offset,
 	}
 
+	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
 	if err != nil {
 		response.Error(c, err)
 		return
 	}
 
-	total, _ := h.operationLogRepo.Count(c.Request.Context(), category, action, "")
+	total, _ := h.operationLogRepo.Count(c.Request.Context(), filter.Category, filter.Action, "")
 
 	response.Success(c, gin.H{
 		"data":   logs,
@@ -90,7 +84,13 @@ func (h *OperationLogHandler) GetUserOperationLogs(c *gin.Context) {
 	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
 	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
 
-	logs, err := h.operationLogRepo.FindByUserID(c.Request.Context(), userID, limit, offset)
+	filter := operation.LogFilter{
+		UserID: userID,
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
 	if err != nil {
 		response.Error(c, err)
 		return
@@ -123,7 +123,13 @@ func (h *OperationLogHandler) GetCategoryOperationLogs(c *gin.Context) {
 	limit := utils.ToInt(c.DefaultQuery("limit", "20"))
 	offset := utils.ToInt(c.DefaultQuery("offset", "0"))
 
-	logs, err := h.operationLogRepo.FindByCategory(c.Request.Context(), category, limit, offset)
+	filter := operation.LogFilter{
+		Category: category,
+		Limit:    limit,
+		Offset:   offset,
+	}
+
+	logs, err := h.operationLogRepo.FindWithFilter(c.Request.Context(), filter)
 	if err != nil {
 		response.Error(c, err)
 		return
