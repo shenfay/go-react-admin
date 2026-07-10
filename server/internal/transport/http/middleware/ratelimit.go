@@ -83,16 +83,18 @@ func RateLimitMiddleware(rl *RateLimiter) gin.HandlerFunc {
 	}
 }
 
+// 包级单例限流器，避免每次请求创建新实例导致限流失效
+var (
+	loginLimiter   = NewRateLimiter(rate.Every(time.Minute/5), 10)   // 5 次/分钟，突发 10 次
+	generalLimiter = NewRateLimiter(rate.Every(time.Minute/60), 100) // 60 次/分钟，突发 100 次
+)
+
 // LoginRateLimit 登录接口专用速率限制（更严格）
 func LoginRateLimit() gin.HandlerFunc {
-	// 5 次/分钟，突发 10 次
-	rl := NewRateLimiter(rate.Every(time.Minute/5), 10)
-	return RateLimitMiddleware(rl)
+	return RateLimitMiddleware(loginLimiter)
 }
 
 // GeneralRateLimit 通用速率限制
 func GeneralRateLimit() gin.HandlerFunc {
-	// 60 次/分钟，突发 100 次
-	rl := NewRateLimiter(rate.Every(time.Minute/60), 100)
-	return RateLimitMiddleware(rl)
+	return RateLimitMiddleware(generalLimiter)
 }

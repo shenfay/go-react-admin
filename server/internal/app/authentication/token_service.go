@@ -150,6 +150,18 @@ func (s *TokenServiceImpl) StoreDeviceInfo(ctx context.Context, token string, de
 	return nil
 }
 
+// LinkAccessToDevice 建立 access_token → device_token_id 映射，用于标识当前请求对应的设备
+func (s *TokenServiceImpl) LinkAccessToDevice(ctx context.Context, accessToken, deviceTokenID string) error {
+	key := fmt.Sprintf("%s%s", constants.RedisKeyAccessDevice, accessToken)
+	return s.redisClient.Set(ctx, key, deviceTokenID, s.accessExpire).Err()
+}
+
+// GetCurrentDeviceTokenID 根据 access_token 获取当前设备对应的 device_token_id
+func (s *TokenServiceImpl) GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error) {
+	key := fmt.Sprintf("%s%s", constants.RedisKeyAccessDevice, accessToken)
+	return s.redisClient.Get(ctx, key).Result()
+}
+
 // RevokeToken 撤销 Token
 func (s *TokenServiceImpl) RevokeToken(ctx context.Context, tokenID string) error {
 	key := fmt.Sprintf("%s%s", constants.RedisKeyRefreshToken, tokenID)

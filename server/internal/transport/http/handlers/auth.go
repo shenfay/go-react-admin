@@ -233,11 +233,20 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	response.Success(c, authentication.ToUserResponse(u))
 }
 
-// maskIP 脱敏 IP 地址
+// maskIP 脱敏 IP 地址（支持 IPv4 和 IPv6）
 func maskIP(ip string) string {
 	if ip == "" {
 		return ""
 	}
+	// IPv6 包含冒号
+	if strings.Contains(ip, ":") {
+		parts := strings.Split(ip, ":")
+		if len(parts) >= 3 {
+			return parts[0] + ":" + parts[1] + ":***"
+		}
+		return ip[:len(ip)/2] + "***"
+	}
+	// IPv4
 	parts := strings.Split(ip, ".")
 	if len(parts) == 4 {
 		return parts[0] + "." + parts[1] + ".***"
@@ -280,6 +289,15 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 		return
 	}
 
+	// 通过 access_token → device_token 映射标识当前设备
+	currentDeviceTokenID := ""
+	authHeader := c.GetHeader("Authorization")
+	if parts := strings.SplitN(authHeader, " ", 2); len(parts) == 2 && parts[0] == "Bearer" {
+		if id, err := h.tokenService.GetCurrentDeviceTokenID(c.Request.Context(), parts[1]); err == nil {
+			currentDeviceTokenID = id
+		}
+	}
+
 	var deviceResponses []DeviceResponse
 	for _, device := range devices {
 		deviceResponses = append(deviceResponses, DeviceResponse{
@@ -288,7 +306,7 @@ func (h *AuthHandler) GetUserDevices(c *gin.Context) {
 			IP:         maskIP(device.IP),
 			UserAgent:  device.UserAgent,
 			CreatedAt:  device.CreatedAt,
-			IsCurrent:  false,
+			IsCurrent:  device.TokenID == currentDeviceTokenID,
 		})
 	}
 
@@ -383,7 +401,7 @@ func detectDeviceType(userAgent string) string {
 	if strings.Contains(userAgent, "iPad") || strings.Contains(userAgent, "Tablet") {
 		return "tablet"
 	}
-	if strings.ContainsAny(userAgent, "MobileAndroidiPhone") {
+	if strings.Contains(userAgent, "Mobile") || strings.Contains(userAgent, "Android") || strings.Contains(userAgent, "iPhone") {
 		return "mobile"
 	}
 

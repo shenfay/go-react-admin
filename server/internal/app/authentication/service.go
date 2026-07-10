@@ -32,6 +32,8 @@ type TokenService interface {
 	ValidateRefreshTokenWithDevice(ctx context.Context, token string) (*DeviceInfo, error)
 	ValidateAccessToken(tokenString string) (*JWTClaims, error)
 	StoreDeviceInfo(ctx context.Context, token string, deviceInfo DeviceInfo) error
+	LinkAccessToDevice(ctx context.Context, accessToken, deviceTokenID string) error
+	GetCurrentDeviceTokenID(ctx context.Context, accessToken string) (string, error)
 	RevokeDeviceByToken(ctx context.Context, token string) error
 	RevokeAllDevices(ctx context.Context, userID string) error
 	GetUserDevices(ctx context.Context, userID string) ([]DeviceInfo, error)
@@ -200,6 +202,9 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		// 日志已在 StoreDeviceInfo 内部处理
 	}
 
+	// 6.1 建立 access_token → device_token 映射，用于标识当前设备
+	s.tokenService.LinkAccessToDevice(ctx, tokens.AccessToken, tokens.RefreshToken)
+
 	// 7. 记录操作日志
 	s.recordOperation(ctx, "AUTH.LOGIN.SUCCESS", "AUTH", "SUCCESS",
 		u.ID, u.Email,
@@ -300,6 +305,9 @@ func (s *Service) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*S
 	}); err != nil {
 		return nil, err
 	}
+
+	// 5.1 建立 access_token → device_token 映射
+	s.tokenService.LinkAccessToDevice(ctx, tokens.AccessToken, tokens.RefreshToken)
 
 	// 6. 更新最后登录时间
 	u.UpdateLastLogin()
