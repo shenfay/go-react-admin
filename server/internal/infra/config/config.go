@@ -9,13 +9,16 @@ import (
 
 // Config 应用程序配置
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	JWT      JWTConfig      `mapstructure:"jwt"`
-	Asynq    AsynqConfig    `mapstructure:"asynq"`
-	Logger   LoggerConfig   `mapstructure:"logger"`
-	CORS     CORSConfig     `mapstructure:"cors"`
+	Server    ServerConfig    `mapstructure:"server"`
+	Database  DatabaseConfig  `mapstructure:"database"`
+	Redis     RedisConfig     `mapstructure:"redis"`
+	JWT       JWTConfig       `mapstructure:"jwt"`
+	Asynq     AsynqConfig     `mapstructure:"asynq"`
+	Logger    LoggerConfig    `mapstructure:"logger"`
+	CORS      CORSConfig      `mapstructure:"cors"`
+	Auth      AuthConfig      `mapstructure:"auth"`
+	Email     EmailConfig     `mapstructure:"email"`
+	WebSocket WebSocketConfig `mapstructure:"websocket"`
 }
 
 // ServerConfig HTTP 服务器配置
@@ -78,6 +81,25 @@ type LoggerConfig struct {
 	OutputPath string `mapstructure:"output_path"`
 }
 
+// AuthConfig 认证配置
+type AuthConfig struct {
+	MaxDevicesPerUser       int           `mapstructure:"max_devices_per_user"`
+	AutoRevokeOldest        bool          `mapstructure:"auto_revoke_oldest"`
+	EmailVerificationExpire time.Duration `mapstructure:"email_verification_expire"`
+	PasswordResetExpire     time.Duration `mapstructure:"password_reset_expire"`
+}
+
+// EmailConfig 邮件配置
+type EmailConfig struct {
+	From                     string `mapstructure:"from"`
+	VerificationURLTemplate  string `mapstructure:"verification_url_template"`
+	PasswordResetURLTemplate string `mapstructure:"password_reset_url_template"`
+	SMTPHost                 string `mapstructure:"smtp_host"`
+	SMTPPort                 int    `mapstructure:"smtp_port"`
+	SMTPUsername             string `mapstructure:"smtp_username"`
+	SMTPPassword             string `mapstructure:"smtp_password"`
+}
+
 // CORSConfig 跨域配置
 type CORSConfig struct {
 	AllowedOrigins   []string `mapstructure:"allowed_origins"`
@@ -85,6 +107,11 @@ type CORSConfig struct {
 	AllowedHeaders   []string `mapstructure:"allowed_headers"`
 	AllowCredentials bool     `mapstructure:"allow_credentials"`
 	MaxAge           int      `mapstructure:"max_age"`
+}
+
+// WebSocketConfig WebSocket 实时推送配置
+type WebSocketConfig struct {
+	Enabled bool `mapstructure:"enabled"` // 是否启用 WebSocket 端点
 }
 
 // Load 加载配置
@@ -158,10 +185,28 @@ func setDefaults() {
 	viper.SetDefault("logger.format", "console")
 	viper.SetDefault("logger.output_path", "stdout")
 
+	// Auth
+	viper.SetDefault("auth.max_devices_per_user", 5)
+	viper.SetDefault("auth.auto_revoke_oldest", false)
+	viper.SetDefault("auth.email_verification_expire", 24*time.Hour)
+	viper.SetDefault("auth.password_reset_expire", 1*time.Hour)
+
+	// Email
+	viper.SetDefault("email.from", "noreply@example.com")
+	viper.SetDefault("email.verification_url_template", "http://localhost:3000/verify-email?token=%s&user_id=%s")
+	viper.SetDefault("email.password_reset_url_template", "http://localhost:3000/reset-password?token=%s&user_id=%s")
+	viper.SetDefault("email.smtp_host", "")
+	viper.SetDefault("email.smtp_port", 587)
+	viper.SetDefault("email.smtp_username", "")
+	viper.SetDefault("email.smtp_password", "")
+
 	// CORS
 	viper.SetDefault("cors.allowed_origins", []string{"http://localhost:5173"})
 	viper.SetDefault("cors.allowed_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 	viper.SetDefault("cors.allowed_headers", []string{"Authorization", "Content-Type", "X-Requested-With"})
 	viper.SetDefault("cors.allow_credentials", true)
 	viper.SetDefault("cors.max_age", 3600)
+
+	// WebSocket
+	viper.SetDefault("websocket.enabled", true)
 }

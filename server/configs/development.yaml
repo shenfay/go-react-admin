@@ -76,3 +76,7 @@ email:
   from: noreply@example.com
   verification_url_template: "http://localhost:3000/verify-email?token=%s&user_id=%s"
   password_reset_url_template: "http://localhost:3000/reset-password?token=%s&user_id=%s"
+
+# WebSocket 实时推送配置
+websocket:
+  enabled: true  # 是否启用 WebSocket 端点（设为 false 则完全禁用实时推送）

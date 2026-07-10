@@ -5,6 +5,7 @@ import (
 	"github.com/shenfay/kiqi/internal/app/notification"
 	domain "github.com/shenfay/kiqi/internal/domain/notification"
 	"github.com/shenfay/kiqi/internal/transport/http/response"
+	validationErr "github.com/shenfay/kiqi/pkg/errors/validation"
 	"github.com/shenfay/kiqi/pkg/utils"
 )
 
@@ -29,6 +30,7 @@ func (h *NotificationHandler) RegisterRoutes(rg *gin.RouterGroup) {
 // RegisterAdminRoutes 注册管理员消息路由
 func (h *NotificationHandler) RegisterAdminRoutes(rg *gin.RouterGroup) {
 	rg.GET("", h.ListAllMessages)
+	rg.POST("/system", h.SendSystemNotification)
 }
 
 // ListMessages 获取当前用户消息列表
@@ -157,6 +159,42 @@ func (h *NotificationHandler) MarkAllAsRead(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"message": "all marked as read"})
+}
+
+// SendSystemNotificationRequest 发送系统通知请求
+type SendSystemNotificationRequest struct {
+	RecipientID string `json:"recipient_id" binding:"required"`
+	Category    string `json:"category" binding:"required"`
+	Title       string `json:"title" binding:"required,max=255"`
+	Content     string `json:"content" binding:"required,max=2000"`
+}
+
+// SendSystemNotification 发送系统通知
+// @Summary 管理员发送系统通知
+// @Tags Messages
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body SendSystemNotificationRequest true "通知内容"
+// @Success 201 {object} response.SuccessResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "服务器内部错误"
+// @Router /admin/messages/system [post]
+func (h *NotificationHandler) SendSystemNotification(c *gin.Context) {
+	var req SendSystemNotificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, validationErr.FromGinError(err))
+		return
+	}
+
+	category := domain.MessageCategory(req.Category)
+	if err := h.service.SendSystemNotification(c.Request.Context(), req.RecipientID, category, req.Title, req.Content); err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Created(c, gin.H{"message": "系统通知已发送"})
 }
 
 // ListAllMessages 管理员查询所有消息

@@ -5,6 +5,7 @@ go 1.25.6
 require (
 	github.com/casbin/casbin/v3 v3.8.1
 	github.com/casbin/gorm-adapter/v3 v3.41.0
+	github.com/coder/websocket v1.8.15
 	github.com/dromara/carbon/v2 v2.6.16
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/validator/v10 v10.30.1

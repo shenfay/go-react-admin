@@ -13,7 +13,6 @@ import (
 	userErr "github.com/shenfay/kiqi/pkg/errors/user"
 	"github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/metrics"
-	"go.uber.org/zap"
 )
 
 // JWTClaims JWT 自定义声明
@@ -238,8 +237,8 @@ func (s *Service) Login(ctx context.Context, cmd LoginCommand) (*ServiceAuthResp
 		perm, err := s.permissionQuerier.GetUserPermissions(ctx, u.ID)
 		if err != nil {
 			logger.Warn("Failed to query user permissions on login",
-				zap.String("user_id", u.ID),
-				zap.Error(err),
+				"user_id", u.ID,
+				"error", err,
 			)
 		} else {
 			permissions = perm
@@ -260,8 +259,8 @@ func (s *Service) Logout(ctx context.Context, cmd LogoutCommand) error {
 	// 1. 撤销该用户所有设备的登录状态（Refresh Token + 设备信息）
 	if err := s.tokenService.RevokeAllDevices(ctx, cmd.UserID); err != nil {
 		logger.Warn("Failed to revoke devices on logout",
-			zap.String("user_id", cmd.UserID),
-			zap.Error(err),
+			"user_id", cmd.UserID,
+			"error", err,
 		)
 	}
 
@@ -361,5 +360,3 @@ func (s *Service) RevokeDevice(ctx context.Context, userID, token string) error 
 func (s *Service) RevokeAllDevices(ctx context.Context, userID string) error {
 	return s.tokenService.RevokeAllDevices(ctx, userID)
 }
-
-

@@ -19,23 +19,29 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shenfay/kiqi/internal/app/admin"
 	"github.com/shenfay/kiqi/internal/app/authentication"
-	"github.com/shenfay/kiqi/internal/app/shared/operationlog"
+	"github.com/shenfay/kiqi/internal/app/emailverification"
 	notificationapp "github.com/shenfay/kiqi/internal/app/notification"
+	"github.com/shenfay/kiqi/internal/app/passwordreset"
+	"github.com/shenfay/kiqi/internal/app/port"
 	appsetting "github.com/shenfay/kiqi/internal/app/setting"
+	"github.com/shenfay/kiqi/internal/app/shared/operationlog"
+	"github.com/shenfay/kiqi/internal/app/tokenmanager"
 	"github.com/shenfay/kiqi/internal/domain/notification"
 	"github.com/shenfay/kiqi/internal/domain/operation"
 	"github.com/shenfay/kiqi/internal/domain/rbac"
-	"github.com/shenfay/kiqi/internal/domain/user"
 	"github.com/shenfay/kiqi/internal/domain/setting"
+	"github.com/shenfay/kiqi/internal/domain/user"
 	casbinenforcer "github.com/shenfay/kiqi/internal/infra/authorize"
-	"github.com/shenfay/kiqi/internal/infra/config"
 	"github.com/shenfay/kiqi/internal/infra/bus"
+	"github.com/shenfay/kiqi/internal/infra/config"
+	"github.com/shenfay/kiqi/internal/infra/mail"
 	"github.com/shenfay/kiqi/internal/infra/messaging"
 	"github.com/shenfay/kiqi/internal/infra/repository"
+	"github.com/shenfay/kiqi/internal/infra/ws"
 	transhttp "github.com/shenfay/kiqi/internal/transport/http"
 	"github.com/shenfay/kiqi/internal/transport/http/handlers"
-	pkglogger "github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/health"
+	pkglogger "github.com/shenfay/kiqi/pkg/logger"
 	"github.com/shenfay/kiqi/pkg/metrics"
 
 	// 导入生成的 Swagger 文档
@@ -84,7 +90,7 @@ func main() {
 	svcs := initServices(cfg, infra, repos, m)
 
 	// 6. 初始化传输层
-	hdls := initHandlers(svcs, repos)
+	hdls := initHandlers(svcs, repos, infra)
 
 	// 7. 启动 HTTP 服务器
 	startServer(&startDeps{
@@ -95,21 +101,27 @@ func main() {
 		enforcer:     infra.enforcer,
 		db:           infra.db,
 		redisClient:  infra.redisClient,
+		hub:          infra.hub,
 	})
 }
 
 // --- Provider 结构体 ---
 
 type infraDeps struct {
-	db          *gorm.DB
-	redisClient *redis.Client
-	asynqClient *asynq.Client
-	bus         *bus.InProcessBus
-	bridge      *messaging.DomainToIntegrationBridge
-	enforcer    *casbinenforcer.Enforcer
+	db             *gorm.DB
+	redisClient    *redis.Client
+	asynqClient    *asynq.Client
+	bus            *bus.InProcessBus
+	bridge         *messaging.DomainToIntegrationBridge
+	enforcer       *casbinenforcer.Enforcer
+	hub            *ws.Hub
+	pushSubscriber *ws.RedisSubscriber
 }
 
 func (d *infraDeps) close() {
+	if d.pushSubscriber != nil {
+		d.pushSubscriber.Stop()
+	}
 	if sqlDB, _ := d.db.DB(); sqlDB != nil {
 		sqlDB.Close()
 	}
@@ -129,11 +141,13 @@ type repoDeps struct {
 
 // svcDeps 应用服务层依赖
 type svcDeps struct {
-	tokenService    authentication.TokenService
-	authService     *authentication.Service
-	adminService    *admin.Service
-	settingSvc      *appsetting.Service
-	notificationSvc *notificationapp.AppService
+	tokenService     authentication.TokenService
+	authService      *authentication.Service
+	adminService     *admin.Service
+	settingSvc       *appsetting.Service
+	notificationSvc  *notificationapp.AppService
+	emailVerifySvc   *emailverification.Service
+	passwordResetSvc *passwordreset.Service
 }
 
 // handlerDeps 传输层依赖
@@ -143,6 +157,7 @@ type handlerDeps struct {
 	operLogHdlr      *handlers.OperationLogHandler
 	settingHdlr      *handlers.SettingHandler
 	notificationHdlr *handlers.NotificationHandler
+	wsHandler        *handlers.WSHandler
 }
 
 // --- Provider 函数 ---
@@ -191,7 +206,7 @@ func initInfrastructure(cfg *config.Config, m *metrics.Metrics) *infraDeps {
 	}
 	pkglogger.Info("\u2713 Casbin enforcer initialized")
 
-	return &infraDeps{
+	deps := &infraDeps{
 		db:          db,
 		redisClient: redisClient,
 		asynqClient: asynqClient,
@@ -199,6 +214,20 @@ func initInfrastructure(cfg *config.Config, m *metrics.Metrics) *infraDeps {
 		bridge:      bridge,
 		enforcer:    enforcer,
 	}
+
+	// WebSocket 实时推送（根据配置决定是否启用）
+	if cfg.WebSocket.Enabled {
+		hub := ws.NewHub()
+		pushSubscriber := ws.NewRedisSubscriber(redisClient, hub)
+		pushSubscriber.Start()
+		deps.hub = hub
+		deps.pushSubscriber = pushSubscriber
+		pkglogger.Info("\u2713 WebSocket real-time push enabled")
+	} else {
+		pkglogger.Info("WebSocket real-time push is disabled")
+	}
+
+	return deps
 }
 
 // initRepositories 初始化仓储
@@ -216,11 +245,11 @@ func initRepositories(db *gorm.DB) *repoDeps {
 // initServices 初始化应用服务
 func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metrics.Metrics) *svcDeps {
 	tokenService := authentication.NewTokenServiceImpl(authentication.TokenServiceConfig{
-		RedisClient:    infra.redisClient,
-		JWTSecret:      cfg.JWT.Secret,
-		Issuer:         cfg.JWT.Issuer,
-		AccessExpire:   cfg.JWT.AccessExpire,
-		RefreshExpire:  cfg.JWT.RefreshExpire,
+		RedisClient:   infra.redisClient,
+		JWTSecret:     cfg.JWT.Secret,
+		Issuer:        cfg.JWT.Issuer,
+		AccessExpire:  cfg.JWT.AccessExpire,
+		RefreshExpire: cfg.JWT.RefreshExpire,
 	})
 
 	// admin.Service 必须先创建：作为 PermissionQuerier 注入 authentication.Service，
@@ -242,28 +271,73 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 	settingRecorder := operationlog.NewOperationRecorder(infra.bus)
 	settingSvc := appsetting.NewService(domainSettingSvc, settingRecorder)
 
-	// 消息模块
+	// 消息模块（WebSocket 启用时通过 Redis Pub/Sub 推送）
 	notificationDomainSvc := notification.NewService(repos.messageRepo)
-	notificationSvc := notificationapp.NewAppService(notificationDomainSvc)
+	var pushPublisher port.RealtimePusher
+	if infra.hub != nil {
+		pushPublisher = ws.NewRedisPublisher(infra.redisClient)
+	}
+	notificationSvc := notificationapp.NewAppService(notificationDomainSvc, pushPublisher)
+
+	// 令牌管理器（共享邮箱验证 + 密码重置）
+	tokenManager := tokenmanager.NewTokenManager(
+		repository.NewVerificationTokenRepository(infra.db),
+		repository.NewResetTokenRepository(infra.db),
+		infra.redisClient,
+		cfg.Auth.EmailVerificationExpire,
+		cfg.Auth.PasswordResetExpire,
+	)
+
+	// 邮件发送器（开发环境使用 NoopSender）
+	emailSender := mail.NewNoopSender()
+
+	// 操作日志记录器
+	verifRecorder := operationlog.NewOperationRecorder(infra.bus)
+	resetRecorder := operationlog.NewOperationRecorder(infra.bus)
+
+	// 邮箱验证服务
+	emailVerifySvc := emailverification.NewService(
+		tokenManager,
+		repos.userRepo,
+		emailSender,
+		infra.bus,
+		verifRecorder,
+	)
+
+	// 密码重置服务
+	passwordResetSvc := passwordreset.NewService(
+		tokenManager,
+		repos.userRepo,
+		emailSender,
+		infra.bus,
+		resetRecorder,
+	)
 
 	return &svcDeps{
-		tokenService:    tokenService,
-		authService:     authService,
-		adminService:    adminService,
-		settingSvc:      settingSvc,
-		notificationSvc: notificationSvc,
+		tokenService:     tokenService,
+		authService:      authService,
+		adminService:     adminService,
+		settingSvc:       settingSvc,
+		notificationSvc:  notificationSvc,
+		emailVerifySvc:   emailVerifySvc,
+		passwordResetSvc: passwordResetSvc,
 	}
 }
 
 // initHandlers 初始化 HTTP 处理器
-func initHandlers(svcs *svcDeps, repos *repoDeps) *handlerDeps {
-	return &handlerDeps{
-		authHandler:      handlers.NewAuthHandler(svcs.authService),
+func initHandlers(svcs *svcDeps, repos *repoDeps, infra *infraDeps) *handlerDeps {
+	hdls := &handlerDeps{
+		authHandler:      handlers.NewAuthHandler(svcs.authService, svcs.emailVerifySvc, svcs.passwordResetSvc),
 		adminHandler:     handlers.NewAdminHandler(svcs.adminService),
 		operLogHdlr:      handlers.NewOperationLogHandler(repos.operLogRepo),
 		settingHdlr:      handlers.NewSettingHandler(svcs.settingSvc),
 		notificationHdlr: handlers.NewNotificationHandler(svcs.notificationSvc),
 	}
+	// WebSocket 处理器（仅在启用时创建）
+	if infra.hub != nil {
+		hdls.wsHandler = handlers.NewWSHandler(infra.hub, svcs.tokenService)
+	}
+	return hdls
 }
 
 // startDeps 服务器启动依赖
@@ -275,6 +349,7 @@ type startDeps struct {
 	enforcer     *casbinenforcer.Enforcer
 	db           *gorm.DB
 	redisClient  *redis.Client
+	hub          *ws.Hub
 }
 
 // startServer 创建并启动 HTTP 服务器（含优雅关闭）
@@ -297,6 +372,7 @@ func startServer(deps *startDeps) {
 		OperationLogHandler: hdls.operLogHdlr,
 		SettingHandler:      hdls.settingHdlr,
 		NotificationHandler: hdls.notificationHdlr,
+		WSHandler:           hdls.wsHandler,
 		TokenManager:        deps.tokenService,
 		Enforcer:            deps.enforcer,
 	})
@@ -327,6 +403,11 @@ func startServer(deps *startDeps) {
 	<-quit
 
 	log.Println("Shutting down server...")
+
+	// 先关闭 WebSocket 连接，触发 HandleWS 退出
+	if deps.hub != nil {
+		deps.hub.Shutdown()
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

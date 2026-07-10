@@ -18,6 +18,7 @@ type RouterDeps struct {
 	OperationLogHandler *handlers.OperationLogHandler
 	SettingHandler      *handlers.SettingHandler
 	NotificationHandler *handlers.NotificationHandler
+	WSHandler           *handlers.WSHandler
 	TokenManager        authentication.TokenManager
 	Enforcer            *authorize.Enforcer
 }
@@ -30,6 +31,7 @@ type Router struct {
 	operationLogHandler *handlers.OperationLogHandler
 	settingHandler      *handlers.SettingHandler
 	notificationHandler *handlers.NotificationHandler
+	wsHandler           *handlers.WSHandler
 	tokenManager        authentication.TokenManager
 	enforcer            *authorize.Enforcer
 	healthHandler       *health.Handler
@@ -44,6 +46,7 @@ func NewRouter(deps *RouterDeps) *Router {
 		operationLogHandler: deps.OperationLogHandler,
 		settingHandler:      deps.SettingHandler,
 		notificationHandler: deps.NotificationHandler,
+		wsHandler:           deps.WSHandler,
 		tokenManager:        deps.TokenManager,
 		enforcer:            deps.Enforcer,
 	}
@@ -73,6 +76,11 @@ func (r *Router) Setup() {
 	// Prometheus 指标端点
 	r.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
+	// WebSocket 端点（仅在启用时注册）
+	if r.wsHandler != nil {
+		r.engine.GET("/ws", r.wsHandler.ServeWS)
+	}
+
 	// API v1 路由组
 	v1 := r.engine.Group("/api/v1")
 	{
@@ -98,6 +106,13 @@ func (r *Router) setupAuthRoutes(v1 *gin.RouterGroup) {
 		auth.POST("/logout", r.authHandler.Logout)
 		auth.POST("/refresh", r.authHandler.RefreshToken)
 
+		// 邮箱验证（公开）
+		auth.GET("/verify-email", r.authHandler.VerifyEmail)
+
+		// 密码重置（公开）
+		auth.POST("/forgot-password", r.authHandler.ForgotPassword)
+		auth.POST("/reset-password", r.authHandler.ResetPassword)
+
 		// 需要认证的路由
 		authMiddleware := middleware.JWTAuthMiddleware(middleware.JWTAuthConfig{
 			TokenService: r.tokenManager,
@@ -106,6 +121,7 @@ func (r *Router) setupAuthRoutes(v1 *gin.RouterGroup) {
 		auth.GET("/devices", authMiddleware, r.authHandler.GetUserDevices)
 		auth.DELETE("/devices/:token", authMiddleware, r.authHandler.RevokeDevice)
 		auth.POST("/logout-all", authMiddleware, r.authHandler.LogoutAllDevices)
+		auth.POST("/resend-verification", authMiddleware, r.authHandler.ResendVerification)
 	}
 }
 
