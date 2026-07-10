@@ -13,6 +13,7 @@ import {
   type MessageRecord,
 } from '@/services/message'
 import { message } from 'antd'
+import { usePushNotification } from '@/hooks/useWebSocket'
 
 function formatTime(dateStr: string, lang: string): string {
   if (!dateStr) return '-'
@@ -65,11 +66,16 @@ export default function MyMessages() {
     }
   }, [])
 
+  // 初始加载未读数
   useEffect(() => {
     fetchUnread()
-    const timer = setInterval(fetchUnread, 30_000)
-    return () => clearInterval(timer)
   }, [fetchUnread])
+
+  // WebSocket 实时推送：弹出通知 + 刷新列表和未读数
+  usePushNotification(() => {
+    fetchUnread()
+    fetchData()
+  })
 
   const { loading, dataSource, total, page, pageSize, fetchData, handlePageChange } =
     useCrudList<MessageRecord>(

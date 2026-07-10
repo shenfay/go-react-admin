@@ -27,6 +27,7 @@ const MyMessages = lazy(() => import('@/pages/MyMessages'))
 const MessageManagement = lazy(() => import('@/pages/MessageManagement'))
 const SystemSettings = lazy(() => import('@/pages/SystemSettings'))
 const DesignSystem = lazy(() => import('@/pages/DesignSystem'))
+const WebSocketTest = lazy(() => import('@/pages/WebSocketTest'))
 
 /** 懒加载 fallback 加载指示器 */
 const PageLoading = () => (
@@ -122,6 +123,10 @@ const router = createBrowserRouter([
       {
         path: 'design-system',
         element: <PermissionGuard permission="design:view"><DesignSystem /></PermissionGuard>,
+      },
+      {
+        path: 'ws-test',
+        element: <WebSocketTest />,
       },
       {
         path: 'settings',

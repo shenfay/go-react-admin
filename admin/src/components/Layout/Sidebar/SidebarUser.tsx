@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { message } from 'antd'
 import { useTranslation } from 'react-i18next'
 import { getUnreadCount } from '@/services/message'
+import { useWebSocketPush } from '@/hooks/useWebSocket'
 
 interface SidebarUserProps {
   collapsed: boolean
@@ -31,11 +32,14 @@ export default function SidebarUser({ collapsed, username, onLogout }: SidebarUs
     }
   }, [])
 
+  // 初始加载 + WebSocket 实时推送更新
   useEffect(() => {
     fetchUnread()
-    const timer = setInterval(fetchUnread, 60_000) // 每分钟轮询
-    return () => clearInterval(timer)
   }, [fetchUnread])
+
+  useWebSocketPush(() => {
+    fetchUnread()
+  })
 
   const handleUserMenuClick = ({ key }: { key: string }) => {
     switch (key) {

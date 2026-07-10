@@ -7,6 +7,7 @@ import PageContainer from './PageContainer'
 import { useUserStore } from '@/stores'
 import { getUserMenuTree } from '@/services/auth'
 import { cancelAllRequests } from '@/utils/request'
+import { useWebSocketInit } from '@/hooks/useWebSocket'
 import type { ReactNode } from 'react'
 
 const { Content } = Layout
@@ -20,6 +21,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation()
   const { isLogin, setMenuTree } = useUserStore()
   const [contentKey, setContentKey] = useState(0)
+
+  // 初始化 WebSocket 连接（实时推送）
+  useWebSocketInit()
 
   // 路由切换时取消进行中的 API 请求
   useEffect(() => {

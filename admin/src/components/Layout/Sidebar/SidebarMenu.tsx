@@ -37,6 +37,8 @@ const menuKeyMap: Record<string, string> = {
   'operation-log': 'menuOperationLog',
   'design-system': 'menuDesignSystem',
   'system-settings': 'menuSystemSettings',
+  message: 'menuMessage',
+  ws_test: 'menuWsTest',
 }
 
 /** 将后端菜单树转换为 Ant Design Menu 项 */
