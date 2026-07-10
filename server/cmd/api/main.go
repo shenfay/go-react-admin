@@ -213,7 +213,8 @@ func initServices(cfg *config.Config, infra *infraDeps, repos *repoDeps, m *metr
 		cfg.JWT.RefreshExpire,
 	)
 
-	// admin.Service 先创建，作为 PermissionQuerier 注入 authentication.Service
+	// admin.Service 必须先创建：作为 PermissionQuerier 注入 authentication.Service，
+	// 用于 Login 时查询用户权限（避免 auth 服务重复持有 roleRepo/menuRepo/enforcer）
 	adminService := admin.NewService(repos.userRepo, repos.roleRepo, repos.menuRepo, infra.enforcer, infra.bus)
 
 	authService := authentication.NewService(
