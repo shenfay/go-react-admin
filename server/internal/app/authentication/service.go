@@ -106,7 +106,7 @@ func NewService(userRepo user.UserRepository, tokenService TokenService, eventBu
 // 1. 验证邮箱唯一性
 // 2. 创建用户实体（密码已加密）
 // 3. 生成访问令牌和刷新令牌
-// 4. 发布 UserRegistered 领域事件
+// 4. 记录操作日志
 //
 // 参数：
 //   - ctx: 请求上下文

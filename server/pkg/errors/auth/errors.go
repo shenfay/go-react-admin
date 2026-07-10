@@ -51,11 +51,3 @@ var (
 	}
 )
 
-// NewAuthError 创建认证域错误（工厂方法）
-func NewAuthError(code string, message string) *errors.AppError {
-	return &errors.AppError{
-		Code:       "AUTH." + code,
-		Message:    message,
-		HTTPStatus: http.StatusUnauthorized,
-	}
-}

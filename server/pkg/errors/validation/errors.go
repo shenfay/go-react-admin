@@ -40,14 +40,6 @@ var (
 	}
 )
 
-// NewValidationError 创建校验域错误（工厂方法）
-func NewValidationError(code string, message string) *errors.AppError {
-	return &errors.AppError{
-		Code:       "VALIDATION." + code,
-		Message:    message,
-		HTTPStatus: http.StatusBadRequest,
-	}
-}
 
 // FromGinError 从 Gin 绑定错误创建验证错误
 func FromGinError(err error) *errors.AppError {
