@@ -40,7 +40,7 @@ class WebSocketManager {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.hostname
     const port = window.location.port || (protocol === 'wss:' ? '443' : '80')
-    const url = `${protocol}//${host}:${port}/ws?token=${token}`
+    const url = `${protocol}//${host}:${port}/api/ws?token=${token}`
 
     try {
       this.ws = new WebSocket(url)

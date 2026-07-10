@@ -78,7 +78,7 @@ func (r *Router) Setup() {
 
 	// WebSocket 端点（仅在启用时注册）
 	if r.wsHandler != nil {
-		r.engine.GET("/ws", r.wsHandler.ServeWS)
+		r.engine.GET("/api/ws", r.wsHandler.ServeWS)
 	}
 
 	// API v1 路由组
